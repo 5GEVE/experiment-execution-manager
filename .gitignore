@@ -1,0 +1,7 @@
+**/.idea/**
+**/*.javac
+**/target/**
+**/*.log
+**/.classpath
+**/.settings/**
+**/.project
