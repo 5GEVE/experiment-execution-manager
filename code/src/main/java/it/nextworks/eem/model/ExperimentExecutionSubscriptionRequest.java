@@ -11,16 +11,17 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * RuntimeConfiguratorSubscription
+ * Subsription reuqest to an execution experiment
  */
+@ApiModel(description = "Subsription reuqest to an execution experiment")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-28T08:59:03.567Z[GMT]")
-public class RuntimeConfiguratorSubscription   {
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-29T09:22:19.643Z[GMT]")
+public class ExperimentExecutionSubscriptionRequest   {
   /**
    * Gets or Sets subscriptionType
    */
   public enum SubscriptionTypeEnum {
-    CONFIGURATIONCHANGE("ConfigurationChange");
+    STATE("EXPERIMENT_EXECUTION_CHANGE_STATE");
 
     private String value;
 
@@ -47,10 +48,10 @@ public class RuntimeConfiguratorSubscription   {
   @JsonProperty("subscriptionType")
   private SubscriptionTypeEnum subscriptionType = null;
 
-  @JsonProperty("experimentExecutionId")
-  private String experimentExecutionId = null;
+  @JsonProperty("callbackURI")
+  private String callbackURI = null;
 
-  public RuntimeConfiguratorSubscription subscriptionType(SubscriptionTypeEnum subscriptionType) {
+  public ExperimentExecutionSubscriptionRequest subscriptionType(SubscriptionTypeEnum subscriptionType) {
     this.subscriptionType = subscriptionType;
     return this;
   }
@@ -70,24 +71,24 @@ public class RuntimeConfiguratorSubscription   {
     this.subscriptionType = subscriptionType;
   }
 
-  public RuntimeConfiguratorSubscription experimentExecutionId(String experimentExecutionId) {
-    this.experimentExecutionId = experimentExecutionId;
+  public ExperimentExecutionSubscriptionRequest callbackURI(String callbackURI) {
+    this.callbackURI = callbackURI;
     return this;
   }
 
   /**
-   * Get experimentExecutionId
-   * @return experimentExecutionId
+   * Get callbackURI
+   * @return callbackURI
   **/
   @ApiModelProperty(required = true, value = "")
       @NotNull
 
-    public String getExperimentExecutionId() {
-    return experimentExecutionId;
+    public String getCallbackURI() {
+    return callbackURI;
   }
 
-  public void setExperimentExecutionId(String experimentExecutionId) {
-    this.experimentExecutionId = experimentExecutionId;
+  public void setCallbackURI(String callbackURI) {
+    this.callbackURI = callbackURI;
   }
 
 
@@ -99,23 +100,23 @@ public class RuntimeConfiguratorSubscription   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RuntimeConfiguratorSubscription runtimeConfiguratorSubscription = (RuntimeConfiguratorSubscription) o;
-    return Objects.equals(this.subscriptionType, runtimeConfiguratorSubscription.subscriptionType) &&
-        Objects.equals(this.experimentExecutionId, runtimeConfiguratorSubscription.experimentExecutionId);
+    ExperimentExecutionSubscriptionRequest experimentExecutionSubscriptionRequest = (ExperimentExecutionSubscriptionRequest) o;
+    return Objects.equals(this.subscriptionType, experimentExecutionSubscriptionRequest.subscriptionType) &&
+        Objects.equals(this.callbackURI, experimentExecutionSubscriptionRequest.callbackURI);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionType, experimentExecutionId);
+    return Objects.hash(subscriptionType, callbackURI);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RuntimeConfiguratorSubscription {\n");
+    sb.append("class ExperimentExecutionSubscriptionRequest {\n");
     
     sb.append("    subscriptionType: ").append(toIndentedString(subscriptionType)).append("\n");
-    sb.append("    experimentExecutionId: ").append(toIndentedString(experimentExecutionId)).append("\n");
+    sb.append("    callbackURI: ").append(toIndentedString(callbackURI)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -5,8 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import it.nextworks.eem.model.ExperimentExecutionInfo;
-import it.nextworks.eem.model.NSInfo;
+import it.nextworks.eem.model.TestCaseDescrConfigMap;
 
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
@@ -16,54 +15,98 @@ import javax.validation.constraints.*;
  * ExperimentExecutionRequest
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-27T13:24:37.065Z[GMT]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-29T09:22:19.643Z[GMT]")
 public class ExperimentExecutionRequest   {
-  @JsonProperty("experimentExecutionInfo")
-  private ExperimentExecutionInfo experimentExecutionInfo = null;
+  @JsonProperty("nsInstanceId")
+  private String nsInstanceId = null;
 
-  @JsonProperty("nsInfo")
-  private NSInfo nsInfo = null;
+  @JsonProperty("experimentDescriptorId")
+  private String experimentDescriptorId = null;
 
-  public ExperimentExecutionRequest experimentExecutionInfo(ExperimentExecutionInfo experimentExecutionInfo) {
-    this.experimentExecutionInfo = experimentExecutionInfo;
+  @JsonProperty("executionId")
+  private String executionId = null;
+
+  @JsonProperty("testCaseDescriptorConfiguration")
+  private TestCaseDescrConfigMap testCaseDescriptorConfiguration = null;
+
+  public ExperimentExecutionRequest nsInstanceId(String nsInstanceId) {
+    this.nsInstanceId = nsInstanceId;
     return this;
   }
 
   /**
-   * Get experimentExecutionInfo
-   * @return experimentExecutionInfo
+   * Get nsInstanceId
+   * @return nsInstanceId
   **/
   @ApiModelProperty(required = true, value = "")
       @NotNull
 
-    @Valid
-    public ExperimentExecutionInfo getExperimentExecutionInfo() {
-    return experimentExecutionInfo;
+    public String getNsInstanceId() {
+    return nsInstanceId;
   }
 
-  public void setExperimentExecutionInfo(ExperimentExecutionInfo experimentExecutionInfo) {
-    this.experimentExecutionInfo = experimentExecutionInfo;
+  public void setNsInstanceId(String nsInstanceId) {
+    this.nsInstanceId = nsInstanceId;
   }
 
-  public ExperimentExecutionRequest nsInfo(NSInfo nsInfo) {
-    this.nsInfo = nsInfo;
+  public ExperimentExecutionRequest experimentDescriptorId(String experimentDescriptorId) {
+    this.experimentDescriptorId = experimentDescriptorId;
     return this;
   }
 
   /**
-   * Get nsInfo
-   * @return nsInfo
+   * Get experimentDescriptorId
+   * @return experimentDescriptorId
   **/
   @ApiModelProperty(required = true, value = "")
       @NotNull
 
-    @Valid
-    public NSInfo getNsInfo() {
-    return nsInfo;
+    public String getExperimentDescriptorId() {
+    return experimentDescriptorId;
   }
 
-  public void setNsInfo(NSInfo nsInfo) {
-    this.nsInfo = nsInfo;
+  public void setExperimentDescriptorId(String experimentDescriptorId) {
+    this.experimentDescriptorId = experimentDescriptorId;
+  }
+
+  public ExperimentExecutionRequest executionId(String executionId) {
+    this.executionId = executionId;
+    return this;
+  }
+
+  /**
+   * Get executionId
+   * @return executionId
+  **/
+  @ApiModelProperty(required = true, value = "")
+      @NotNull
+
+    public String getExecutionId() {
+    return executionId;
+  }
+
+  public void setExecutionId(String executionId) {
+    this.executionId = executionId;
+  }
+
+  public ExperimentExecutionRequest testCaseDescriptorConfiguration(TestCaseDescrConfigMap testCaseDescriptorConfiguration) {
+    this.testCaseDescriptorConfiguration = testCaseDescriptorConfiguration;
+    return this;
+  }
+
+  /**
+   * Get testCaseDescriptorConfiguration
+   * @return testCaseDescriptorConfiguration
+  **/
+  @ApiModelProperty(value = "")
+  
+    @Valid
+    public TestCaseDescrConfigMap getTestCaseDescriptorConfiguration() {
+    return testCaseDescriptorConfiguration;
+  }
+
+  public void setTestCaseDescriptorConfiguration(TestCaseDescrConfigMap testCaseDescriptorConfiguration) {
+    this.testCaseDescriptorConfiguration = testCaseDescriptorConfiguration;
   }
 
 
@@ -76,13 +119,15 @@ public class ExperimentExecutionRequest   {
       return false;
     }
     ExperimentExecutionRequest experimentExecutionRequest = (ExperimentExecutionRequest) o;
-    return Objects.equals(this.experimentExecutionInfo, experimentExecutionRequest.experimentExecutionInfo) &&
-        Objects.equals(this.nsInfo, experimentExecutionRequest.nsInfo);
+    return Objects.equals(this.nsInstanceId, experimentExecutionRequest.nsInstanceId) &&
+        Objects.equals(this.experimentDescriptorId, experimentExecutionRequest.experimentDescriptorId) &&
+        Objects.equals(this.executionId, experimentExecutionRequest.executionId) &&
+        Objects.equals(this.testCaseDescriptorConfiguration, experimentExecutionRequest.testCaseDescriptorConfiguration);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(experimentExecutionInfo, nsInfo);
+    return Objects.hash(nsInstanceId, experimentDescriptorId, executionId, testCaseDescriptorConfiguration);
   }
 
   @Override
@@ -90,8 +135,10 @@ public class ExperimentExecutionRequest   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ExperimentExecutionRequest {\n");
     
-    sb.append("    experimentExecutionInfo: ").append(toIndentedString(experimentExecutionInfo)).append("\n");
-    sb.append("    nsInfo: ").append(toIndentedString(nsInfo)).append("\n");
+    sb.append("    nsInstanceId: ").append(toIndentedString(nsInstanceId)).append("\n");
+    sb.append("    experimentDescriptorId: ").append(toIndentedString(experimentDescriptorId)).append("\n");
+    sb.append("    executionId: ").append(toIndentedString(executionId)).append("\n");
+    sb.append("    testCaseDescriptorConfiguration: ").append(toIndentedString(testCaseDescriptorConfiguration)).append("\n");
     sb.append("}");
     return sb.toString();
   }

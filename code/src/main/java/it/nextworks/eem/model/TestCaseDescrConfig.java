@@ -1,6 +1,8 @@
 package it.nextworks.eem.model;
 
 import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -9,8 +11,8 @@ import javax.validation.constraints.*;
  * TestCaseDescrConfig
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-27T13:24:37.065Z[GMT]")
-public class TestCaseDescrConfig   {
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-29T09:22:19.643Z[GMT]")
+public class TestCaseDescrConfig extends HashMap<String, String>  {
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -25,14 +27,14 @@ public class TestCaseDescrConfig   {
 
   @Override
   public int hashCode() {
-    return Objects.hash();
+    return Objects.hash(super.hashCode());
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class TestCaseDescrConfig {\n");
-    
+    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
     sb.append("}");
     return sb.toString();
   }

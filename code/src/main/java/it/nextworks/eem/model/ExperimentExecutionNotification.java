@@ -3,10 +3,10 @@ package it.nextworks.eem.model;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
+import it.nextworks.eem.model.ExperimentState;
+
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -15,92 +15,59 @@ import javax.validation.constraints.*;
  * ExperimentExecutionNotification
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-27T13:24:37.065Z[GMT]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-29T09:22:19.643Z[GMT]")
 public class ExperimentExecutionNotification   {
-  @JsonProperty("id")
-  private String id = null;
+  @JsonProperty("executionId")
+  private String executionId = null;
 
-  /**
-   * Status of the notification. Should be \"Configuring\" till configuration ends. Then, if configuration is performed, the status is CONFIGURED, otherwise is \"FAILED\"
-   */
-  public enum NotificationStateEnum {
-    CONFIGURING("CONFIGURING"),
-    
-    CONFIGURED("CONFIGURED"),
-    
-    FAILED("FAILED");
-
-    private String value;
-
-    NotificationStateEnum(String value) {
-      this.value = value;
-    }
-
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    @JsonCreator
-    public static NotificationStateEnum fromValue(String text) {
-      for (NotificationStateEnum b : NotificationStateEnum.values()) {
-        if (String.valueOf(b.value).equals(text)) {
-          return b;
-        }
-      }
-      return null;
-    }
-  }
-  @JsonProperty("notificationState")
-  private NotificationStateEnum notificationState = null;
+  @JsonProperty("state")
+  private ExperimentState state = null;
 
   @JsonProperty("subscriptionId")
   private String subscriptionId = null;
 
-  @JsonProperty("experimentExecutionId")
-  private String experimentExecutionId = null;
+  @JsonProperty("callbackURI")
+  private String callbackURI = null;
 
-  @JsonProperty("timestamp")
-  private BigDecimal timestamp = null;
-
-  public ExperimentExecutionNotification id(String id) {
-    this.id = id;
+  public ExperimentExecutionNotification executionId(String executionId) {
+    this.executionId = executionId;
     return this;
   }
 
   /**
-   * Notification ID
-   * @return id
+   * Get executionId
+   * @return executionId
   **/
-  @ApiModelProperty(value = "Notification ID")
-  
-    public String getId() {
-    return id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public ExperimentExecutionNotification notificationState(NotificationStateEnum notificationState) {
-    this.notificationState = notificationState;
-    return this;
-  }
-
-  /**
-   * Status of the notification. Should be \"Configuring\" till configuration ends. Then, if configuration is performed, the status is CONFIGURED, otherwise is \"FAILED\"
-   * @return notificationState
-  **/
-  @ApiModelProperty(required = true, value = "Status of the notification. Should be \"Configuring\" till configuration ends. Then, if configuration is performed, the status is CONFIGURED, otherwise is \"FAILED\"")
+  @ApiModelProperty(required = true, value = "")
       @NotNull
 
-    public NotificationStateEnum getNotificationState() {
-    return notificationState;
+    public String getExecutionId() {
+    return executionId;
   }
 
-  public void setNotificationState(NotificationStateEnum notificationState) {
-    this.notificationState = notificationState;
+  public void setExecutionId(String executionId) {
+    this.executionId = executionId;
+  }
+
+  public ExperimentExecutionNotification state(ExperimentState state) {
+    this.state = state;
+    return this;
+  }
+
+  /**
+   * Get state
+   * @return state
+  **/
+  @ApiModelProperty(required = true, value = "")
+      @NotNull
+
+    @Valid
+    public ExperimentState getState() {
+    return state;
+  }
+
+  public void setState(ExperimentState state) {
+    this.state = state;
   }
 
   public ExperimentExecutionNotification subscriptionId(String subscriptionId) {
@@ -109,11 +76,12 @@ public class ExperimentExecutionNotification   {
   }
 
   /**
-   * Identifier of the subscription that has triggered that notification.
+   * Get subscriptionId
    * @return subscriptionId
   **/
-  @ApiModelProperty(value = "Identifier of the subscription that has triggered that notification.")
-  
+  @ApiModelProperty(required = true, value = "")
+      @NotNull
+
     public String getSubscriptionId() {
     return subscriptionId;
   }
@@ -122,43 +90,24 @@ public class ExperimentExecutionNotification   {
     this.subscriptionId = subscriptionId;
   }
 
-  public ExperimentExecutionNotification experimentExecutionId(String experimentExecutionId) {
-    this.experimentExecutionId = experimentExecutionId;
+  public ExperimentExecutionNotification callbackURI(String callbackURI) {
+    this.callbackURI = callbackURI;
     return this;
   }
 
   /**
-   * Identifier of the experiment execution
-   * @return experimentExecutionId
+   * Get callbackURI
+   * @return callbackURI
   **/
-  @ApiModelProperty(value = "Identifier of the experiment execution")
-  
-    public String getExperimentExecutionId() {
-    return experimentExecutionId;
+  @ApiModelProperty(required = true, value = "")
+      @NotNull
+
+    public String getCallbackURI() {
+    return callbackURI;
   }
 
-  public void setExperimentExecutionId(String experimentExecutionId) {
-    this.experimentExecutionId = experimentExecutionId;
-  }
-
-  public ExperimentExecutionNotification timestamp(BigDecimal timestamp) {
-    this.timestamp = timestamp;
-    return this;
-  }
-
-  /**
-   * Get timestamp
-   * @return timestamp
-  **/
-  @ApiModelProperty(value = "")
-  
-    @Valid
-    public BigDecimal getTimestamp() {
-    return timestamp;
-  }
-
-  public void setTimestamp(BigDecimal timestamp) {
-    this.timestamp = timestamp;
+  public void setCallbackURI(String callbackURI) {
+    this.callbackURI = callbackURI;
   }
 
 
@@ -171,16 +120,15 @@ public class ExperimentExecutionNotification   {
       return false;
     }
     ExperimentExecutionNotification experimentExecutionNotification = (ExperimentExecutionNotification) o;
-    return Objects.equals(this.id, experimentExecutionNotification.id) &&
-        Objects.equals(this.notificationState, experimentExecutionNotification.notificationState) &&
+    return Objects.equals(this.executionId, experimentExecutionNotification.executionId) &&
+        Objects.equals(this.state, experimentExecutionNotification.state) &&
         Objects.equals(this.subscriptionId, experimentExecutionNotification.subscriptionId) &&
-        Objects.equals(this.experimentExecutionId, experimentExecutionNotification.experimentExecutionId) &&
-        Objects.equals(this.timestamp, experimentExecutionNotification.timestamp);
+        Objects.equals(this.callbackURI, experimentExecutionNotification.callbackURI);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, notificationState, subscriptionId, experimentExecutionId, timestamp);
+    return Objects.hash(executionId, state, subscriptionId, callbackURI);
   }
 
   @Override
@@ -188,11 +136,10 @@ public class ExperimentExecutionNotification   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ExperimentExecutionNotification {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    notificationState: ").append(toIndentedString(notificationState)).append("\n");
+    sb.append("    executionId: ").append(toIndentedString(executionId)).append("\n");
+    sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    subscriptionId: ").append(toIndentedString(subscriptionId)).append("\n");
-    sb.append("    experimentExecutionId: ").append(toIndentedString(experimentExecutionId)).append("\n");
-    sb.append("    timestamp: ").append(toIndentedString(timestamp)).append("\n");
+    sb.append("    callbackURI: ").append(toIndentedString(callbackURI)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -8,10 +8,11 @@ package it.nextworks.eem.api;
 import io.swagger.annotations.*;
 import it.nextworks.eem.model.ConfigurationChangeNotification;
 import it.nextworks.eem.model.ErrorInfo;
-import it.nextworks.eem.model.ExperimentExecution;
-import it.nextworks.eem.model.ExperimentExecutionInfo;
+import it.nextworks.eem.model.ExperimentExecutionRequest;
 import it.nextworks.eem.model.ExperimentExecutionResponse;
-import it.nextworks.eem.model.ExperimentExecutionSubscription;
+import it.nextworks.eem.model.ExperimentExecutionSubscriptionRequest;
+import it.nextworks.eem.model.ExperimentExecutionSubscriptionResponse;
+import it.nextworks.eem.model.ExperimentState;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -29,38 +30,38 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-27T13:24:37.065Z[GMT]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-29T09:22:19.643Z[GMT]")
 @Api(value = "eem", description = "the eem API")
 public interface EemApi {
 
-    @ApiOperation(value = "List all experiments available", nickname = "eemExperimentsExecutionGet", notes = "", response = ExperimentExecutionInfo.class, responseContainer = "List", tags={  })
+    @ApiOperation(value = "List all experiments available", nickname = "eemExperimentExecutionsGet", notes = "", response = ExperimentExecutionResponse.class, responseContainer = "List", tags={ "EEM Operations", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "List of all experiments", response = ExperimentExecutionInfo.class, responseContainer = "List"),
+        @ApiResponse(code = 200, message = "List of all experiments", response = ExperimentExecutionResponse.class, responseContainer = "List"),
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
         @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
         @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
-    @RequestMapping(value = "/eem/experiments_execution",
-        produces = { "application/json", "ErrorDetails" }, 
+    @RequestMapping(value = "/eem/experiment_executions",
+        produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<List<ExperimentExecutionInfo>> eemExperimentsExecutionGet(@ApiParam(value = "Execution state of the experiment", allowableValues = "INIT, CONFIGURING, RUNNING, RUNNING_STEP, PAUSED, VALIDATING, COMPLETED, ABORTING, ABORTED, FAILED") @Valid @RequestParam(value = "status", required = false) String status);
+    ResponseEntity<List<ExperimentExecutionResponse>> eemExperimentExecutionsGet(@ApiParam(value = "Execution state of the experiment") @Valid @RequestParam(value = "state", required = false) ExperimentState state);
 
 
-    @ApiOperation(value = "", nickname = "eemExperimentsExecutionIdAbortPost", notes = "", tags={  })
+    @ApiOperation(value = "", nickname = "eemExperimentExecutionsIdAbortPost", notes = "", tags={ "EEM Operations", })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Return 200 OK upon action completion"),
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
         @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
-        @ApiResponse(code = 404, message = "Identifier of the experiment execution not found"),
+        @ApiResponse(code = 404, message = "Identifier of the experiment execution not found", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
         @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
-    @RequestMapping(value = "/eem/experiments_execution/{id}/abort",
-        produces = { "ErrorDetails" }, 
+    @RequestMapping(value = "/eem/experiment_executions/{id}/abort",
+        produces = { "application/json" }, 
         method = RequestMethod.POST)
-    ResponseEntity<Void> eemExperimentsExecutionIdAbortPost(@ApiParam(value = "",required=true) @PathVariable("id") String id);
+    ResponseEntity<Void> eemExperimentExecutionsIdAbortPost(@ApiParam(value = "",required=true) @PathVariable("id") String id);
 
 
-    @ApiOperation(value = "", nickname = "eemExperimentsExecutionIdDelete", notes = "", tags={  })
+    @ApiOperation(value = "", nickname = "eemExperimentExecutionsIdDelete", notes = "", tags={ "EEM Operations", })
     @ApiResponses(value = { 
         @ApiResponse(code = 204, message = "Return 204 No content upon action completion"),
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
@@ -68,49 +69,35 @@ public interface EemApi {
         @ApiResponse(code = 404, message = "Identifier of the Experiment execution not found", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
         @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
-    @RequestMapping(value = "/eem/experiments_execution/{id}",
-        produces = { "ErrorDetails" }, 
+    @RequestMapping(value = "/eem/experiment_executions/{id}",
+        produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    ResponseEntity<Void> eemExperimentsExecutionIdDelete(@ApiParam(value = "",required=true) @PathVariable("id") String id);
+    ResponseEntity<Void> eemExperimentExecutionsIdDelete(@ApiParam(value = "",required=true) @PathVariable("id") String id);
 
 
-    @ApiOperation(value = "", nickname = "eemExperimentsExecutionIdGet", notes = "API to get experiment execution details", response = ExperimentExecution.class, tags={  })
+    @ApiOperation(value = "", nickname = "eemExperimentExecutionsIdGet", notes = "API to get experiment execution details", response = ExperimentExecutionResponse.class, tags={ "EEM Operations", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Return experiment execution details", response = ExperimentExecution.class),
+        @ApiResponse(code = 200, message = "Return experiment execution details", response = ExperimentExecutionResponse.class),
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
         @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
         @ApiResponse(code = 404, message = "Identifier of the experiment execution not found", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
         @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
-    @RequestMapping(value = "/eem/experiments_execution/{id}",
-        produces = { "ExperimentExecution", "ErrorDetails" }, 
+    @RequestMapping(value = "/eem/experiment_executions/{id}",
+        produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<ExperimentExecution> eemExperimentsExecutionIdGet(@ApiParam(value = "",required=true) @PathVariable("id") String id);
+    ResponseEntity<ExperimentExecutionResponse> eemExperimentExecutionsIdGet(@ApiParam(value = "",required=true) @PathVariable("id") String id);
 
 
-    @ApiOperation(value = "", nickname = "eemExperimentsExecutionIdOptions", notes = "", tags={  })
+    @ApiOperation(value = "", nickname = "eemExperimentExecutionsIdOptions", notes = "", tags={ "EEM Operations", })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Return 200 OK upon action completion") })
-    @RequestMapping(value = "/eem/experiments_execution/{id}",
+    @RequestMapping(value = "/eem/experiment_executions/{id}",
         method = RequestMethod.OPTIONS)
-    ResponseEntity<Void> eemExperimentsExecutionIdOptions(@ApiParam(value = "",required=true) @PathVariable("id") String id);
+    ResponseEntity<Void> eemExperimentExecutionsIdOptions(@ApiParam(value = "",required=true) @PathVariable("id") String id);
 
 
-    @ApiOperation(value = "", nickname = "eemExperimentsExecutionIdPausePost", notes = "", tags={  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Return 200 OK upon action completion"),
-        @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
-        @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
-        @ApiResponse(code = 404, message = "Identifier of the experiment execution not found"),
-        @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
-        @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
-    @RequestMapping(value = "/eem/experiments_execution/{id}/pause",
-        produces = { "ErrorDetails", "ErrorInfo" }, 
-        method = RequestMethod.POST)
-    ResponseEntity<Void> eemExperimentsExecutionIdPausePost(@ApiParam(value = "",required=true) @PathVariable("id") String id);
-
-
-    @ApiOperation(value = "", nickname = "eemExperimentsExecutionIdRunPost", notes = "", tags={  })
+    @ApiOperation(value = "", nickname = "eemExperimentExecutionsIdPausePost", notes = "", tags={ "EEM Operations", })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Return 200 OK upon action completion"),
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
@@ -118,13 +105,13 @@ public interface EemApi {
         @ApiResponse(code = 404, message = "Identifier of the experiment execution not found", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
         @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
-    @RequestMapping(value = "/eem/experiments_execution/{id}/run",
-        produces = { "ErrorDetails" }, 
+    @RequestMapping(value = "/eem/experiment_executions/{id}/pause",
+        produces = { "application/json" }, 
         method = RequestMethod.POST)
-    ResponseEntity<Void> eemExperimentsExecutionIdRunPost(@ApiParam(value = "",required=true) @PathVariable("id") String id,@ApiParam(value = "Determine the type of run. If not present, the default value is RUN_ALL" , allowableValues="RUN_IN_STEPS, RUN_ALL") @RequestHeader(value="runType", required=false) String runType);
+    ResponseEntity<Void> eemExperimentExecutionsIdPausePost(@ApiParam(value = "",required=true) @PathVariable("id") String id);
 
 
-    @ApiOperation(value = "", nickname = "eemExperimentsExecutionIdStepPost", notes = "", tags={  })
+    @ApiOperation(value = "", nickname = "eemExperimentExecutionsIdResumePost", notes = "", tags={ "EEM Operations", })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Return 200 OK upon action completion"),
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
@@ -132,80 +119,101 @@ public interface EemApi {
         @ApiResponse(code = 404, message = "Identifier of the experiment execution not found", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
         @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
-    @RequestMapping(value = "/eem/experiments_execution/{id}/step",
-        produces = { "ErrorDetails" }, 
+    @RequestMapping(value = "/eem/experiment_executions/{id}/resume",
+        produces = { "application/json" }, 
         method = RequestMethod.POST)
-    ResponseEntity<Void> eemExperimentsExecutionIdStepPost(@ApiParam(value = "",required=true) @PathVariable("id") String id);
+    ResponseEntity<Void> eemExperimentExecutionsIdResumePost(@ApiParam(value = "",required=true) @PathVariable("id") String id);
 
 
-    @ApiOperation(value = "", nickname = "eemExperimentsExecutionOptions", notes = "", tags={  })
+    @ApiOperation(value = "", nickname = "eemExperimentExecutionsIdRunPost", notes = "", tags={ "EEM Operations", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 204, message = "The Option operation is needed for compatibility reasons with JS applications") })
-    @RequestMapping(value = "/eem/experiments_execution",
+        @ApiResponse(code = 200, message = "Return 200 OK upon action completion"),
+        @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
+        @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
+        @ApiResponse(code = 404, message = "Identifier of the experiment execution not found", response = ErrorInfo.class),
+        @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
+        @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
+    @RequestMapping(value = "/eem/experiment_executions/{id}/run",
+        produces = { "application/json" }, 
+        consumes = { "application/json" },
+        method = RequestMethod.POST)
+    ResponseEntity<Void> eemExperimentExecutionsIdRunPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody ExperimentExecutionRequest body,@ApiParam(value = "",required=true) @PathVariable("id") String id,@ApiParam(value = "Determine the type of run. If not present, the default value is RUN_ALL" , allowableValues="RUN_IN_STEPS, RUN_ALL") @RequestHeader(value="runType", required=false) String runType);
+
+
+    @ApiOperation(value = "", nickname = "eemExperimentExecutionsIdStepPost", notes = "", tags={ "EEM Operations", })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Return 200 OK upon action completion"),
+        @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
+        @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
+        @ApiResponse(code = 404, message = "Identifier of the experiment execution not found", response = ErrorInfo.class),
+        @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
+        @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
+    @RequestMapping(value = "/eem/experiment_executions/{id}/step",
+        produces = { "application/json" }, 
+        method = RequestMethod.POST)
+    ResponseEntity<Void> eemExperimentExecutionsIdStepPost(@ApiParam(value = "",required=true) @PathVariable("id") String id);
+
+
+    @ApiOperation(value = "", nickname = "eemExperimentExecutionsOptions", notes = "", tags={ "EEM Operations", })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 204, message = "The Option operation is needed for compatibility reasons with JS     applications") })
+    @RequestMapping(value = "/eem/experiment_executions",
         method = RequestMethod.OPTIONS)
-    ResponseEntity<Void> eemExperimentsExecutionOptions();
+    ResponseEntity<Void> eemExperimentExecutionsOptions();
 
 
-    @ApiOperation(value = "Requests a new experiment execution", nickname = "eemExperimentsExecutionPost", notes = "", response = ExperimentExecutionResponse.class, tags={  })
+    @ApiOperation(value = "Requests a new experiment execution", nickname = "eemExperimentExecutionsPost", notes = "", response = String.class, tags={ "EEM Operations", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 201, message = "Experiment execution identifier", response = ExperimentExecutionResponse.class),
+        @ApiResponse(code = 201, message = "Experiment execution identifier", response = String.class),
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
         @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
         @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
-    @RequestMapping(value = "/eem/experiments_execution",
-        produces = { "application/json", "ErrorDetails" }, 
+    @RequestMapping(value = "/eem/experiment_executions",
+        produces = { "text/plain", "application/json" }, 
         method = RequestMethod.POST)
-    ResponseEntity<ExperimentExecutionResponse> eemExperimentsExecutionPost();
+    ResponseEntity<String> eemExperimentExecutionsPost();
 
 
-    @ApiOperation(value = "", nickname = "eemNotificationsGet", notes = "", tags={  })
+    @ApiOperation(value = "", nickname = "eemExperimentNotificationsGet", notes = "", tags={ "EEM Notifications", })
     @ApiResponses(value = { 
         @ApiResponse(code = 204, message = "Default returned value in case the subscribers checks the notification endpoint") })
-    @RequestMapping(value = "/eem/notifications",
+    @RequestMapping(value = "/eem/experiment_notifications",
         method = RequestMethod.GET)
-    ResponseEntity<Void> eemNotificationsGet();
+    ResponseEntity<Void> eemExperimentNotificationsGet();
 
 
-    @ApiOperation(value = "", nickname = "eemNotificationsOptions", notes = "", tags={  })
+    @ApiOperation(value = "", nickname = "eemExperimentNotificationsOptions", notes = "", tags={ "EEM Notifications", })
     @ApiResponses(value = { 
         @ApiResponse(code = 204, message = "No content should be returned.") })
-    @RequestMapping(value = "/eem/notifications",
+    @RequestMapping(value = "/eem/experiment_notifications",
         method = RequestMethod.OPTIONS)
-    ResponseEntity<Void> eemNotificationsOptions();
+    ResponseEntity<Void> eemExperimentNotificationsOptions();
 
 
-    @ApiOperation(value = "", nickname = "eemNotificationsPost", notes = "", tags={  })
+    @ApiOperation(value = "", nickname = "eemExperimentNotificationsPost", notes = "", tags={ "EEM Notifications", })
     @ApiResponses(value = { 
         @ApiResponse(code = 204, message = "No response body is sent as response of a notification") })
-    @RequestMapping(value = "/eem/notifications",
-        consumes = { "ConfigurationChangeState" },
+    @RequestMapping(value = "/eem/experiment_notifications",
+        consumes = { "application/json" },
         method = RequestMethod.POST)
-    ResponseEntity<Void> eemNotificationsPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody ConfigurationChangeNotification body);
+    ResponseEntity<Void> eemExperimentNotificationsPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody ConfigurationChangeNotification body);
 
 
-    @ApiOperation(value = "", nickname = "eemOptions", notes = "", tags={  })
+    @ApiOperation(value = "", nickname = "eemExperimentSubscriptionsGet", notes = "", response = ExperimentExecutionSubscriptionResponse.class, responseContainer = "List", tags={ "EEM Subscriptions", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 204, message = "The Option operation is needed for compatibility reasons with JS applications") })
-    @RequestMapping(value = "/eem/",
-        method = RequestMethod.OPTIONS)
-    ResponseEntity<Void> eemOptions();
-
-
-    @ApiOperation(value = "", nickname = "eemSubscriptionsGet", notes = "", response = ExperimentExecutionSubscription.class, responseContainer = "List", tags={  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Return list of subscriptions to the Experiment Execution Manager", response = ExperimentExecutionSubscription.class, responseContainer = "List"),
+        @ApiResponse(code = 200, message = "Return list of subscriptions to the Experiment Execution Manager", response = ExperimentExecutionSubscriptionResponse.class, responseContainer = "List"),
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
         @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
         @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
-    @RequestMapping(value = "/eem/subscriptions",
-        produces = { "application/json", "ErrorDetails" }, 
+    @RequestMapping(value = "/eem/experiment_subscriptions",
+        produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<List<ExperimentExecutionSubscription>> eemSubscriptionsGet();
+    ResponseEntity<List<ExperimentExecutionSubscriptionResponse>> eemExperimentSubscriptionsGet();
 
 
-    @ApiOperation(value = "", nickname = "eemSubscriptionsOptions", notes = "", tags={  })
+    @ApiOperation(value = "", nickname = "eemExperimentSubscriptionsOptions", notes = "", tags={ "EEM Subscriptions", })
     @ApiResponses(value = { 
         @ApiResponse(code = 204, message = "No content is expected on OPTION ReST request"),
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
@@ -213,29 +221,29 @@ public interface EemApi {
         @ApiResponse(code = 404, message = "Return error details", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
         @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
-    @RequestMapping(value = "/eem/subscriptions",
-        produces = { "ErrorDetails" }, 
+    @RequestMapping(value = "/eem/experiment_subscriptions",
+        produces = { "application/json" }, 
         method = RequestMethod.OPTIONS)
-    ResponseEntity<Void> eemSubscriptionsOptions();
+    ResponseEntity<Void> eemExperimentSubscriptionsOptions();
 
 
-    @ApiOperation(value = "", nickname = "eemSubscriptionsPost", notes = "", response = ExperimentExecutionSubscription.class, tags={  })
+    @ApiOperation(value = "", nickname = "eemExperimentSubscriptionsPost", notes = "", response = String.class, tags={ "EEM Subscriptions", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 201, message = "Creates a new subscription to the Execution Experiment Manager", response = ExperimentExecutionSubscription.class),
+        @ApiResponse(code = 201, message = "Creates a new subscription to the Execution Experiment Manager", response = String.class),
         @ApiResponse(code = 303, message = "Subscription already exists", response = ErrorInfo.class),
         @ApiResponse(code = 400, message = "Bad request", response = ErrorInfo.class),
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
         @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
         @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
-    @RequestMapping(value = "/eem/subscriptions",
-        produces = { "ExperimentExecutionSubscription", "ErrorDetails" }, 
-        consumes = { "ExperimentExecutionSubscriptionRequest" },
+    @RequestMapping(value = "/eem/experiment_subscriptions",
+        produces = { "text/plain", "application/json" }, 
+        consumes = { "application/json" },
         method = RequestMethod.POST)
-    ResponseEntity<ExperimentExecutionSubscription> eemSubscriptionsPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody ExperimentExecutionSubscription body);
+    ResponseEntity<String> eemExperimentSubscriptionsPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody ExperimentExecutionSubscriptionRequest body);
 
 
-    @ApiOperation(value = "", nickname = "eemSubscriptionsSubscriptionIdDelete", notes = "", tags={  })
+    @ApiOperation(value = "", nickname = "eemExperimentSubscriptionsSubscriptionIdDelete", notes = "", tags={ "EEM Subscriptions", })
     @ApiResponses(value = { 
         @ApiResponse(code = 204, message = "No content is returned. Subscription is removed"),
         @ApiResponse(code = 400, message = "Bad request. Malformed request", response = ErrorInfo.class),
@@ -244,36 +252,44 @@ public interface EemApi {
         @ApiResponse(code = 404, message = "Return error details", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
         @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
-    @RequestMapping(value = "/eem/subscriptions/{subscriptionId}",
-        produces = { "ErrorDetails" }, 
+    @RequestMapping(value = "/eem/experiment_subscriptions/{subscriptionId}",
+        produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    ResponseEntity<Void> eemSubscriptionsSubscriptionIdDelete(@ApiParam(value = "",required=true) @PathVariable("subscriptionId") String subscriptionId);
+    ResponseEntity<Void> eemExperimentSubscriptionsSubscriptionIdDelete(@ApiParam(value = "",required=true) @PathVariable("subscriptionId") String subscriptionId);
 
 
-    @ApiOperation(value = "", nickname = "eemSubscriptionsSubscriptionIdGet", notes = "", response = ExperimentExecutionSubscription.class, tags={  })
+    @ApiOperation(value = "", nickname = "eemExperimentSubscriptionsSubscriptionIdGet", notes = "", response = ExperimentExecutionSubscriptionResponse.class, tags={ "EEM Subscriptions", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Returns experiment execution subscription for the id provided on the path", response = ExperimentExecutionSubscription.class),
+        @ApiResponse(code = 200, message = "Returns experiment execution subscription for the id provided on the path", response = ExperimentExecutionSubscriptionResponse.class),
         @ApiResponse(code = 400, message = "Bad request. Malformed request", response = ErrorInfo.class),
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
         @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
         @ApiResponse(code = 404, message = "Return error details", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
         @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
-    @RequestMapping(value = "/eem/subscriptions/{subscriptionId}",
-        produces = { "ExperimentExecutionSubscription", "ErrorDetails" }, 
+    @RequestMapping(value = "/eem/experiment_subscriptions/{subscriptionId}",
+        produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<ExperimentExecutionSubscription> eemSubscriptionsSubscriptionIdGet(@ApiParam(value = "",required=true) @PathVariable("subscriptionId") String subscriptionId);
+    ResponseEntity<ExperimentExecutionSubscriptionResponse> eemExperimentSubscriptionsSubscriptionIdGet(@ApiParam(value = "",required=true) @PathVariable("subscriptionId") String subscriptionId);
 
 
-    @ApiOperation(value = "", nickname = "eemSubscriptionsSubscriptionIdOptions", notes = "", tags={  })
+    @ApiOperation(value = "", nickname = "eemExperimentSubscriptionsSubscriptionIdOptions", notes = "", tags={ "EEM Subscriptions", })
     @ApiResponses(value = { 
         @ApiResponse(code = 204, message = "No content") })
-    @RequestMapping(value = "/eem/subscriptions/{subscriptionId}",
+    @RequestMapping(value = "/eem/experiment_subscriptions/{subscriptionId}",
         method = RequestMethod.OPTIONS)
-    ResponseEntity<Void> eemSubscriptionsSubscriptionIdOptions(@ApiParam(value = "",required=true) @PathVariable("subscriptionId") String subscriptionId);
+    ResponseEntity<Void> eemExperimentSubscriptionsSubscriptionIdOptions(@ApiParam(value = "",required=true) @PathVariable("subscriptionId") String subscriptionId);
 
 
-    @ApiOperation(value = "List API versions", nickname = "listVersionsv1", notes = "", tags={  })
+    @ApiOperation(value = "", nickname = "eemOptions", notes = "", tags={ "EEM Application", })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 204, message = "The Option operation is needed for compatibility reasons with JS applications") })
+    @RequestMapping(value = "/eem/",
+        method = RequestMethod.OPTIONS)
+    ResponseEntity<Void> eemOptions();
+
+
+    @ApiOperation(value = "List API versions", nickname = "listVersionsv1", notes = "", tags={ "EEM Application", })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "200 response"),
         @ApiResponse(code = 300, message = "300 response") })

@@ -13,7 +13,7 @@ import javax.validation.constraints.*;
  * ExecutionResult
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-27T13:24:37.065Z[GMT]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-29T09:22:19.643Z[GMT]")
 public class ExecutionResult   {
   @JsonProperty("result")
   private String result = null;

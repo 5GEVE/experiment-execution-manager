@@ -14,10 +14,10 @@ import javax.validation.constraints.*;
  * ConfigurationChangeNotification
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-27T13:24:37.065Z[GMT]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-29T09:22:19.643Z[GMT]")
 public class ConfigurationChangeNotification   {
-  @JsonProperty("expId")
-  private String expId = null;
+  @JsonProperty("executionId")
+  private String executionId = null;
 
   /**
    * Gets or Sets configurationChangeState
@@ -54,23 +54,24 @@ public class ConfigurationChangeNotification   {
   @JsonProperty("configurationChangeState")
   private ConfigurationChangeStateEnum configurationChangeState = null;
 
-  public ConfigurationChangeNotification expId(String expId) {
-    this.expId = expId;
+  public ConfigurationChangeNotification executionId(String executionId) {
+    this.executionId = executionId;
     return this;
   }
 
   /**
-   * Get expId
-   * @return expId
+   * Get executionId
+   * @return executionId
   **/
-  @ApiModelProperty(value = "")
-  
-    public String getExpId() {
-    return expId;
+  @ApiModelProperty(required = true, value = "")
+      @NotNull
+
+    public String getExecutionId() {
+    return executionId;
   }
 
-  public void setExpId(String expId) {
-    this.expId = expId;
+  public void setExecutionId(String executionId) {
+    this.executionId = executionId;
   }
 
   public ConfigurationChangeNotification configurationChangeState(ConfigurationChangeStateEnum configurationChangeState) {
@@ -103,13 +104,13 @@ public class ConfigurationChangeNotification   {
       return false;
     }
     ConfigurationChangeNotification configurationChangeNotification = (ConfigurationChangeNotification) o;
-    return Objects.equals(this.expId, configurationChangeNotification.expId) &&
+    return Objects.equals(this.executionId, configurationChangeNotification.executionId) &&
         Objects.equals(this.configurationChangeState, configurationChangeNotification.configurationChangeState);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(expId, configurationChangeState);
+    return Objects.hash(executionId, configurationChangeState);
   }
 
   @Override
@@ -117,7 +118,7 @@ public class ConfigurationChangeNotification   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ConfigurationChangeNotification {\n");
     
-    sb.append("    expId: ").append(toIndentedString(expId)).append("\n");
+    sb.append("    executionId: ").append(toIndentedString(executionId)).append("\n");
     sb.append("    configurationChangeState: ").append(toIndentedString(configurationChangeState)).append("\n");
     sb.append("}");
     return sb.toString();

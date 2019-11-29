@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import it.nextworks.eem.model.ExperimentExecutionInfo;
+import it.nextworks.eem.model.ExperimentState;
+import it.nextworks.eem.model.TestCaseResult;
 
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
@@ -15,52 +16,121 @@ import javax.validation.constraints.*;
  * ExperimentExecutionResponse
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-27T13:24:37.065Z[GMT]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-29T09:22:19.643Z[GMT]")
 public class ExperimentExecutionResponse   {
-  @JsonProperty("metadata")
-  private String metadata = null;
+  @JsonProperty("executionId")
+  private String executionId = null;
 
-  @JsonProperty("experimentExecutionInfo")
-  private ExperimentExecutionInfo experimentExecutionInfo = null;
+  @JsonProperty("state")
+  private ExperimentState state = null;
 
-  public ExperimentExecutionResponse metadata(String metadata) {
-    this.metadata = metadata;
+  @JsonProperty("testCaseResult")
+  private TestCaseResult testCaseResult = null;
+
+  @JsonProperty("reportUrl")
+  private String reportUrl = null;
+
+  @JsonProperty("eemSubscriptionId")
+  private String eemSubscriptionId = null;
+
+  public ExperimentExecutionResponse executionId(String executionId) {
+    this.executionId = executionId;
     return this;
   }
 
   /**
-   * Additional paramenters to be added
-   * @return metadata
+   * Identifier of the executed experiment
+   * @return executionId
   **/
-  @ApiModelProperty(value = "Additional paramenters to be added")
-  
-    public String getMetadata() {
-    return metadata;
+  @ApiModelProperty(required = true, value = "Identifier of the executed experiment")
+      @NotNull
+
+    public String getExecutionId() {
+    return executionId;
   }
 
-  public void setMetadata(String metadata) {
-    this.metadata = metadata;
+  public void setExecutionId(String executionId) {
+    this.executionId = executionId;
   }
 
-  public ExperimentExecutionResponse experimentExecutionInfo(ExperimentExecutionInfo experimentExecutionInfo) {
-    this.experimentExecutionInfo = experimentExecutionInfo;
+  public ExperimentExecutionResponse state(ExperimentState state) {
+    this.state = state;
     return this;
   }
 
   /**
-   * Get experimentExecutionInfo
-   * @return experimentExecutionInfo
+   * Get state
+   * @return state
   **/
   @ApiModelProperty(required = true, value = "")
       @NotNull
 
     @Valid
-    public ExperimentExecutionInfo getExperimentExecutionInfo() {
-    return experimentExecutionInfo;
+    public ExperimentState getState() {
+    return state;
   }
 
-  public void setExperimentExecutionInfo(ExperimentExecutionInfo experimentExecutionInfo) {
-    this.experimentExecutionInfo = experimentExecutionInfo;
+  public void setState(ExperimentState state) {
+    this.state = state;
+  }
+
+  public ExperimentExecutionResponse testCaseResult(TestCaseResult testCaseResult) {
+    this.testCaseResult = testCaseResult;
+    return this;
+  }
+
+  /**
+   * Get testCaseResult
+   * @return testCaseResult
+  **/
+  @ApiModelProperty(value = "")
+  
+    @Valid
+    public TestCaseResult getTestCaseResult() {
+    return testCaseResult;
+  }
+
+  public void setTestCaseResult(TestCaseResult testCaseResult) {
+    this.testCaseResult = testCaseResult;
+  }
+
+  public ExperimentExecutionResponse reportUrl(String reportUrl) {
+    this.reportUrl = reportUrl;
+    return this;
+  }
+
+  /**
+   * URL containing the report of the execution
+   * @return reportUrl
+  **/
+  @ApiModelProperty(value = "URL containing the report of the execution")
+  
+    public String getReportUrl() {
+    return reportUrl;
+  }
+
+  public void setReportUrl(String reportUrl) {
+    this.reportUrl = reportUrl;
+  }
+
+  public ExperimentExecutionResponse eemSubscriptionId(String eemSubscriptionId) {
+    this.eemSubscriptionId = eemSubscriptionId;
+    return this;
+  }
+
+  /**
+   * Get eemSubscriptionId
+   * @return eemSubscriptionId
+  **/
+  @ApiModelProperty(required = true, value = "")
+      @NotNull
+
+    public String getEemSubscriptionId() {
+    return eemSubscriptionId;
+  }
+
+  public void setEemSubscriptionId(String eemSubscriptionId) {
+    this.eemSubscriptionId = eemSubscriptionId;
   }
 
 
@@ -73,13 +143,16 @@ public class ExperimentExecutionResponse   {
       return false;
     }
     ExperimentExecutionResponse experimentExecutionResponse = (ExperimentExecutionResponse) o;
-    return Objects.equals(this.metadata, experimentExecutionResponse.metadata) &&
-        Objects.equals(this.experimentExecutionInfo, experimentExecutionResponse.experimentExecutionInfo);
+    return Objects.equals(this.executionId, experimentExecutionResponse.executionId) &&
+        Objects.equals(this.state, experimentExecutionResponse.state) &&
+        Objects.equals(this.testCaseResult, experimentExecutionResponse.testCaseResult) &&
+        Objects.equals(this.reportUrl, experimentExecutionResponse.reportUrl) &&
+        Objects.equals(this.eemSubscriptionId, experimentExecutionResponse.eemSubscriptionId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(metadata, experimentExecutionInfo);
+    return Objects.hash(executionId, state, testCaseResult, reportUrl, eemSubscriptionId);
   }
 
   @Override
@@ -87,8 +160,11 @@ public class ExperimentExecutionResponse   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ExperimentExecutionResponse {\n");
     
-    sb.append("    metadata: ").append(toIndentedString(metadata)).append("\n");
-    sb.append("    experimentExecutionInfo: ").append(toIndentedString(experimentExecutionInfo)).append("\n");
+    sb.append("    executionId: ").append(toIndentedString(executionId)).append("\n");
+    sb.append("    state: ").append(toIndentedString(state)).append("\n");
+    sb.append("    testCaseResult: ").append(toIndentedString(testCaseResult)).append("\n");
+    sb.append("    reportUrl: ").append(toIndentedString(reportUrl)).append("\n");
+    sb.append("    eemSubscriptionId: ").append(toIndentedString(eemSubscriptionId)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -2,6 +2,10 @@ package it.nextworks.eem.model;
 
 import java.util.Objects;
 import io.swagger.annotations.ApiModel;
+import it.nextworks.eem.model.ExecutionResult;
+
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -11,8 +15,8 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Map of TestCaseResults")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-27T13:24:37.065Z[GMT]")
-public class TestCaseResult   {
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-29T09:22:19.643Z[GMT]")
+public class TestCaseResult extends HashMap<String, ExecutionResult>  {
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -27,14 +31,14 @@ public class TestCaseResult   {
 
   @Override
   public int hashCode() {
-    return Objects.hash();
+    return Objects.hash(super.hashCode());
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class TestCaseResult {\n");
-    
+    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
     sb.append("}");
     return sb.toString();
   }

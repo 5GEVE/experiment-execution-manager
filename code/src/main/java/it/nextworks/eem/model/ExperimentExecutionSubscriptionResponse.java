@@ -11,11 +11,12 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * ExperimentExecutionSubscription
+ * Subsription response
  */
+@ApiModel(description = "Subsription response")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-28T08:59:03.567Z[GMT]")
-public class ExperimentExecutionSubscription   {
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-11-29T09:22:19.643Z[GMT]")
+public class ExperimentExecutionSubscriptionResponse   {
   /**
    * Gets or Sets subscriptionType
    */
@@ -47,13 +48,16 @@ public class ExperimentExecutionSubscription   {
   @JsonProperty("subscriptionType")
   private SubscriptionTypeEnum subscriptionType = null;
 
-  @JsonProperty("experimentExecutionId")
-  private String experimentExecutionId = null;
+  @JsonProperty("executionId")
+  private String executionId = null;
 
   @JsonProperty("callbackURI")
   private String callbackURI = null;
 
-  public ExperimentExecutionSubscription subscriptionType(SubscriptionTypeEnum subscriptionType) {
+  @JsonProperty("id")
+  private String id = null;
+
+  public ExperimentExecutionSubscriptionResponse subscriptionType(SubscriptionTypeEnum subscriptionType) {
     this.subscriptionType = subscriptionType;
     return this;
   }
@@ -73,27 +77,27 @@ public class ExperimentExecutionSubscription   {
     this.subscriptionType = subscriptionType;
   }
 
-  public ExperimentExecutionSubscription experimentExecutionId(String experimentExecutionId) {
-    this.experimentExecutionId = experimentExecutionId;
+  public ExperimentExecutionSubscriptionResponse executionId(String executionId) {
+    this.executionId = executionId;
     return this;
   }
 
   /**
-   * Get experimentExecutionId
-   * @return experimentExecutionId
+   * Get executionId
+   * @return executionId
   **/
   @ApiModelProperty(required = true, value = "")
       @NotNull
 
-    public String getExperimentExecutionId() {
-    return experimentExecutionId;
+    public String getExecutionId() {
+    return executionId;
   }
 
-  public void setExperimentExecutionId(String experimentExecutionId) {
-    this.experimentExecutionId = experimentExecutionId;
+  public void setExecutionId(String executionId) {
+    this.executionId = executionId;
   }
 
-  public ExperimentExecutionSubscription callbackURI(String callbackURI) {
+  public ExperimentExecutionSubscriptionResponse callbackURI(String callbackURI) {
     this.callbackURI = callbackURI;
     return this;
   }
@@ -113,6 +117,26 @@ public class ExperimentExecutionSubscription   {
     this.callbackURI = callbackURI;
   }
 
+  public ExperimentExecutionSubscriptionResponse id(String id) {
+    this.id = id;
+    return this;
+  }
+
+  /**
+   * Subscribtion ID
+   * @return id
+  **/
+  @ApiModelProperty(required = true, value = "Subscribtion ID")
+      @NotNull
+
+    public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -122,25 +146,27 @@ public class ExperimentExecutionSubscription   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ExperimentExecutionSubscription experimentExecutionSubscription = (ExperimentExecutionSubscription) o;
-    return Objects.equals(this.subscriptionType, experimentExecutionSubscription.subscriptionType) &&
-        Objects.equals(this.experimentExecutionId, experimentExecutionSubscription.experimentExecutionId) &&
-        Objects.equals(this.callbackURI, experimentExecutionSubscription.callbackURI);
+    ExperimentExecutionSubscriptionResponse experimentExecutionSubscriptionResponse = (ExperimentExecutionSubscriptionResponse) o;
+    return Objects.equals(this.subscriptionType, experimentExecutionSubscriptionResponse.subscriptionType) &&
+        Objects.equals(this.executionId, experimentExecutionSubscriptionResponse.executionId) &&
+        Objects.equals(this.callbackURI, experimentExecutionSubscriptionResponse.callbackURI) &&
+        Objects.equals(this.id, experimentExecutionSubscriptionResponse.id);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionType, experimentExecutionId, callbackURI);
+    return Objects.hash(subscriptionType, executionId, callbackURI, id);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ExperimentExecutionSubscription {\n");
+    sb.append("class ExperimentExecutionSubscriptionResponse {\n");
     
     sb.append("    subscriptionType: ").append(toIndentedString(subscriptionType)).append("\n");
-    sb.append("    experimentExecutionId: ").append(toIndentedString(experimentExecutionId)).append("\n");
+    sb.append("    executionId: ").append(toIndentedString(executionId)).append("\n");
     sb.append("    callbackURI: ").append(toIndentedString(callbackURI)).append("\n");
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("}");
     return sb.toString();
   }
