@@ -9,7 +9,7 @@ import it.nextworks.eem.model.ExperimentExecutionRequest;
 import it.nextworks.eem.model.ExperimentExecutionSubscriptionResponse;
 import it.nextworks.eem.model.ConfigurationChangeNotification;
 import it.nextworks.eem.model.ErrorInfo;
-import it.nextworks.eem.model.ExperimentExecutionResponse;
+import it.nextworks.eem.model.ExperimentExecution;
 import it.nextworks.eem.model.ExperimentExecutionSubscriptionRequest;
 import it.nextworks.eem.model.ExperimentState;
 import io.swagger.annotations.*;
@@ -22,15 +22,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-12-03T08:24:25.833Z[GMT]")
 @Api(value = "eem", description = "the eem API")
 public interface EemApi {
 
-    @ApiOperation(value = "List all experiments available", nickname = "eemExperimentExecutionsGet", notes = "", response = ExperimentExecutionResponse.class, responseContainer = "List", tags={ "EEM Operations", })
+    @ApiOperation(value = "List all experiments available", nickname = "eemExperimentExecutionsGet", notes = "", response = ExperimentExecution.class, responseContainer = "List", tags={ "EEM Operations", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "List of all experiments", response = ExperimentExecutionResponse.class, responseContainer = "List"),
+        @ApiResponse(code = 200, message = "List of all experiments", response = ExperimentExecution.class, responseContainer = "List"),
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
         @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
@@ -67,9 +66,9 @@ public interface EemApi {
     ResponseEntity<?> eemExperimentExecutionsIdDelete(@ApiParam(value = "",required=true) @PathVariable("id") String id);
 
 
-    @ApiOperation(value = "", nickname = "eemExperimentExecutionsIdGet", notes = "API to get experiment execution details", response = ExperimentExecutionResponse.class, tags={ "EEM Operations", })
+    @ApiOperation(value = "", nickname = "eemExperimentExecutionsIdGet", notes = "API to get experiment execution details", response = ExperimentExecution.class, tags={ "EEM Operations", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Return experiment execution details", response = ExperimentExecutionResponse.class),
+        @ApiResponse(code = 200, message = "Return experiment execution details", response = ExperimentExecution.class),
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
         @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
         @ApiResponse(code = 404, message = "Identifier of the experiment execution not found", response = ErrorInfo.class),

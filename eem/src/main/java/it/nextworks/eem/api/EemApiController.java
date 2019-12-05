@@ -46,14 +46,14 @@ public class EemApiController implements EemApi {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             try {
-                return new ResponseEntity<List<ExperimentExecutionResponse>>(objectMapper.readValue("[ {\n  \"executionId\" : \"executionId\",\n  \"testCaseResult\" : {\n    \"key\" : {\n      \"result\" : \"result\"\n    }\n  },\n  \"state\" : \"INIT\",\n  \"reportUrl\" : \"reportUrl\",\n  \"eemSubscriptionId\" : \"eemSubscriptionId\"\n}, {\n  \"executionId\" : \"executionId\",\n  \"testCaseResult\" : {\n    \"key\" : {\n      \"result\" : \"result\"\n    }\n  },\n  \"state\" : \"INIT\",\n  \"reportUrl\" : \"reportUrl\",\n  \"eemSubscriptionId\" : \"eemSubscriptionId\"\n} ]", List.class), HttpStatus.NOT_IMPLEMENTED);
+                return new ResponseEntity<List<ExperimentExecution>>(objectMapper.readValue("[ {\n  \"executionId\" : \"executionId\",\n  \"testCaseResult\" : {\n    \"key\" : {\n      \"result\" : \"result\"\n    }\n  },\n  \"state\" : \"INIT\",\n  \"reportUrl\" : \"reportUrl\",\n  \"eemSubscriptionId\" : \"eemSubscriptionId\"\n}, {\n  \"executionId\" : \"executionId\",\n  \"testCaseResult\" : {\n    \"key\" : {\n      \"result\" : \"result\"\n    }\n  },\n  \"state\" : \"INIT\",\n  \"reportUrl\" : \"reportUrl\",\n  \"eemSubscriptionId\" : \"eemSubscriptionId\"\n} ]", List.class), HttpStatus.NOT_IMPLEMENTED);
             } catch (IOException e) {
                 log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<List<ExperimentExecutionResponse>>(HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<List<ExperimentExecution>>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 
-        return new ResponseEntity<List<ExperimentExecutionResponse>>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<List<ExperimentExecution>>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     public ResponseEntity<?> eemExperimentExecutionsIdAbortPost(@ApiParam(value = "",required=true) @PathVariable("id") String id) {
@@ -92,8 +92,8 @@ public class EemApiController implements EemApi {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             try {
-                ExperimentExecutionResponse response = eemService.getExperimentExecution(id);
-                return new ResponseEntity<ExperimentExecutionResponse>(response, HttpStatus.OK);
+                ExperimentExecution response = eemService.getExperimentExecution(id);
+                return new ResponseEntity<ExperimentExecution>(response, HttpStatus.OK);
             } catch(FailedOperationException e){
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),

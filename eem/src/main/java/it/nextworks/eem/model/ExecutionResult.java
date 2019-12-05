@@ -1,10 +1,16 @@
 package it.nextworks.eem.model;
 
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.validation.annotation.Validated;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.*;
 
 /**
@@ -12,7 +18,18 @@ import javax.validation.constraints.*;
  */
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-12-03T08:24:25.833Z[GMT]")
+@Entity
 public class ExecutionResult   {
+
+  @Id
+  @GeneratedValue
+  @JsonIgnore
+  private Long id;
+
+  @JsonIgnore
+  @ManyToOne
+  private ExperimentExecution execution;
+
   @JsonProperty("result")
   private String result = null;
 
@@ -36,6 +53,13 @@ public class ExecutionResult   {
     this.result = result;
   }
 
+  public ExperimentExecution getExecution() {
+    return execution;
+  }
+
+  public void setExecution(ExperimentExecution execution) {
+    this.execution = execution;
+  }
 
   @Override
   public boolean equals(java.lang.Object o) {
