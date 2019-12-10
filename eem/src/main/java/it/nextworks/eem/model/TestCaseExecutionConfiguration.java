@@ -46,6 +46,14 @@ public class TestCaseExecutionConfiguration {
 		if (execConfiguration != null) this.execConfiguration = execConfiguration;
 	}
 
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	/**
 	 * @return the tcDescriptorId
 	 */
@@ -95,13 +103,14 @@ public class TestCaseExecutionConfiguration {
 			return false;
 		}
 		TestCaseExecutionConfiguration testCaseExecutionConfiguration = (TestCaseExecutionConfiguration) o;
-		return Objects.equals(this.tcDescriptorId, testCaseExecutionConfiguration.tcDescriptorId) &&
+		return Objects.equals(this.id, testCaseExecutionConfiguration.id) &&
+				Objects.equals(this.tcDescriptorId, testCaseExecutionConfiguration.tcDescriptorId) &&
 				Objects.equals(this.execConfiguration, testCaseExecutionConfiguration.execConfiguration);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(tcDescriptorId, execConfiguration);
+		return Objects.hash(id, tcDescriptorId , execConfiguration);
 	}
 
 	@Override
@@ -109,6 +118,7 @@ public class TestCaseExecutionConfiguration {
 		StringBuilder sb = new StringBuilder();
 		sb.append("class TestCaseExecutionConfiguration {\n");
 
+		sb.append("    id: ").append(toIndentedString(id)).append("\n");
 		sb.append("    tcDescriptorId: ").append(toIndentedString(tcDescriptorId)).append("\n");
 		sb.append("    execConfiguration: ").append(toIndentedString(execConfiguration)).append("\n");
 		sb.append("}");

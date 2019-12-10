@@ -1,11 +1,10 @@
 package it.nextworks.eem.engine;
 
-import it.nextworks.eem.model.ExecutionResult;
-import it.nextworks.eem.model.ExperimentExecution;
-import it.nextworks.eem.model.ExperimentState;
-import it.nextworks.eem.model.TestCaseExecutionConfiguration;
+import it.nextworks.eem.model.*;
+import it.nextworks.eem.model.enumerates.ExperimentState;
+import it.nextworks.eem.model.enumerates.SubscriptionType;
 import it.nextworks.eem.repos.ExperimentExecutionRepository;
-import org.junit.Assert;
+import it.nextworks.eem.repos.ExperimentExecutionSubscriptionRepository;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,14 +30,11 @@ public class EEMServiceTests {
     @Autowired
     ExperimentExecutionRepository experimentExecutionRepository;
 
-    @Test
-    public void createExperimentExecutionInstanceTest() throws Exception {
-        String executionId = eemService.createExperimentExecutionInstance();
-        assertNotNull(executionId);
-        log.debug("Execution Experiment Id : {}", executionId);
-    }
+    @Autowired
+    ExperimentExecutionSubscriptionRepository experimentExecutionSubscriptionRepository;
 
     @Test
+    @Ignore
     public void storeAndDeleteExperimentExecutionTest() throws Exception{
         ExperimentExecution experimentExecution = new ExperimentExecution();
         String executionId = UUID.randomUUID().toString();
@@ -64,14 +60,53 @@ public class EEMServiceTests {
                 .testCaseDescriptorConfiguration(testCaseExecutionConfigurations)
                 .testCaseResult(testCaseResults)
                 .reportUrl("url1");
-
         //store
         experimentExecutionRepository.saveAndFlush(experimentExecution);
+        log.debug("Execution Experiment : {}", experimentExecution.toString());
+        //initialize again the object that has been modified by jpa
+        experimentExecution.executionId(executionId)
+                .state(ExperimentState.INIT)
+                .testCaseDescriptorConfiguration(testCaseExecutionConfigurations)
+                .testCaseResult(testCaseResults)
+                .reportUrl("url1");
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
-        Assert.assertEquals(experimentExecution, experimentExecutionOptional.get());
+        assertEquals(experimentExecution, experimentExecutionOptional.get());
         //delete
         experimentExecutionRepository.delete(experimentExecutionOptional.get());
         experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         assertFalse(experimentExecutionOptional.isPresent());
+    }
+
+    @Test
+    @Ignore
+    public void experimentExecutionTest() throws Exception {
+        //create
+        String executionId = eemService.createExperimentExecutionInstance();
+        assertNotNull(executionId);
+        //retrieve
+        ExperimentExecution experimentExecution = eemService.getExperimentExecution(executionId);
+        assertNotNull(experimentExecution);
+        //delete
+        eemService.removeExperimentExecutionRecord(executionId);
+        Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
+        assertFalse(experimentExecutionOptional.isPresent());
+    }
+
+    @Test
+    @Ignore
+    public void experimentExecutionSubscriptionTest() throws Exception {
+        String executionId = eemService.createExperimentExecutionInstance();
+        assertNotNull(executionId);
+        ExperimentExecutionSubscriptionRequest request = new ExperimentExecutionSubscriptionRequest();
+        request.subscriptionType(SubscriptionType.STATE)
+                .executionId(executionId)
+                .callbackURI("test");
+        //subscribe
+        String subscriptionId = eemService.subscribe(request);
+        assertNotNull(subscriptionId);
+        //unsubscribe
+        eemService.unsubscribe(subscriptionId);
+        Optional<ExperimentExecutionSubscription> experimentExecutionSubscription = experimentExecutionSubscriptionRepository.findBySubscriptionId(subscriptionId);
+        assertFalse(experimentExecutionSubscription.isPresent());
     }
 }

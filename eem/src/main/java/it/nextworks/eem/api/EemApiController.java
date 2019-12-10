@@ -4,6 +4,7 @@ import it.nextworks.eem.engine.EemService;
 import it.nextworks.eem.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
+import it.nextworks.eem.model.enumerates.ExperimentState;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
@@ -42,7 +43,7 @@ public class EemApiController implements EemApi {
         this.request = request;
     }
 
-    public ResponseEntity<?> eemExperimentExecutionsGet(@ApiParam(value = "Execution state of the experiment") @Valid @RequestParam(value = "state", required = false) ExperimentState state) {
+    public ResponseEntity<?> eemExperimentExecutionsGet(@ApiParam(value = "Execution state of the experiment") @RequestParam(value = "state", required = false) ExperimentState state) {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             try {
@@ -62,10 +63,14 @@ public class EemApiController implements EemApi {
             eemService.abortExperimentExecution(id);
             return new ResponseEntity<Void>(HttpStatus.OK);
         }catch(FailedOperationException e){
+            log.debug(null, e);
+            log.error(e.getMessage());
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }catch(NotExistingEntityException e){
+            log.debug(null, e);
+            log.error(e.getMessage());
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                     HttpStatus.NOT_FOUND);
@@ -78,10 +83,14 @@ public class EemApiController implements EemApi {
             eemService.removeExperimentExecutionRecord(id);
             return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
         }catch(FailedOperationException e){
+            log.debug(null, e);
+            log.error(e.getMessage());
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }catch(NotExistingEntityException e){
+            log.debug(null, e);
+            log.error(e.getMessage());
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                     HttpStatus.NOT_FOUND);
@@ -95,15 +104,20 @@ public class EemApiController implements EemApi {
                 ExperimentExecution response = eemService.getExperimentExecution(id);
                 return new ResponseEntity<ExperimentExecution>(response, HttpStatus.OK);
             } catch(FailedOperationException e){
+                log.debug(null, e);
+                log.error(e.getMessage());
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                         HttpStatus.INTERNAL_SERVER_ERROR);
             }catch(NotExistingEntityException e){
+                log.debug(null, e);
+                log.error(e.getMessage());
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                         HttpStatus.NOT_FOUND);
             }
         }else{
+            log.error("Accept header null or different from application/json");
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.PRECONDITION_FAILED.value()).detail("Accept header null or different from application/json"),
                     HttpStatus.PRECONDITION_FAILED);
@@ -125,20 +139,27 @@ public class EemApiController implements EemApi {
         return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    public ResponseEntity<?> eemExperimentExecutionsIdRunPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody ExperimentExecutionRequest body, @ApiParam(value = "",required=true) @PathVariable("id") String id, @ApiParam(value = "Determine the type of run. If not present, the default value is RUN_ALL" , allowableValues="RUN_IN_STEPS, RUN_ALL") @RequestHeader(value="runType", required=false) String runType) {
+    public ResponseEntity<?> eemExperimentExecutionsIdRunPost(@ApiParam(value = "" ,required=true )  @RequestBody ExperimentExecutionRequest body, @ApiParam(value = "",required=true) @PathVariable("id") String id, @ApiParam(value = "Determine the type of run. If not present, the default value is RUN_ALL" , allowableValues="RUN_IN_STEPS, RUN_ALL") @RequestParam(value="runType", required=false) String runType) {
         String accept = request.getHeader("Accept");
+        //TODO add request validation, add isValid in the data model
         try{
-            eemService.runExperimentExecution(body);
+            eemService.runExperimentExecution(body, runType);
             return new ResponseEntity<Void>(HttpStatus.OK);
         }catch(FailedOperationException e){
+            log.debug(null, e);
+            log.error(e.getMessage());
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }catch(NotExistingEntityException e){
+            log.debug(null, e);
+            log.error(e.getMessage());
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                     HttpStatus.NOT_FOUND);
         }catch(MalformattedElementException e){
+            log.debug(null, e);
+            log.error(e.getMessage());
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.BAD_REQUEST.value()).detail(e.getMessage()),
                     HttpStatus.BAD_REQUEST);
@@ -162,11 +183,14 @@ public class EemApiController implements EemApi {
                 String response = eemService.createExperimentExecutionInstance();
                 return new ResponseEntity<String>(response, HttpStatus.CREATED);
             } catch(FailedOperationException e){
+                log.debug(null, e);
+                log.error(e.getMessage());
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                         HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }else{
+            log.error("Accept header null or different from application/json");
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.PRECONDITION_FAILED.value()).detail("Accept header null or different from application/json"),
                     HttpStatus.PRECONDITION_FAILED);
@@ -183,7 +207,7 @@ public class EemApiController implements EemApi {
         return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    public ResponseEntity<?> eemExperimentNotificationsPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody ConfigurationChangeNotification body) {
+    public ResponseEntity<?> eemExperimentNotificationsPost(@ApiParam(value = "" ,required=true )  @RequestBody ConfigurationChangeNotification body) {
         String accept = request.getHeader("Accept");
         return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -192,14 +216,14 @@ public class EemApiController implements EemApi {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             try {
-                return new ResponseEntity<List<ExperimentExecutionSubscriptionResponse>>(objectMapper.readValue("[ {\n  \"id\" : \"beb7074c-845e-4170-be2e-7e33e31e921a\",\n  \"callbackURI\" : \"http://127.0.0.1/subscribe\",\n  \"subscriptionType\" : \"EXPERIMENT_EXECUTION_CHANGE_STATUS\",\n  \"executionId\" : \"experiment_execution_id\"\n}, {\n  \"id\" : \"beb7074c-845e-4170-be2e-7e33e31e921a\",\n  \"callbackURI\" : \"http://127.0.0.1/subscribe\",\n  \"subscriptionType\" : \"EXPERIMENT_EXECUTION_CHANGE_STATUS\",\n  \"executionId\" : \"experiment_execution_id\"\n} ]", List.class), HttpStatus.NOT_IMPLEMENTED);
+                return new ResponseEntity<List<ExperimentExecutionSubscription>>(objectMapper.readValue("[ {\n  \"id\" : \"beb7074c-845e-4170-be2e-7e33e31e921a\",\n  \"callbackURI\" : \"http://127.0.0.1/subscribe\",\n  \"subscriptionType\" : \"EXPERIMENT_EXECUTION_CHANGE_STATUS\",\n  \"executionId\" : \"experiment_execution_id\"\n}, {\n  \"id\" : \"beb7074c-845e-4170-be2e-7e33e31e921a\",\n  \"callbackURI\" : \"http://127.0.0.1/subscribe\",\n  \"subscriptionType\" : \"EXPERIMENT_EXECUTION_CHANGE_STATUS\",\n  \"executionId\" : \"experiment_execution_id\"\n} ]", List.class), HttpStatus.NOT_IMPLEMENTED);
             } catch (IOException e) {
                 log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<List<ExperimentExecutionSubscriptionResponse>>(HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<List<ExperimentExecutionSubscription>>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 
-        return new ResponseEntity<List<ExperimentExecutionSubscriptionResponse>>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<List<ExperimentExecutionSubscription>>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     public ResponseEntity<?> eemExperimentSubscriptionsOptions() {
@@ -207,22 +231,27 @@ public class EemApiController implements EemApi {
         return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    public ResponseEntity<?> eemExperimentSubscriptionsPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody ExperimentExecutionSubscriptionRequest body) {
+    public ResponseEntity<?> eemExperimentSubscriptionsPost(@ApiParam(value = "" ,required=true )  @RequestBody ExperimentExecutionSubscriptionRequest body) {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             try {
                 String response = eemService.subscribe(body);
                 return new ResponseEntity<String>(response, HttpStatus.CREATED);
             } catch(FailedOperationException e){
+                log.debug(null, e);
+                log.error(e.getMessage());
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                         HttpStatus.INTERNAL_SERVER_ERROR);
             }catch(NotExistingEntityException e){
+                log.debug(null, e);
+                log.error(e.getMessage());
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                         HttpStatus.NOT_FOUND);
             }
         }else{
+            log.error("Accept header null or different from application/json");
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.PRECONDITION_FAILED.value()).detail("Accept header null or different from application/json"),
                     HttpStatus.PRECONDITION_FAILED);
@@ -235,10 +264,14 @@ public class EemApiController implements EemApi {
             eemService.unsubscribe(subscriptionId);
             return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
         }catch(FailedOperationException e){
+            log.debug(null, e);
+            log.error(e.getMessage());
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }catch(NotExistingEntityException e){
+            log.debug(null, e);
+            log.error(e.getMessage());
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                     HttpStatus.NOT_FOUND);
@@ -249,14 +282,14 @@ public class EemApiController implements EemApi {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             try {
-                return new ResponseEntity<ExperimentExecutionSubscriptionResponse>(objectMapper.readValue("{\n  \"id\" : \"beb7074c-845e-4170-be2e-7e33e31e921a\",\n  \"callbackURI\" : \"http://127.0.0.1/subscribe\",\n  \"subscriptionType\" : \"EXPERIMENT_EXECUTION_CHANGE_STATUS\",\n  \"executionId\" : \"experiment_execution_id\"\n}", ExperimentExecutionSubscriptionResponse.class), HttpStatus.NOT_IMPLEMENTED);
+                return new ResponseEntity<ExperimentExecutionSubscription>(objectMapper.readValue("{\n  \"id\" : \"beb7074c-845e-4170-be2e-7e33e31e921a\",\n  \"callbackURI\" : \"http://127.0.0.1/subscribe\",\n  \"subscriptionType\" : \"EXPERIMENT_EXECUTION_CHANGE_STATUS\",\n  \"executionId\" : \"experiment_execution_id\"\n}", ExperimentExecutionSubscription.class), HttpStatus.NOT_IMPLEMENTED);
             } catch (IOException e) {
                 log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<ExperimentExecutionSubscriptionResponse>(HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<ExperimentExecutionSubscription>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 
-        return new ResponseEntity<ExperimentExecutionSubscriptionResponse>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<ExperimentExecutionSubscription>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     public ResponseEntity<?> eemExperimentSubscriptionsSubscriptionIdOptions(@ApiParam(value = "",required=true) @PathVariable("subscriptionId") String subscriptionId) {
@@ -264,7 +297,6 @@ public class EemApiController implements EemApi {
         return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    /*
     public ResponseEntity<?> eemOptions() {
         String accept = request.getHeader("Accept");
         return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
@@ -274,5 +306,4 @@ public class EemApiController implements EemApi {
         String accept = request.getHeader("Accept");
         return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
     }
-    */
 }

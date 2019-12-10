@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
+import it.nextworks.eem.model.enumerates.ExperimentState;
 import org.hibernate.annotations.*;
 import org.springframework.validation.annotation.Validated;
 
@@ -39,10 +40,10 @@ public class ExperimentExecution {
   //Important note: this field is optional, i.e. if not provided all the test cases will be executed by default, with the configuration given in the descriptor
   @JsonProperty("testCaseDescriptorConfiguration")
   @JsonInclude(JsonInclude.Include.NON_EMPTY)
-  @OneToMany(mappedBy = "execution", cascade= CascadeType.ALL)
+  @OneToMany(mappedBy = "execution", cascade= CascadeType.ALL, orphanRemoval = true)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @LazyCollection(LazyCollectionOption.FALSE)
-  private List<TestCaseExecutionConfiguration> testCaseDescriptorConfiguration = new ArrayList<TestCaseExecutionConfiguration>();
+  private List<TestCaseExecutionConfiguration> testCaseDescriptorConfiguration = new ArrayList<>();
 
   @JsonProperty("testCaseResult")
   @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -51,7 +52,7 @@ public class ExperimentExecution {
   @Fetch(FetchMode.SELECT)
   @Cascade(org.hibernate.annotations.CascadeType.ALL)
    */
-  @OneToMany(mappedBy = "execution", cascade= CascadeType.ALL)
+  @OneToMany(mappedBy = "execution", cascade= CascadeType.ALL, orphanRemoval = true)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @LazyCollection(LazyCollectionOption.FALSE)
   private Map<String, ExecutionResult> testCaseResult = new HashMap<>();
@@ -59,6 +60,14 @@ public class ExperimentExecution {
   @JsonProperty("reportUrl")
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private String reportUrl = null;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
 
   public ExperimentExecution executionId(String executionId) {
     this.executionId = executionId;
@@ -177,23 +186,33 @@ public class ExperimentExecution {
       return false;
     }
     ExperimentExecution experimentExecutionResponse = (ExperimentExecution) o;
-    return Objects.equals(this.executionId, experimentExecutionResponse.executionId) &&
+    return Objects.equals(this.id, experimentExecutionResponse.id) &&
+        Objects.equals(this.executionId, experimentExecutionResponse.executionId) &&
         Objects.equals(this.state, experimentExecutionResponse.state) &&
         Objects.equals(this.testCaseDescriptorConfiguration, experimentExecutionResponse.testCaseDescriptorConfiguration) &&
         Objects.equals(this.testCaseResult, experimentExecutionResponse.testCaseResult) &&
         Objects.equals(this.reportUrl, experimentExecutionResponse.reportUrl);
   }
 
+  private boolean testCaseExecutionConfigurationEquals(List<TestCaseExecutionConfiguration> list1, List<TestCaseExecutionConfiguration> list2){
+    boolean equals = true;
+    if(list1.size() != list2.size())
+      return false;
+
+    return equals;
+  }
+
   @Override
   public int hashCode() {
-    return Objects.hash(executionId, state, testCaseDescriptorConfiguration, testCaseResult, reportUrl);
+    return Objects.hash(id, executionId, state, testCaseDescriptorConfiguration, testCaseResult, reportUrl);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ExperimentExecutionResponse {\n");
-    
+
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    executionId: ").append(toIndentedString(executionId)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    testCaseResult: ").append(toIndentedString(testCaseResult)).append("\n");

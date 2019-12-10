@@ -15,6 +15,7 @@
 */
 package it.nextworks.eem.model;
 
+import it.nextworks.eem.model.enumerates.ExperimentState;
 import it.nextworks.nfvmano.libs.ifa.common.InterfaceMessage;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 

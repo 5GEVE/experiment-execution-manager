@@ -13,14 +13,14 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package it.nextworks.eem.repos;
+package it.nextworks.eem.engine.messages;
 
-import it.nextworks.eem.model.ExperimentExecution;
-import org.springframework.data.jpa.repository.JpaRepository;
+public enum InternalMessageType {
 
-import java.util.Optional;
-
-public interface ExperimentExecutionRepository extends JpaRepository<ExperimentExecution, Long> {
-
-	Optional<ExperimentExecution> findByExecutionId(String executionId);
+	ABORT_EXPERIMENT,
+	RESUME_EXPERIMENT,
+	PAUSE_EXPERIMENT,
+	STEP_EXPERIMENT,
+	RUN_STEP_EXPERIMENT,
+	RUN_ALL_EXPERIMENT
 }

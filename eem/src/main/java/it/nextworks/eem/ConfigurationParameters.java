@@ -13,14 +13,11 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package it.nextworks.eem.repos;
+package it.nextworks.eem;
 
-import it.nextworks.eem.model.ExperimentExecution;
-import org.springframework.data.jpa.repository.JpaRepository;
+public final class ConfigurationParameters {
 
-import java.util.Optional;
-
-public interface ExperimentExecutionRepository extends JpaRepository<ExperimentExecution, Long> {
-
-	Optional<ExperimentExecution> findByExecutionId(String executionId);
+	public static final String eemQueueNamePrefix = "eem-in-";
+	public static final String eemQueueExchange = "eem-queue-exchange";
+	
 }

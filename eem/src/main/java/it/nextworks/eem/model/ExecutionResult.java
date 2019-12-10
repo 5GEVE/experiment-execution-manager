@@ -33,6 +33,14 @@ public class ExecutionResult   {
   @JsonProperty("result")
   private String result = null;
 
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
   public ExecutionResult result(String result) {
     this.result = result;
     return this;
@@ -70,19 +78,21 @@ public class ExecutionResult   {
       return false;
     }
     ExecutionResult executionResult = (ExecutionResult) o;
-    return Objects.equals(this.result, executionResult.result);
+    return Objects.equals(this.id, executionResult.id) &&
+            Objects.equals(this.result, executionResult.result);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(result);
+    return Objects.hash(id, result);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ExecutionResult {\n");
-    
+
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    result: ").append(toIndentedString(result)).append("\n");
     sb.append("}");
     return sb.toString();

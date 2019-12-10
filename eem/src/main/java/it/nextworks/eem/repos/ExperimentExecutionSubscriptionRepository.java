@@ -15,12 +15,14 @@
 */
 package it.nextworks.eem.repos;
 
-import it.nextworks.eem.model.ExperimentExecution;
+import it.nextworks.eem.model.ExperimentExecutionSubscription;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
-public interface ExperimentExecutionRepository extends JpaRepository<ExperimentExecution, Long> {
+public interface ExperimentExecutionSubscriptionRepository extends JpaRepository<ExperimentExecutionSubscription, Long> {
 
-	Optional<ExperimentExecution> findByExecutionId(String executionId);
+	Optional<ExperimentExecutionSubscription> findBySubscriptionId(String subscriptionId);
+	List<ExperimentExecutionSubscription> findByExecutionId(String executionId);
 }

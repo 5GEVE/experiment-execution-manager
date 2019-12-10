@@ -1,13 +1,17 @@
 package it.nextworks.eem.model;
 
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import it.nextworks.eem.model.enumerates.SubscriptionType;
 import org.springframework.validation.annotation.Validated;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.validation.constraints.*;
 
 /**
@@ -16,37 +20,19 @@ import javax.validation.constraints.*;
 @ApiModel(description = "Subsription response")
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-12-03T08:24:25.833Z[GMT]")
-public class ExperimentExecutionSubscriptionResponse   {
-  /**
-   * Gets or Sets subscriptionType
-   */
-  public enum SubscriptionTypeEnum {
-    STATE("EXPERIMENT_EXECUTION_CHANGE_STATE");
+@Entity
+public class ExperimentExecutionSubscription {
 
-    private String value;
+  @Id
+  @GeneratedValue
+  @JsonIgnore
+  private Long id;
 
-    SubscriptionTypeEnum(String value) {
-      this.value = value;
-    }
+  @JsonProperty("subscriptionId")
+  private String subscriptionId = null;
 
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    @JsonCreator
-    public static SubscriptionTypeEnum fromValue(String text) {
-      for (SubscriptionTypeEnum b : SubscriptionTypeEnum.values()) {
-        if (String.valueOf(b.value).equals(text)) {
-          return b;
-        }
-      }
-      return null;
-    }
-  }
   @JsonProperty("subscriptionType")
-  private SubscriptionTypeEnum subscriptionType = null;
+  private SubscriptionType subscriptionType = null;
 
   @JsonProperty("executionId")
   private String executionId = null;
@@ -54,12 +40,17 @@ public class ExperimentExecutionSubscriptionResponse   {
   @JsonProperty("callbackURI")
   private String callbackURI = null;
 
-  @JsonProperty("id")
-  private String id = null;
-
-  public ExperimentExecutionSubscriptionResponse subscriptionType(SubscriptionTypeEnum subscriptionType) {
+  public ExperimentExecutionSubscription subscriptionType(SubscriptionType subscriptionType) {
     this.subscriptionType = subscriptionType;
     return this;
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
   }
 
   /**
@@ -69,15 +60,15 @@ public class ExperimentExecutionSubscriptionResponse   {
   @ApiModelProperty(required = true, value = "")
       @NotNull
 
-    public SubscriptionTypeEnum getSubscriptionType() {
+    public SubscriptionType getSubscriptionType() {
     return subscriptionType;
   }
 
-  public void setSubscriptionType(SubscriptionTypeEnum subscriptionType) {
+  public void setSubscriptionType(SubscriptionType subscriptionType) {
     this.subscriptionType = subscriptionType;
   }
 
-  public ExperimentExecutionSubscriptionResponse executionId(String executionId) {
+  public ExperimentExecutionSubscription executionId(String executionId) {
     this.executionId = executionId;
     return this;
   }
@@ -97,7 +88,7 @@ public class ExperimentExecutionSubscriptionResponse   {
     this.executionId = executionId;
   }
 
-  public ExperimentExecutionSubscriptionResponse callbackURI(String callbackURI) {
+  public ExperimentExecutionSubscription callbackURI(String callbackURI) {
     this.callbackURI = callbackURI;
     return this;
   }
@@ -117,8 +108,8 @@ public class ExperimentExecutionSubscriptionResponse   {
     this.callbackURI = callbackURI;
   }
 
-  public ExperimentExecutionSubscriptionResponse id(String id) {
-    this.id = id;
+  public ExperimentExecutionSubscription subscriptionId(String subscriptionId) {
+    this.subscriptionId = subscriptionId;
     return this;
   }
 
@@ -129,12 +120,10 @@ public class ExperimentExecutionSubscriptionResponse   {
   @ApiModelProperty(required = true, value = "Subscribtion ID")
       @NotNull
 
-    public String getId() {
-    return id;
-  }
+    public String getSubscriptionId() { return subscriptionId; }
 
-  public void setId(String id) {
-    this.id = id;
+  public void setSubscriptionId(String subscriptionId) {
+    this.subscriptionId = subscriptionId;
   }
 
 
@@ -146,27 +135,29 @@ public class ExperimentExecutionSubscriptionResponse   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ExperimentExecutionSubscriptionResponse experimentExecutionSubscriptionResponse = (ExperimentExecutionSubscriptionResponse) o;
-    return Objects.equals(this.subscriptionType, experimentExecutionSubscriptionResponse.subscriptionType) &&
-        Objects.equals(this.executionId, experimentExecutionSubscriptionResponse.executionId) &&
-        Objects.equals(this.callbackURI, experimentExecutionSubscriptionResponse.callbackURI) &&
-        Objects.equals(this.id, experimentExecutionSubscriptionResponse.id);
+    ExperimentExecutionSubscription experimentExecutionSubscription = (ExperimentExecutionSubscription) o;
+    return Objects.equals(this.id, experimentExecutionSubscription.id) &&
+        Objects.equals(this.subscriptionId, experimentExecutionSubscription.subscriptionId)    &&
+        Objects.equals(this.subscriptionType, experimentExecutionSubscription.subscriptionType) &&
+        Objects.equals(this.executionId, experimentExecutionSubscription.executionId) &&
+        Objects.equals(this.callbackURI, experimentExecutionSubscription.callbackURI);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionType, executionId, callbackURI, id);
+    return Objects.hash(id, subscriptionType, executionId, callbackURI, subscriptionId);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ExperimentExecutionSubscriptionResponse {\n");
-    
+
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
+    sb.append("    subscriptionId: ").append(toIndentedString(subscriptionId)).append("\n");
     sb.append("    subscriptionType: ").append(toIndentedString(subscriptionType)).append("\n");
     sb.append("    executionId: ").append(toIndentedString(executionId)).append("\n");
     sb.append("    callbackURI: ").append(toIndentedString(callbackURI)).append("\n");
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("}");
     return sb.toString();
   }

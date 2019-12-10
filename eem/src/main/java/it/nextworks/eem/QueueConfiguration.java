@@ -13,14 +13,19 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package it.nextworks.eem.repos;
+package it.nextworks.eem;
 
-import it.nextworks.eem.model.ExperimentExecution;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.amqp.core.TopicExchange;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import java.util.Optional;
 
-public interface ExperimentExecutionRepository extends JpaRepository<ExperimentExecution, Long> {
+@Configuration
+public class QueueConfiguration {
 
-	Optional<ExperimentExecution> findByExecutionId(String executionId);
+	@Bean(name=ConfigurationParameters.eemQueueExchange)
+	TopicExchange exchange() {
+		return new TopicExchange(ConfigurationParameters.eemQueueExchange, true, false);
+	}
+	
 }
