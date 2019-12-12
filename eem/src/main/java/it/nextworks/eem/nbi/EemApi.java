@@ -3,7 +3,7 @@
  * https://github.com/swagger-api/swagger-codegen
  * Do not edit the class manually.
  */
-package it.nextworks.eem.api;
+package it.nextworks.eem.nbi;
 
 import it.nextworks.eem.model.ExperimentExecutionRequest;
 import it.nextworks.eem.model.ExperimentExecutionSubscription;
@@ -11,7 +11,7 @@ import it.nextworks.eem.model.ConfigurationChangeNotification;
 import it.nextworks.eem.model.ErrorInfo;
 import it.nextworks.eem.model.ExperimentExecution;
 import it.nextworks.eem.model.ExperimentExecutionSubscriptionRequest;
-import it.nextworks.eem.model.enumerates.ExperimentState;
+import it.nextworks.eem.model.enumerate.ExperimentState;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -92,8 +92,7 @@ public interface EemApi {
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
         @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
         @ApiResponse(code = 404, message = "Identifier of the experiment execution not found", response = ErrorInfo.class),
-        @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
-        @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
+        @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class)})
     @RequestMapping(value = "/eem/experiment_executions/{id}/pause",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
@@ -106,8 +105,7 @@ public interface EemApi {
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
         @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
         @ApiResponse(code = 404, message = "Identifier of the experiment execution not found", response = ErrorInfo.class),
-        @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
-        @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
+        @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class) })
     @RequestMapping(value = "/eem/experiment_executions/{id}/resume",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
@@ -135,8 +133,7 @@ public interface EemApi {
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
         @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
         @ApiResponse(code = 404, message = "Identifier of the experiment execution not found", response = ErrorInfo.class),
-        @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
-        @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
+        @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class) })
     @RequestMapping(value = "/eem/experiment_executions/{id}/step",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
@@ -220,7 +217,7 @@ public interface EemApi {
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Creates a new subscription to the Execution Experiment Manager", response = String.class),
         @ApiResponse(code = 303, message = "Subscription already exists", response = ErrorInfo.class),
-        @ApiResponse(code = 400, message = "Bad request", response = ErrorInfo.class),
+        @ApiResponse(code = 400, message = "Malformatted request", response = ErrorInfo.class),
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
         @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),

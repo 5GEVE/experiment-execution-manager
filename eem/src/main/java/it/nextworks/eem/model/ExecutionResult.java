@@ -5,6 +5,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import org.springframework.validation.annotation.Validated;
 
 import javax.persistence.Entity;
@@ -107,5 +108,11 @@ public class ExecutionResult   {
       return "null";
     }
     return o.toString().replace("\n", "\n    ");
+  }
+
+  @JsonIgnore
+  public void isValid() throws MalformattedElementException {
+    if(result == null)
+      throw new MalformattedElementException("result cannot be null");
   }
 }

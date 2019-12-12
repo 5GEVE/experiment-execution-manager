@@ -1,10 +1,10 @@
 package it.nextworks.eem.engine;
 
 import it.nextworks.eem.model.*;
-import it.nextworks.eem.model.enumerates.ExperimentState;
-import it.nextworks.eem.model.enumerates.SubscriptionType;
-import it.nextworks.eem.repos.ExperimentExecutionRepository;
-import it.nextworks.eem.repos.ExperimentExecutionSubscriptionRepository;
+import it.nextworks.eem.model.enumerate.ExperimentState;
+import it.nextworks.eem.model.enumerate.SubscriptionType;
+import it.nextworks.eem.repo.ExperimentExecutionRepository;
+import it.nextworks.eem.repo.ExperimentExecutionSubscriptionRepository;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;

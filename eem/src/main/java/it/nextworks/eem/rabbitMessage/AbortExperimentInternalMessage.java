@@ -13,17 +13,15 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package it.nextworks.eem.engine.messages;
+package it.nextworks.eem.rabbitMessage;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import it.nextworks.eem.model.ExperimentExecutionRequest;
 
 public class AbortExperimentInternalMessage extends InternalMessage {
 
 	@JsonCreator
 	public AbortExperimentInternalMessage() {
-		this.type = InternalMessageType.ABORT_EXPERIMENT;
+		this.type = InternalMessageType.ABORT;
 	}
 
 }

@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
-import it.nextworks.eem.model.enumerates.ExperimentState;
+import it.nextworks.eem.model.enumerate.ExperimentState;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import org.hibernate.annotations.*;
 import org.springframework.validation.annotation.Validated;
 
@@ -47,11 +48,6 @@ public class ExperimentExecution {
 
   @JsonProperty("testCaseResult")
   @JsonInclude(JsonInclude.Include.NON_EMPTY)
-  /*
-  @ElementCollection(fetch=FetchType.EAGER)
-  @Fetch(FetchMode.SELECT)
-  @Cascade(org.hibernate.annotations.CascadeType.ALL)
-   */
   @OneToMany(mappedBy = "execution", cascade= CascadeType.ALL, orphanRemoval = true)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @LazyCollection(LazyCollectionOption.FALSE)
@@ -60,6 +56,10 @@ public class ExperimentExecution {
   @JsonProperty("reportUrl")
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private String reportUrl = null;
+
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @JsonProperty("errorMessage")
+  private String errorMessage;
 
   public Long getId() {
     return id;
@@ -135,6 +135,11 @@ public class ExperimentExecution {
     }
   }
 
+  public void addTestCaseResult(String testCaseId, ExecutionResult result){
+    result.setExecution(this);
+    this.testCaseResult.put(testCaseId, result);
+  }
+
   public ExperimentExecution reportUrl(String reportUrl) {
     this.reportUrl = reportUrl;
     return this;
@@ -175,6 +180,25 @@ public class ExperimentExecution {
     for (TestCaseExecutionConfiguration tc : this.testCaseDescriptorConfiguration) {
       tc.setExecution(this);
     }
+  }
+
+  public ExperimentExecution errorMessage(String errorMessage) {
+    this.errorMessage = errorMessage;
+    return this;
+  }
+
+  /**
+   * Error Message
+   * @return errorMessage
+   **/
+  @ApiModelProperty(required = false, value = "Error Message")
+
+  public String getErrorMessage() {
+    return errorMessage;
+  }
+
+  public void setErrorMessage(String errorMessage) {
+    this.errorMessage = errorMessage;
   }
 
   @Override
@@ -231,5 +255,13 @@ public class ExperimentExecution {
       return "null";
     }
     return o.toString().replace("\n", "\n    ");
+  }
+
+  @JsonIgnore
+  public void isValid() throws MalformattedElementException {
+    if(executionId == null)
+      throw new MalformattedElementException("executionId cannot be null");
+    if(state == null)
+      throw new MalformattedElementException("state cannot be null");
   }
 }

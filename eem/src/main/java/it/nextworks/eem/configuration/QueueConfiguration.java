@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package it.nextworks.eem;
+package it.nextworks.eem.configuration;
 
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class QueueConfiguration {
 
-	@Bean(name=ConfigurationParameters.eemQueueExchange)
+	@Bean(name= ConfigurationParameters.eemQueueExchange)
 	TopicExchange exchange() {
 		return new TopicExchange(ConfigurationParameters.eemQueueExchange, true, false);
 	}

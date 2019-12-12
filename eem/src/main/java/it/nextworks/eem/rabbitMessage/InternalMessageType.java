@@ -13,11 +13,16 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package it.nextworks.eem;
+package it.nextworks.eem.rabbitMessage;
 
-public final class ConfigurationParameters {
+public enum InternalMessageType {
 
-	public static final String eemQueueNamePrefix = "eem-in-";
-	public static final String eemQueueExchange = "eem-queue-exchange";
-	
+	ABORT,
+	RESUME,
+	PAUSE,
+	STEP,
+	RUN_STEP,
+    RUN_ALL,
+	RUN_TEST_CASE,
+	RESULT
 }

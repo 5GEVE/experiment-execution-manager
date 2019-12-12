@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import it.nextworks.eem.model.enumerates.SubscriptionType;
+import it.nextworks.eem.model.enumerate.SubscriptionType;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import org.springframework.validation.annotation.Validated;
 
 import javax.persistence.Entity;
@@ -171,5 +172,17 @@ public class ExperimentExecutionSubscription {
       return "null";
     }
     return o.toString().replace("\n", "\n    ");
+  }
+
+  @JsonIgnore
+  public void isValid() throws MalformattedElementException {
+    if(executionId == null)
+      throw new MalformattedElementException("executionId cannot be null");
+    if(subscriptionType == null)
+      throw new MalformattedElementException("subscriptionType cannot be null");
+    if(callbackURI == null)
+      throw new MalformattedElementException("callbackURI cannot be null");
+    if(subscriptionId == null)
+      throw new MalformattedElementException("subscriptionId cannot be null");
   }
 }

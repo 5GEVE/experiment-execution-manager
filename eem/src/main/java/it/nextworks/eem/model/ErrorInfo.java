@@ -1,9 +1,12 @@
 package it.nextworks.eem.model;
 
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.*;
@@ -100,5 +103,13 @@ public class ErrorInfo   {
       return "null";
     }
     return o.toString().replace("\n", "\n    ");
+  }
+
+  @JsonIgnore
+  public void isValid() throws MalformattedElementException {
+    if(status == null)
+      throw new MalformattedElementException("status cannot be null");
+    if(detail == null)
+      throw new MalformattedElementException("detail cannot be null");
   }
 }

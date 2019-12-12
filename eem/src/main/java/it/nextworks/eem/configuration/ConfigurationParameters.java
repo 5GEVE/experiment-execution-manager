@@ -13,14 +13,12 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package it.nextworks.eem.engine.messages;
+package it.nextworks.eem.configuration;
 
-public enum InternalMessageType {
+public final class ConfigurationParameters {
 
-	ABORT_EXPERIMENT,
-	RESUME_EXPERIMENT,
-	PAUSE_EXPERIMENT,
-	STEP_EXPERIMENT,
-	RUN_STEP_EXPERIMENT,
-	RUN_ALL_EXPERIMENT
+	public static final String eemQueueInNamePrefix = "eem-in-";
+	public static final String eemQueueOutNamePrefix = "eem-out-";
+	public static final String eemQueueExchange = "eem-queue-exchange";
+	
 }

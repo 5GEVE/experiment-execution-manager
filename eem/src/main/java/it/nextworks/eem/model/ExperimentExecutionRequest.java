@@ -1,8 +1,11 @@
 package it.nextworks.eem.model;
 
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -148,5 +151,15 @@ public class ExperimentExecutionRequest   {
       return "null";
     }
     return o.toString().replace("\n", "\n    ");
+  }
+
+  @JsonIgnore
+  public void isValid() throws MalformattedElementException {
+    if(executionId == null)
+      throw new MalformattedElementException("executionId cannot be null");
+    if(nsInstanceId == null)
+      throw new MalformattedElementException("nsInstanceId cannot be null");
+    if(experimentDescriptorId == null)
+      throw new MalformattedElementException("experimentDescriptorId cannot be null");
   }
 }

@@ -13,15 +13,29 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package it.nextworks.eem.engine.messages;
+package it.nextworks.eem.rabbitMessage;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import it.nextworks.eem.model.ExperimentExecutionRequest;
 
-public class ResumeExperimentInternalMessage extends InternalMessage {
+public class RunStepExperimentInternalMessage extends InternalMessage {
+
+	@JsonProperty("request")
+	private ExperimentExecutionRequest request;
 
 	@JsonCreator
-	public ResumeExperimentInternalMessage() {
-		this.type = InternalMessageType.RESUME_EXPERIMENT;
+	public RunStepExperimentInternalMessage(@JsonProperty("request") ExperimentExecutionRequest request) {
+		this.type = InternalMessageType.RUN_STEP;
+		this.request = request;
+	}
+
+
+	/**
+	 * @return the request
+	 */
+	public ExperimentExecutionRequest getRequest() {
+		return request;
 	}
 
 }

@@ -1,10 +1,13 @@
 package it.nextworks.eem.model;
 
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModelProperty;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -188,5 +191,17 @@ public class ConfigurationChangeNotification   {
       return "null";
     }
     return o.toString().replace("\n", "\n    ");
+  }
+
+  @JsonIgnore
+  public void isValid() throws MalformattedElementException {
+    if(executionId == null)
+      throw new MalformattedElementException("executionId cannot be null");
+    if(configurationChangeState == null)
+      throw new MalformattedElementException("configurationChangeState cannot be null");
+    if(notificationInfo == null)
+      throw new MalformattedElementException("notificationInfo cannot be null");
+    if(notificationError != null)
+      notificationError.isValid();
   }
 }

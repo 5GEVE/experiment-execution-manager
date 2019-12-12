@@ -1,10 +1,10 @@
-package it.nextworks.eem.api;
+package it.nextworks.eem.nbi;
 
 import it.nextworks.eem.engine.EemService;
 import it.nextworks.eem.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
-import it.nextworks.eem.model.enumerates.ExperimentState;
+import it.nextworks.eem.model.enumerate.ExperimentState;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
@@ -16,10 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.validation.Valid;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
@@ -131,18 +129,50 @@ public class EemApiController implements EemApi {
 
     public ResponseEntity<?> eemExperimentExecutionsIdPausePost(@ApiParam(value = "",required=true) @PathVariable("id") String id) {
         String accept = request.getHeader("Accept");
-        return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
+        try{
+            eemService.pauseExperimentExecution(id);
+            return new ResponseEntity<Void>(HttpStatus.OK);
+        }catch(FailedOperationException e){
+            log.debug(null, e);
+            log.error(e.getMessage());
+            return new ResponseEntity<ErrorInfo>(
+                    new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }catch(NotExistingEntityException e){
+            log.debug(null, e);
+            log.error(e.getMessage());
+            return new ResponseEntity<ErrorInfo>(
+                    new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
+                    HttpStatus.NOT_FOUND);
+        }
     }
 
     public ResponseEntity<?> eemExperimentExecutionsIdResumePost(@ApiParam(value = "",required=true) @PathVariable("id") String id) {
         String accept = request.getHeader("Accept");
-        return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
+        try{
+            eemService.resumeExperimentExecution(id);
+            return new ResponseEntity<Void>(HttpStatus.OK);
+        }catch(FailedOperationException e){
+            log.debug(null, e);
+            log.error(e.getMessage());
+            return new ResponseEntity<ErrorInfo>(
+                    new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }catch(NotExistingEntityException e){
+            log.debug(null, e);
+            log.error(e.getMessage());
+            return new ResponseEntity<ErrorInfo>(
+                    new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
+                    HttpStatus.NOT_FOUND);
+        }
     }
 
+    //TODO why executionId is both in the url and in the body? If we keep both, check also if the one in the url is correct (just add a check if both are equals)
     public ResponseEntity<?> eemExperimentExecutionsIdRunPost(@ApiParam(value = "" ,required=true )  @RequestBody ExperimentExecutionRequest body, @ApiParam(value = "",required=true) @PathVariable("id") String id, @ApiParam(value = "Determine the type of run. If not present, the default value is RUN_ALL" , allowableValues="RUN_IN_STEPS, RUN_ALL") @RequestParam(value="runType", required=false) String runType) {
         String accept = request.getHeader("Accept");
-        //TODO add request validation, add isValid in the data model
         try{
+            if(runType == null)
+                runType = "RUN_ALL";
             eemService.runExperimentExecution(body, runType);
             return new ResponseEntity<Void>(HttpStatus.OK);
         }catch(FailedOperationException e){
@@ -168,7 +198,22 @@ public class EemApiController implements EemApi {
 
     public ResponseEntity<?> eemExperimentExecutionsIdStepPost(@ApiParam(value = "",required=true) @PathVariable("id") String id) {
         String accept = request.getHeader("Accept");
-        return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
+        try{
+            eemService.stepExperimentExecution(id);
+            return new ResponseEntity<Void>(HttpStatus.OK);
+        }catch(FailedOperationException e){
+            log.debug(null, e);
+            log.error(e.getMessage());
+            return new ResponseEntity<ErrorInfo>(
+                    new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }catch(NotExistingEntityException e){
+            log.debug(null, e);
+            log.error(e.getMessage());
+            return new ResponseEntity<ErrorInfo>(
+                    new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
+                    HttpStatus.NOT_FOUND);
+        }
     }
 
     public ResponseEntity<?> eemExperimentExecutionsOptions() {
@@ -249,6 +294,13 @@ public class EemApiController implements EemApi {
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                         HttpStatus.NOT_FOUND);
+            }
+            catch(MalformattedElementException e){
+                log.debug(null, e);
+                log.error(e.getMessage());
+                return new ResponseEntity<ErrorInfo>(
+                        new ErrorInfo().status(HttpStatus.BAD_REQUEST.value()).detail(e.getMessage()),
+                        HttpStatus.BAD_REQUEST);
             }
         }else{
             log.error("Accept header null or different from application/json");

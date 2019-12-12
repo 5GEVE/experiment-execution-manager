@@ -10,7 +10,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication
 @EnableSwagger2
-@ComponentScan(basePackages = { "it.nextworks.eem", "it.nextworks.eem.api" , "it.nextworks.eem.configuration"})
+@ComponentScan(basePackages = { "it.nextworks.eem", "it.nextworks.eem.nbi" , "it.nextworks.eem.configuration"})
 public class EEMApplication implements CommandLineRunner {
 
     @Override

@@ -13,15 +13,14 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package it.nextworks.eem.engine.messages;
+package it.nextworks.eem.repo;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
+import it.nextworks.eem.model.ExperimentExecution;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public class StepExperimentInternalMessage extends InternalMessage {
+import java.util.Optional;
 
-	@JsonCreator
-	public StepExperimentInternalMessage() {
-		this.type = InternalMessageType.STEP_EXPERIMENT;
-	}
+public interface ExperimentExecutionRepository extends JpaRepository<ExperimentExecution, Long> {
 
+	Optional<ExperimentExecution> findByExecutionId(String executionId);
 }

@@ -1,4 +1,4 @@
-package it.nextworks.eem.api;
+package it.nextworks.eem.nbi;
 
 import java.io.IOException;
 

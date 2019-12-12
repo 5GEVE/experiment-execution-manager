@@ -2,6 +2,7 @@ package it.nextworks.eem.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -134,5 +135,11 @@ public class TestCaseExecutionConfiguration {
 			return "null";
 		}
 		return o.toString().replace("\n", "\n    ");
+	}
+
+	@JsonIgnore
+	public void isValid() throws MalformattedElementException {
+		if(tcDescriptorId == null)
+			throw new MalformattedElementException("tcDescriptorId cannot be null");
 	}
 }
