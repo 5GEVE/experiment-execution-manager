@@ -10,6 +10,9 @@ import it.nextworks.eem.rabbitMessage.*;
 import it.nextworks.eem.model.*;
 import it.nextworks.eem.model.enumerate.ExperimentState;
 import it.nextworks.eem.repo.ExperimentExecutionRepository;
+import it.nextworks.eem.sbi.jenkins.SbiJenkinsService;
+import it.nextworks.eem.sbi.runtimeConfigurator.SbiConfigurationService;
+import it.nextworks.eem.sbi.validationComponent.SbiValidationService;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
@@ -52,7 +55,18 @@ public class EemService{
     private EemSubscriptionService subscriptionService;
 
     @Autowired
+    private SbiJenkinsService jenkinsService;
+
+    @Autowired
+    private SbiValidationService validationService;
+
+    @Autowired
+    private SbiConfigurationService configurationService;
+
+    @Autowired
     private ExperimentExecutionRepository experimentExecutionRepository;
+
+    //TODO initializate EEIM for each experiment execution stored in db and not completed
 
     public synchronized String createExperimentExecutionInstance() throws FailedOperationException{
         log.info("Received request for new Experiment Execution");
@@ -82,8 +96,8 @@ public class EemService{
         if(!experimentExecutionOptional.isPresent())
             throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", experimentExecutionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
-        if(!experimentExecution.getState().equals(ExperimentState.FAILED) && !experimentExecution.getState().equals(ExperimentState.ABORTED) && !experimentExecution.getState().equals(ExperimentState.COMPLETED))//TODO PAUSED?
-            throw new FailedOperationException(String.format("Experiment Execution with Id %s is neither in FAILED or ABORTED or COMPLETED state", experimentExecutionId));
+        if(!experimentExecution.getState().equals(ExperimentState.INIT) && !experimentExecution.getState().equals(ExperimentState.FAILED) && !experimentExecution.getState().equals(ExperimentState.ABORTED) && !experimentExecution.getState().equals(ExperimentState.COMPLETED))//TODO PAUSED?
+            throw new FailedOperationException(String.format("Experiment Execution with Id %s is neither in INIT or FAILED or ABORTED or COMPLETED state", experimentExecutionId));
         experimentExecutionRepository.delete(experimentExecutionOptional.get());
         experimentExecutionInstances.remove(experimentExecutionId);
         log.info("Experiment Execution with Id {} deleted", experimentExecutionId);
@@ -207,7 +221,7 @@ public class EemService{
 
     private void initNewExperimentExecutionInstanceManager(String experimentExecutionId) {
         log.info("Initializing new Experiment Execution Instance Manager with Id {}", experimentExecutionId);
-        ExperimentExecutionInstanceManager eeim = new ExperimentExecutionInstanceManager(experimentExecutionId, experimentExecutionRepository, subscriptionService, rabbitTemplate, messageExchange, rabbitHost);
+        ExperimentExecutionInstanceManager eeim = new ExperimentExecutionInstanceManager(experimentExecutionId, experimentExecutionRepository, subscriptionService, jenkinsService, validationService, configurationService);
         createQueue(experimentExecutionId, eeim);
         experimentExecutionInstances.put(experimentExecutionId, eeim);
         log.debug("Experiment Execution Instance Manager with Id {} initialized", experimentExecutionId);

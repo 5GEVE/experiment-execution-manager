@@ -27,7 +27,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.UnknownHttpStatusCodeException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,15 +59,22 @@ public class ExperimentLcmRestClient {
 			log.debug("Sending HTTP request");
 			ResponseEntity<?> httpResponse =
 					restTemplate.exchange(url, HttpMethod.POST, entity, ExperimentExecutionStateChangeNotification.class);
-			log.debug("Response code: " + httpResponse.getStatusCode().toString());
 			HttpStatus code = httpResponse.getStatusCode();
-			if (code.equals(HttpStatus.OK)) {
+			if (code.equals(HttpStatus.OK))
 				log.debug("Experiment Execution state change notification sent correctly");
+			/*
 			} else if (code.equals(HttpStatus.BAD_REQUEST)) {
+				log.debug("Error sending Experiment Execution state change notification : {} ", httpResponse.getBody());
 				throw new MalformattedElementException("Error sending Experiment Execution state change notification : " + httpResponse.getBody());
-			}
-		} catch (MalformattedElementException e) {
-			throw new FailedOperationException("Error while interacting with Experiment-Lcm");
+			}*/
+		} catch (HttpClientErrorException e) {
+			throw new FailedOperationException("Error sending Experiment Execution state change notification : Client error");
+		} catch (HttpServerErrorException e) {
+			throw new FailedOperationException("Error sending Experiment Execution state change notification : Server error");
+		} catch (UnknownHttpStatusCodeException e) {
+			throw new FailedOperationException("Error sending Experiment Execution state change notification : Unknown error");
+		}catch (Exception e){
+			throw new FailedOperationException("Generic Error while interacting with Experiment-Lcm : " + e.getMessage());
 		}
 	}
 }

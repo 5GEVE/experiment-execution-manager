@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import com.google.gson.Gson;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -31,6 +32,8 @@ public class EemApiController implements EemApi {
     private final ObjectMapper objectMapper;
 
     private final HttpServletRequest request;
+
+    private static final Gson gson = new Gson();
 
     @Autowired
     EemService eemService;
@@ -171,7 +174,7 @@ public class EemApiController implements EemApi {
     public ResponseEntity<?> eemExperimentExecutionsIdRunPost(@ApiParam(value = "" ,required=true )  @RequestBody ExperimentExecutionRequest body, @ApiParam(value = "",required=true) @PathVariable("id") String id, @ApiParam(value = "Determine the type of run. If not present, the default value is RUN_ALL" , allowableValues="RUN_IN_STEPS, RUN_ALL") @RequestParam(value="runType", required=false) String runType) {
         String accept = request.getHeader("Accept");
         try{
-            if(runType == null)
+            if(runType == null || !runType.equals("RUN_ALL") || !runType.equals("RUN_IN_STEPS"))
                 runType = "RUN_ALL";
             eemService.runExperimentExecution(body, runType);
             return new ResponseEntity<Void>(HttpStatus.OK);
@@ -226,7 +229,7 @@ public class EemApiController implements EemApi {
         if (accept != null && accept.contains("application/json")) {
             try {
                 String response = eemService.createExperimentExecutionInstance();
-                return new ResponseEntity<String>(response, HttpStatus.CREATED);
+                return new ResponseEntity<String>(gson.toJson(response), HttpStatus.CREATED);
             } catch(FailedOperationException e){
                 log.debug(null, e);
                 log.error(e.getMessage());
@@ -281,7 +284,7 @@ public class EemApiController implements EemApi {
         if (accept != null && accept.contains("application/json")) {
             try {
                 String response = eemService.subscribe(body);
-                return new ResponseEntity<String>(response, HttpStatus.CREATED);
+                return new ResponseEntity<String>(gson.toJson(response), HttpStatus.CREATED);
             } catch(FailedOperationException e){
                 log.debug(null, e);
                 log.error(e.getMessage());

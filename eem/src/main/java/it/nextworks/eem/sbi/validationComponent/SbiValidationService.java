@@ -1,4 +1,4 @@
-package it.nextworks.eem.sbi.jenkins;
+package it.nextworks.eem.sbi.validationComponent;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -6,7 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.nextworks.eem.configuration.ConfigurationParameters;
-import it.nextworks.eem.rabbitMessage.*;
+import it.nextworks.eem.rabbitMessage.InternalMessage;
+import it.nextworks.eem.rabbitMessage.ValidationResultInternalMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.TopicExchange;
@@ -16,9 +17,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SbiJenkinsService {
+public class SbiValidationService {
 
-    private static final Logger log = LoggerFactory.getLogger(SbiJenkinsService.class);
+    private static final Logger log = LoggerFactory.getLogger(SbiValidationService.class);
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -27,39 +28,39 @@ public class SbiJenkinsService {
     @Qualifier(ConfigurationParameters.eemQueueExchange)
     private TopicExchange messageExchange;
 
-    public void runTestCase(String executionId, String tcDescriptorId, String robotFile){//TODO change type of robotFile
+    public void validateExperiment(String executionId){
         new Thread(() -> {
-            jenkinsStuff(executionId, tcDescriptorId, robotFile);
+            validationStuff(executionId);
         }).start();
     }
 
-    private void jenkinsStuff(String executionId, String tcDescriptorId, String robotFile){//TODO modify name
-        //TODO run test case and get result
+    private void validationStuff(String executionId){//TODO modify name
+        //TODO validate experiment
         try {//TODO remove
-            log.debug("Running the experiment");
-            Thread.sleep(10000);
+            log.debug("Validating the experiment");
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             log.debug("Sleep error");
         }
         //test ok
-        String result = "OK";
-        String topic = "lifecycle.testCaseResult." + executionId;
-        InternalMessage internalMessage = new TestCaseResultInternalMessage(result, tcDescriptorId, false);
+        String validation = "OK";
+        String topic = "lifecycle.validation." + executionId;
+        InternalMessage internalMessage = new ValidationResultInternalMessage("Validation ok", false);
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
             log.error("Error while translating internal scheduling message in Json format");
-            manageTestCaseError("Error while translating internal scheduling message in Json format", executionId, tcDescriptorId);
+            manageValidationError("Error while translating internal scheduling message in Json format", executionId);
         }
         //test ko
-        //manageTestCaseError();
+        //manageValidationError();
     }
 
-    private void manageTestCaseError(String errorMessage, String executionId, String tcDescriptorId){
-        log.error("Test Case with Id {} of Experiment Execution with Id {} failed : {}", tcDescriptorId, executionId, errorMessage);
-        errorMessage = String.format("Test Case with Id %s for Experiment Execution with Id %s failed : %s", tcDescriptorId, executionId, errorMessage);
-        String topic = "lifecycle.testCaseResult." + executionId;
-        InternalMessage internalMessage = new TestCaseResultInternalMessage(errorMessage, tcDescriptorId, true);
+    private void manageValidationError(String errorMessage, String executionId){
+        log.error("Validation of Experiment Execution with Id {} failed : {}", executionId, errorMessage);
+        errorMessage = String.format("Validation of Experiment Execution with Id %s failed : %s", executionId, errorMessage);
+        String topic = "lifecycle.validation." + executionId;
+        InternalMessage internalMessage = new ValidationResultInternalMessage(errorMessage, true);
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {

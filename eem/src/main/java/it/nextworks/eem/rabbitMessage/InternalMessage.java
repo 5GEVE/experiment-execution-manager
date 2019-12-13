@@ -20,14 +20,17 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "msgType")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
-		@Type(value = RunAllExperimentInternalMessage.class, name = "RUN_ALL_EXPERIMENT"),
-		@Type(value = RunStepExperimentInternalMessage.class, name = "RUN_STEP_EXPERIMENT"),
-		@Type(value = RunStepExperimentInternalMessage.class, name = "ABORT_EXPERIMENT"),
-		@Type(value = RunStepExperimentInternalMessage.class, name = "PAUSE_EXPERIMENT"),
-		@Type(value = RunStepExperimentInternalMessage.class, name = "STEP_EXPERIMENT"),
-		@Type(value = RunStepExperimentInternalMessage.class, name = "RESUME_STEP_EXPERIMENT"),
+		@Type(value = RunAllExperimentInternalMessage.class, name = "RUN_ALL"),
+		@Type(value = RunStepExperimentInternalMessage.class, name = "RUN_STEP"),
+		@Type(value = AbortExperimentInternalMessage.class, name = "ABORT"),
+		@Type(value = PauseExperimentInternalMessage.class, name = "PAUSE"),
+		@Type(value = StepExperimentInternalMessage.class, name = "STEP"),
+		@Type(value = ResumeExperimentInternalMessage.class, name = "RESUME"),
+		@Type(value = TestCaseResultInternalMessage.class, name = "TC_RESULT"),
+		@Type(value = ValidationResultInternalMessage.class, name = "VALIDATION_RESULT"),
+		@Type(value = ConfigurationResultInternalMessage.class, name = "CONFIGURATION_RESULT")
 })
 public abstract class InternalMessage {
 	

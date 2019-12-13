@@ -34,6 +34,8 @@ public class ExecutionResult   {
   @JsonProperty("result")
   private String result = null;
 
+  //TODO add boolean failed?
+
   public Long getId() {
     return id;
   }

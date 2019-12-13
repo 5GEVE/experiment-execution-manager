@@ -51,7 +51,6 @@ public class SbiExperimentLcmService {
 			experimentLcmRestClient.notifyExperimentExecutionStateChange(url, msg);
 		} catch (FailedOperationException e) {
 			log.error(e.getMessage());
-			log.debug(null, e);
 			//TODO handle error?
 		}
  	}

@@ -23,6 +23,8 @@ public enum InternalMessageType {
 	STEP,
 	RUN_STEP,
     RUN_ALL,
-	RUN_TEST_CASE,
-	RESULT
+	TC_RESULT,
+	VALIDATION_RESULT,
+	CONFIGURATION_RESULT
+
 }

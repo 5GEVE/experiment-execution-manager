@@ -18,10 +18,7 @@ package it.nextworks.eem.rabbitMessage;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class TestCaseResultInternalMessage extends InternalMessage {
-
-	@JsonProperty("tcDescriptorId")
-	private String tcDescriptorId;
+public class ConfigurationResultInternalMessage extends InternalMessage {
 
 	@JsonProperty("failed")
 	private boolean failed;
@@ -29,14 +26,15 @@ public class TestCaseResultInternalMessage extends InternalMessage {
 	@JsonProperty("result")
 	private String result;
 
-	//TODO add reportUrl?
+	@JsonProperty("runType")
+	private String runType;
 
 	@JsonCreator
-	public TestCaseResultInternalMessage(@JsonProperty("result") String result, @JsonProperty("tcDescriptorId") String tcDescriptorId, @JsonProperty("failed") boolean failed) {
-		this.type = InternalMessageType.TC_RESULT;
+	public ConfigurationResultInternalMessage(@JsonProperty("result") String result, @JsonProperty("runType") String runType, @JsonProperty("failed") boolean failed) {
+		this.type = InternalMessageType.CONFIGURATION_RESULT;
 		this.result = result;
-		this.tcDescriptorId = tcDescriptorId;
 		this.failed = failed;
+		this.runType = runType;
 	}
 
 	/**
@@ -47,12 +45,12 @@ public class TestCaseResultInternalMessage extends InternalMessage {
 	}
 
 	/**
-	 * @return the tcDescriptorId
-	 */
-	public String getTcDescriptorId() { return tcDescriptorId; }
-
-	/**
 	 * @return failed
 	 */
 	public boolean isFailed() { return failed; }
+
+	/**
+	 * @return runType
+	 */
+	public String getRunType() { return runType; }
 }

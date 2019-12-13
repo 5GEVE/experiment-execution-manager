@@ -18,7 +18,6 @@ package it.nextworks.eem.configuration;
 public final class ConfigurationParameters {
 
 	public static final String eemQueueInNamePrefix = "eem-in-";
-	public static final String eemQueueOutNamePrefix = "eem-out-";
 	public static final String eemQueueExchange = "eem-queue-exchange";
 	
 }

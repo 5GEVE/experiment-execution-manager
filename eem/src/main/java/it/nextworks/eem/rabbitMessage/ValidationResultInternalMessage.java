@@ -18,10 +18,7 @@ package it.nextworks.eem.rabbitMessage;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class TestCaseResultInternalMessage extends InternalMessage {
-
-	@JsonProperty("tcDescriptorId")
-	private String tcDescriptorId;
+public class ValidationResultInternalMessage extends InternalMessage {
 
 	@JsonProperty("failed")
 	private boolean failed;
@@ -29,13 +26,10 @@ public class TestCaseResultInternalMessage extends InternalMessage {
 	@JsonProperty("result")
 	private String result;
 
-	//TODO add reportUrl?
-
 	@JsonCreator
-	public TestCaseResultInternalMessage(@JsonProperty("result") String result, @JsonProperty("tcDescriptorId") String tcDescriptorId, @JsonProperty("failed") boolean failed) {
-		this.type = InternalMessageType.TC_RESULT;
+	public ValidationResultInternalMessage(@JsonProperty("result") String result, @JsonProperty("failed") boolean failed) {
+		this.type = InternalMessageType.VALIDATION_RESULT;
 		this.result = result;
-		this.tcDescriptorId = tcDescriptorId;
 		this.failed = failed;
 	}
 
@@ -45,11 +39,6 @@ public class TestCaseResultInternalMessage extends InternalMessage {
 	public String getResult() {
 		return result;
 	}
-
-	/**
-	 * @return the tcDescriptorId
-	 */
-	public String getTcDescriptorId() { return tcDescriptorId; }
 
 	/**
 	 * @return failed

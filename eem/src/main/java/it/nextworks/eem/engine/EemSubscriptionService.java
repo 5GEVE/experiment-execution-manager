@@ -55,7 +55,7 @@ public class EemSubscriptionService{
     }
 
     public void notifyExperimentExecutionStateChange(ExperimentExecutionStateChangeNotification msg, ExperimentState previousState){
-        log.info("Notifying Experiment Execution with Id {} state change from {} to {}", msg.getExperimentExecutionId(), msg.getCurrentStatus(), previousState);
+        log.info("Notifying Experiment Execution with Id {} state change from {} to {}", msg.getExperimentExecutionId(), previousState, msg.getCurrentStatus());
         List<ExperimentExecutionSubscription> subscriptions = experimentExecutionSubscriptionRepository.findByExecutionId(msg.getExperimentExecutionId());
         for(ExperimentExecutionSubscription subscription : subscriptions){
             lcmService.notifyExperimentExecutionStateChange(subscription.getCallbackURI(), msg);
