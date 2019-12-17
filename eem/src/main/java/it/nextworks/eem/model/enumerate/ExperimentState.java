@@ -1,4 +1,4 @@
-package it.nextworks.eem.model;
+package it.nextworks.eem.model.enumerate;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 

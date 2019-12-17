@@ -1,11 +1,13 @@
 package it.nextworks.eem.model;
 
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import it.nextworks.eem.model.enumerate.SubscriptionType;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.*;
@@ -17,36 +19,9 @@ import javax.validation.constraints.*;
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-12-03T08:24:25.833Z[GMT]")
 public class ExperimentExecutionSubscriptionRequest   {
-  /**
-   * Gets or Sets subscriptionType
-   */
-  public enum SubscriptionTypeEnum {
-    STATE("EXPERIMENT_EXECUTION_CHANGE_STATE");
 
-    private String value;
-
-    SubscriptionTypeEnum(String value) {
-      this.value = value;
-    }
-
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    @JsonCreator
-    public static SubscriptionTypeEnum fromValue(String text) {
-      for (SubscriptionTypeEnum b : SubscriptionTypeEnum.values()) {
-        if (String.valueOf(b.value).equals(text)) {
-          return b;
-        }
-      }
-      return null;
-    }
-  }
   @JsonProperty("subscriptionType")
-  private SubscriptionTypeEnum subscriptionType = null;
+  private SubscriptionType subscriptionType = null;
 
   @JsonProperty("callbackURI")
   private String callbackURI = null;
@@ -54,7 +29,7 @@ public class ExperimentExecutionSubscriptionRequest   {
   @JsonProperty("executionId")
   private String executionId = null;
 
-  public ExperimentExecutionSubscriptionRequest subscriptionType(SubscriptionTypeEnum subscriptionType) {
+  public ExperimentExecutionSubscriptionRequest subscriptionType(SubscriptionType subscriptionType) {
     this.subscriptionType = subscriptionType;
     return this;
   }
@@ -66,11 +41,11 @@ public class ExperimentExecutionSubscriptionRequest   {
   @ApiModelProperty(required = true, value = "")
       @NotNull
 
-    public SubscriptionTypeEnum getSubscriptionType() {
+    public SubscriptionType getSubscriptionType() {
     return subscriptionType;
   }
 
-  public void setSubscriptionType(SubscriptionTypeEnum subscriptionType) {
+  public void setSubscriptionType(SubscriptionType subscriptionType) {
     this.subscriptionType = subscriptionType;
   }
 
@@ -155,5 +130,15 @@ public class ExperimentExecutionSubscriptionRequest   {
       return "null";
     }
     return o.toString().replace("\n", "\n    ");
+  }
+
+  @JsonIgnore
+  public void isValid() throws MalformattedElementException {
+    if(executionId == null)
+      throw new MalformattedElementException("executionId cannot be null");
+    if(subscriptionType == null)
+      throw new MalformattedElementException("subscriptionType cannot be null");
+    if(callbackURI == null)
+      throw new MalformattedElementException("callbackURI cannot be null");
   }
 }
