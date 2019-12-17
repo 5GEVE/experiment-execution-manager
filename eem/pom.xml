@@ -136,5 +136,11 @@
             <version>2.8.6</version>
         </dependency>
 
+        <!-- Msno client -->
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>msno-client</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 </project>

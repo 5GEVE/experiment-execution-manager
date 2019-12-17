@@ -1,5 +1,5 @@
 /*
-* Copyright 2018 Nextworks s.r.l.
+* Copyright 2019 Nextworks s.r.l.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -33,13 +33,13 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class SbiExperimentCatalogueService 
+public class ExperimentCatalogueService
 implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, TranslatorInterface,
 	CtxBlueprintCatalogueInterface, CtxDescriptorCatalogueInterface,
 	TestCaseBlueprintCatalogueInterface, TestCaseDescriptorCatalogueInterface,
 		VsBlueprintCatalogueInterface, VsDescriptorCatalogueInterface {
 
-	private static final Logger log = LoggerFactory.getLogger(SbiExperimentCatalogueService.class);
+	private static final Logger log = LoggerFactory.getLogger(ExperimentCatalogueService.class);
 	
 	@Value("${portal.catalogue.address}")
 	private String catalogueAddress;
@@ -49,7 +49,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	
 	private ExperimentCatalogueRestClient experimentCatalogueRestClient;
 	
-	public SbiExperimentCatalogueService() {}
+	public ExperimentCatalogueService() {}
 
 	public ExpBlueprint getExperimentBlueprint(String expBlueprintId) {
 		try {
@@ -66,9 +66,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
  	}
 
 	@Override
-	public QueryExpBlueprintResponse queryExpBlueprint(GeneralizedQueryRequest request)
-			throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException,
-			FailedOperationException {
+	public QueryExpBlueprintResponse queryExpBlueprint(GeneralizedQueryRequest request) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to query experiment blueprint");
 		//The ELM is only allowed to request the experiment blueprint given its ID
 		String experimentBlueprintId;
@@ -83,8 +81,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	}
 	
 	@Override
-	public QueryExpDescriptorResponse queryExpDescriptor(GeneralizedQueryRequest request)
-			throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException, FailedOperationException {
+	public QueryExpDescriptorResponse queryExpDescriptor(GeneralizedQueryRequest request) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to query experiment descriptor");
         //The ELM is only allowed to request the experiment descriptor given its ID
 		String experimentDescriptorId;
@@ -99,8 +96,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	}
 	
 	@Override
-    public QueryVsBlueprintResponse queryVsBlueprint(GeneralizedQueryRequest request)
-            throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException, FailedOperationException {
+    public QueryVsBlueprintResponse queryVsBlueprint(GeneralizedQueryRequest request) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to query vertical service blueprint");
 		//The ELM is only allowed to request the vertical service blueprint given its ID
 		String blueprintId;
@@ -115,8 +111,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	}
 	
 	@Override
-	public QueryVsDescriptorResponse queryVsDescriptor(GeneralizedQueryRequest request) 
-			throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException, FailedOperationException {
+	public QueryVsDescriptorResponse queryVsDescriptor(GeneralizedQueryRequest request) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to query VS descriptor");
         //The ELM is only allowed to request the VS descriptor given its ID
 		String descriptorId;
@@ -131,8 +126,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	}
 	
 	@Override
-	public QueryCtxBlueprintResponse queryCtxBlueprint(GeneralizedQueryRequest request)
-			throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException, FailedOperationException {
+	public QueryCtxBlueprintResponse queryCtxBlueprint(GeneralizedQueryRequest request) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to query context blueprint");
 		//The ELM is only allowed to request the context blueprint given its ID
 		String blueprintId;
@@ -147,8 +141,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	}
 	
 	@Override
-	public QueryCtxDescriptorResponse queryCtxDescriptor(GeneralizedQueryRequest request)
-			throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException, FailedOperationException {
+	public QueryCtxDescriptorResponse queryCtxDescriptor(GeneralizedQueryRequest request) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to query CTXD descriptor");
         //The ELM is only allowed to request the CTX descriptor given its ID
 		String descriptorId;
@@ -163,8 +156,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	}
 	
 	@Override
-	public QueryTestCaseBlueprintResponse queryTestCaseBlueprint(GeneralizedQueryRequest request)
-			throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException, FailedOperationException {
+	public QueryTestCaseBlueprintResponse queryTestCaseBlueprint(GeneralizedQueryRequest request) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to query TC blueprint");
 		//The ELM is only allowed to request the TC blueprint given its ID
 		String blueprintId;
@@ -179,8 +171,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	}
 	
 	@Override
-	public QueryTestCaseDescriptorResponse queryTestCaseDescriptor(GeneralizedQueryRequest request)
-			throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException, FailedOperationException {
+	public QueryTestCaseDescriptorResponse queryTestCaseDescriptor(GeneralizedQueryRequest request) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to query TC descriptor");
         //The ELM is only allowed to request the TC descriptor given its ID
 		String descriptorId;
@@ -195,8 +186,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	}
 	
 	@Override
-	public NfvNsInstantiationInfo translateExpd(String expdId)
-			throws MalformattedElementException, FailedOperationException, NotExistingEntityException, MethodNotImplementedException {
+	public NfvNsInstantiationInfo translateExpd(String expdId) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to translate experiment descriptor into NFV NS specification");
 		if (expdId == null) throw new MalformattedElementException("Malformatted Translation Request: null experiment ID.");
 		return experimentCatalogueRestClient.translateExpd(expdId);

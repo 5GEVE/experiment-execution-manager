@@ -16,29 +16,21 @@
 package it.nextworks.eem.sbi.lcm;
 
 import it.nextworks.eem.model.ExperimentExecutionStateChangeNotification;
-import it.nextworks.eem.sbi.expcatalogue.ExperimentCatalogueRestClient;
-import it.nextworks.nfvmano.catalogue.blueprint.elements.ExpBlueprint;
-import it.nextworks.nfvmano.catalogue.blueprint.elements.ExpBlueprintInfo;
-import it.nextworks.nfvmano.catalogue.blueprint.messages.*;
-import it.nextworks.nfvmano.catalogue.translator.NfvNsInstantiationInfo;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.*;
-import it.nextworks.nfvmano.libs.ifa.common.messages.GeneralizedQueryRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.List;
-import java.util.Map;
 
 @Service
-public class SbiExperimentLcmService {
+public class ExperimentLcmService {
 
-	private static final Logger log = LoggerFactory.getLogger(SbiExperimentLcmService.class);
+	private static final Logger log = LoggerFactory.getLogger(ExperimentLcmService.class);
 
 	private ExperimentLcmRestClient experimentLcmRestClient;
 
-	public SbiExperimentLcmService() {}
+	public ExperimentLcmService() {}
 
 	@PostConstruct
 	private void initLcmRestClient() {

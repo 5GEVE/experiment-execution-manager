@@ -32,7 +32,7 @@ public interface EemApi {
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
         @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
-        @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
+        @ApiResponse(code = 412, message = "Precondition Failed", response = ErrorInfo.class) })
     @RequestMapping(value = "/eem/experiment_executions",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
@@ -192,7 +192,7 @@ public interface EemApi {
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
         @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
-        @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
+        @ApiResponse(code = 412, message = "Precondition Failed", response = ErrorInfo.class)})
     @RequestMapping(value = "/eem/experiment_subscriptions",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
@@ -241,16 +241,14 @@ public interface EemApi {
         method = RequestMethod.DELETE)
     ResponseEntity<?> eemExperimentSubscriptionsSubscriptionIdDelete(@ApiParam(value = "",required=true) @PathVariable("subscriptionId") String subscriptionId);
 
-
     @ApiOperation(value = "", nickname = "eemExperimentSubscriptionsSubscriptionIdGet", notes = "", response = ExperimentExecutionSubscription.class, tags={ "EEM Subscriptions", })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Returns experiment execution subscription for the id provided on the path", response = ExperimentExecutionSubscription.class),
-        @ApiResponse(code = 400, message = "Bad request. Malformed request", response = ErrorInfo.class),
         @ApiResponse(code = 401, message = "Operation not authorised", response = ErrorInfo.class),
         @ApiResponse(code = 403, message = "Operation forbidden", response = ErrorInfo.class),
-        @ApiResponse(code = 404, message = "Return error details", response = ErrorInfo.class),
+        @ApiResponse(code = 404, message = "Identifier of the experiment execution subscription not found", response = ErrorInfo.class),
         @ApiResponse(code = 500, message = "Operation failed", response = ErrorInfo.class),
-        @ApiResponse(code = 501, message = "Operation not implemented", response = ErrorInfo.class) })
+        @ApiResponse(code = 412, message = "Precondition Failed", response = ErrorInfo.class) })
     @RequestMapping(value = "/eem/experiment_subscriptions/{subscriptionId}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)

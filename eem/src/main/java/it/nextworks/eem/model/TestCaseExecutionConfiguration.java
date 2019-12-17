@@ -41,8 +41,7 @@ public class TestCaseExecutionConfiguration {
 	 * @param tcDescriptorId
 	 * @param execConfiguration
 	 */
-	public TestCaseExecutionConfiguration(ExperimentExecution execution, String tcDescriptorId, Map<String, String> execConfiguration) {
-		this.execution = execution;
+	public TestCaseExecutionConfiguration(String tcDescriptorId, Map<String, String> execConfiguration) {
 		this.tcDescriptorId = tcDescriptorId;
 		if (execConfiguration != null) this.execConfiguration = execConfiguration;
 	}

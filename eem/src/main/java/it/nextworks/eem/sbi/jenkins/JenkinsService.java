@@ -1,4 +1,4 @@
-package it.nextworks.eem.sbi.runtimeConfigurator;
+package it.nextworks.eem.sbi.jenkins;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -6,8 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.nextworks.eem.configuration.ConfigurationParameters;
-import it.nextworks.eem.rabbitMessage.ConfigurationResultInternalMessage;
-import it.nextworks.eem.rabbitMessage.InternalMessage;
+import it.nextworks.eem.rabbitMessage.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.TopicExchange;
@@ -17,8 +16,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SbiConfigurationService {
-    private static final Logger log = LoggerFactory.getLogger(SbiConfigurationService.class);
+public class JenkinsService {
+
+    private static final Logger log = LoggerFactory.getLogger(JenkinsService.class);
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -27,39 +27,39 @@ public class SbiConfigurationService {
     @Qualifier(ConfigurationParameters.eemQueueExchange)
     private TopicExchange messageExchange;
 
-    public void configureExperiment(String executionId, String runType){
+    public void runTestCase(String executionId, String tcDescriptorId, String robotFile){//TODO change type of robotFile
         new Thread(() -> {
-            configurationStuff(executionId, runType);
+            jenkinsStuff(executionId, tcDescriptorId, robotFile);
         }).start();
     }
 
-    private void configurationStuff(String executionId, String runType){//TODO modify name
+    private void jenkinsStuff(String executionId, String tcDescriptorId, String robotFile){//TODO modify name
         //TODO run test case and get result
         try {//TODO remove
-            log.debug("Configuring the experiment");
-            Thread.sleep(10000);
+            log.debug("Running the experiment");
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             log.debug("Sleep error");
         }
         //test ok
         String result = "OK";
-        String topic = "lifecycle.configuration." + executionId;
-        InternalMessage internalMessage = new ConfigurationResultInternalMessage(result, runType, false);
+        String topic = "lifecycle.testCaseResult." + executionId;
+        InternalMessage internalMessage = new TestCaseResultInternalMessage(result, tcDescriptorId, false);
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
             log.error("Error while translating internal scheduling message in Json format");
-            manageConfigurationError("Error while translating internal scheduling message in Json format", executionId, runType);
+            manageTestCaseError("Error while translating internal scheduling message in Json format", executionId, tcDescriptorId);
         }
         //test ko
-        //manageConfigurationError();
+        //manageTestCaseError();
     }
 
-    private void manageConfigurationError(String errorMessage, String executionId, String runType){
-        log.error("Configuration of Experiment Execution with Id {} failed : {}", executionId, errorMessage);
-        errorMessage = String.format("Configuration of Experiment Execution with Id %s failed : %s", executionId, errorMessage);
-        String topic = "lifecycle.configuration." + executionId;
-        InternalMessage internalMessage = new ConfigurationResultInternalMessage(errorMessage, runType, true);
+    private void manageTestCaseError(String errorMessage, String executionId, String tcDescriptorId){
+        log.error("Test Case with Id {} of Experiment Execution with Id {} failed : {}", tcDescriptorId, executionId, errorMessage);
+        errorMessage = String.format("Test Case with Id %s for Experiment Execution with Id %s failed : %s", tcDescriptorId, executionId, errorMessage);
+        String topic = "lifecycle.testCaseResult." + executionId;
+        InternalMessage internalMessage = new TestCaseResultInternalMessage(errorMessage, tcDescriptorId, true);
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {

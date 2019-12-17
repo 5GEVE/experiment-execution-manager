@@ -16,12 +16,8 @@
 package it.nextworks.eem.sbi.lcm;
 
 import it.nextworks.eem.model.ExperimentExecutionStateChangeNotification;
-import it.nextworks.eem.sbi.expcatalogue.RequestResponseLoggingInterceptor;
-import it.nextworks.nfvmano.catalogue.blueprint.elements.*;
-import it.nextworks.nfvmano.catalogue.blueprint.messages.*;
+import it.nextworks.eem.sbi.RequestResponseLoggingInterceptor;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
-import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
-import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
@@ -32,9 +28,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.UnknownHttpStatusCodeException;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 
 public class ExperimentLcmRestClient {

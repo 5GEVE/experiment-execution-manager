@@ -6,7 +6,7 @@ import it.nextworks.eem.model.ExperimentExecutionSubscriptionRequest;
 import it.nextworks.eem.model.enumerate.ExperimentState;
 import it.nextworks.eem.model.enumerate.SubscriptionType;
 import it.nextworks.eem.repo.ExperimentExecutionSubscriptionRepository;
-import it.nextworks.eem.sbi.lcm.SbiExperimentLcmService;
+import it.nextworks.eem.sbi.lcm.ExperimentLcmService;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import org.slf4j.Logger;
@@ -27,10 +27,22 @@ public class EemSubscriptionService{
     private ExperimentExecutionSubscriptionRepository experimentExecutionSubscriptionRepository;
 
     @Autowired
-    private SbiExperimentLcmService lcmService;
+    private ExperimentLcmService lcmService;
+
+    public List<ExperimentExecutionSubscription> getExperimentExecutionSubscriptions() throws FailedOperationException {
+        return experimentExecutionSubscriptionRepository.findAll();
+    }
+
+    public ExperimentExecutionSubscription getExperimentExecutionSubscription(String subscriptionId) throws FailedOperationException, NotExistingEntityException {
+        Optional<ExperimentExecutionSubscription> experimentExecutionSubscriptionOptional = experimentExecutionSubscriptionRepository.findBySubscriptionId(subscriptionId);
+        if(!experimentExecutionSubscriptionOptional.isPresent())
+            throw new NotExistingEntityException(String.format("Experiment Execution Subscription with Id %s not found", subscriptionId));
+        log.debug("{}", experimentExecutionSubscriptionOptional.get().toString());
+        return experimentExecutionSubscriptionOptional.get();
+    }
 
     public String subscribe(ExperimentExecutionSubscriptionRequest subscriptionRequest) throws FailedOperationException{
-        String subscriptionId = UUID.randomUUID().toString();
+        String subscriptionId = UUID.randomUUID().toString();//TODO use the id generated from the db?
         log.info("Creating new Experiment Execution Subscription with Id {}", subscriptionId);
         ExperimentExecutionSubscription experimentExecutionSubscription = new ExperimentExecutionSubscription();
         experimentExecutionSubscription.subscriptionId(subscriptionId)
@@ -52,6 +64,15 @@ public class EemSubscriptionService{
             throw new NotExistingEntityException(String.format("Experiment Execution Subscription with Id %s not found", subscriptionId));
         experimentExecutionSubscriptionRepository.delete(experimentExecutionSubscription.get());
         log.info("Deleted Experiment Execution Subscription with Id {}", subscriptionId);
+    }
+
+    public void deleteAllSubscriptions(String executionId){
+        log.info("Deleting all Experiment Execution Subscriptions of Experiment Execution with Id {}", executionId);
+        List<ExperimentExecutionSubscription> experimentExecutionSubscriptions = experimentExecutionSubscriptionRepository.findByExecutionId(executionId);
+        for(ExperimentExecutionSubscription subscription : experimentExecutionSubscriptions) {
+            log.info("Experiment Execution Subscription with Id {} deleted", subscription.getSubscriptionId());
+            experimentExecutionSubscriptionRepository.delete(subscription);
+        }
     }
 
     public void notifyExperimentExecutionStateChange(ExperimentExecutionStateChangeNotification msg, ExperimentState previousState){

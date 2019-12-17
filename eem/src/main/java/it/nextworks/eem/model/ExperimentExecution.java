@@ -36,7 +36,15 @@ public class ExperimentExecution {
   @JsonProperty("state")
   private ExperimentState state = null;
 
-  //this list specifies the test cases for the requested execution
+  @JsonProperty("nsInstanceId")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String nsInstanceId = null;
+
+  @JsonProperty("experimentDescriptorId")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String experimentDescriptorId = null;
+
+  //this list specifies the test cases for the requested execution//TODO how to run a subset of test cases?
   //in general a subset of the test cases can be executed in each run and the config parameters of the descriptors can be overwritten
   //Important note: this field is optional, i.e. if not provided all the test cases will be executed by default, with the configuration given in the descriptor
   @JsonProperty("testCaseDescriptorConfiguration")
@@ -108,6 +116,44 @@ public class ExperimentExecution {
 
   public void setState(ExperimentState state) {
     this.state = state;
+  }
+
+  public ExperimentExecution nsInstanceId(String nsInstanceId) {
+    this.nsInstanceId = nsInstanceId;
+    return this;
+  }
+
+  /**
+   * Get nsInstanceId
+   * @return nsInstanceId
+   **/
+  @ApiModelProperty(required = false, value = "")
+
+  public String getNsInstanceId() {
+    return nsInstanceId;
+  }
+
+  public void setNsInstanceId(String nsInstanceId) {
+    this.nsInstanceId = nsInstanceId;
+  }
+
+  public ExperimentExecution experimentDescriptorId(String experimentDescriptorId) {
+    this.experimentDescriptorId = experimentDescriptorId;
+    return this;
+  }
+
+  /**
+   * Get experimentDescriptorId
+   * @return experimentDescriptorId
+   **/
+  @ApiModelProperty(required = false, value = "")
+
+  public String getExperimentDescriptorId() {
+    return experimentDescriptorId;
+  }
+
+  public void setExperimentDescriptorId(String experimentDescriptorId) {
+    this.experimentDescriptorId = experimentDescriptorId;
   }
 
   public ExperimentExecution testCaseResult(Map<String, ExecutionResult> testCaseResult) {

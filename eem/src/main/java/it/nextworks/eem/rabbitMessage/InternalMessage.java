@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "msgType")
 @JsonSubTypes({
 		@Type(value = RunAllExperimentInternalMessage.class, name = "RUN_ALL"),
 		@Type(value = RunStepExperimentInternalMessage.class, name = "RUN_STEP"),
@@ -34,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 })
 public abstract class InternalMessage {
 	
-	@JsonProperty("type")
+	@JsonProperty("msgType")
 	InternalMessageType type;
 
 	/**

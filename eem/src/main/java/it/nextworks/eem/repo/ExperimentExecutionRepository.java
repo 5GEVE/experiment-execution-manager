@@ -16,11 +16,14 @@
 package it.nextworks.eem.repo;
 
 import it.nextworks.eem.model.ExperimentExecution;
+import it.nextworks.eem.model.enumerate.ExperimentState;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ExperimentExecutionRepository extends JpaRepository<ExperimentExecution, Long> {
 
 	Optional<ExperimentExecution> findByExecutionId(String executionId);
+	List<ExperimentExecution> findByState(ExperimentState state);
 }

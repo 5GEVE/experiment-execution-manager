@@ -1,4 +1,4 @@
-package it.nextworks.eem.sbi.lcm;
+package it.nextworks.eem.sbi;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

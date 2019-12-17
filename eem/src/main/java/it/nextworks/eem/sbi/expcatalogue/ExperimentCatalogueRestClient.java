@@ -15,19 +15,20 @@
 */
 package it.nextworks.eem.sbi.expcatalogue;
 
+import it.nextworks.eem.sbi.RequestResponseLoggingInterceptor;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.*;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.*;
 import it.nextworks.nfvmano.catalogue.translator.NfvNsInstantiationInfo;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
-import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
-import it.nextworks.nfvmano.libs.ifa.common.exceptions.MethodNotImplementedException;
-import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.UnknownHttpStatusCodeException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,7 +53,7 @@ public class ExperimentCatalogueRestClient {
 
 	}
 
-	public QueryExpBlueprintResponse queryExperimentBlueprint(String blueprintId) throws NotExistingEntityException, FailedOperationException, MalformattedElementException {
+	public QueryExpBlueprintResponse queryExperimentBlueprint(String blueprintId) throws FailedOperationException {
 		log.debug("Building HTTP request for querying Experiment Blueprint with ID " + blueprintId);
 		HttpHeaders header = new HttpHeaders();
 		header.add("Content-Type", "application/json");
@@ -78,21 +79,20 @@ public class ExperimentCatalogueRestClient {
                 queryList.add(httpResponse.getBody());
 
 				return new QueryExpBlueprintResponse(queryList);
-			} else if (code.equals(HttpStatus.NOT_FOUND)) {
-				throw new NotExistingEntityException("Error during experiment blueprint retrieval: " + httpResponse.getBody());
-			} else if (code.equals(HttpStatus.BAD_REQUEST)) {
-				throw new MalformattedElementException("Error during experiment blueprint retrieval: " + httpResponse.getBody());
-			} else {
-				throw new FailedOperationException("Generic error during NS interaction with portal catalogue");
-			}
-			
+			}else
+				return null;
+		} catch (HttpClientErrorException e) {
+			throw new FailedOperationException("Error during Experiment Blueprint retrieval : Client error");
+		} catch (HttpServerErrorException e) {
+			throw new FailedOperationException("Error during Experiment Blueprint retrieval : Server error");
+		} catch (UnknownHttpStatusCodeException e) {
+			throw new FailedOperationException("Error during Experiment Blueprint retrieval: Unknown error");
 		} catch (Exception e) {
-			log.debug("Error while interacting with portal catalogue.");
-			throw new FailedOperationException("Error while interacting with portal catalogue at url " + url);
+			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
 		}
 	}
 	
-	public QueryExpDescriptorResponse queryExperimentDescriptor(String descriptorId) throws NotExistingEntityException, FailedOperationException, MalformattedElementException {
+	public QueryExpDescriptorResponse queryExperimentDescriptor(String descriptorId) throws FailedOperationException {
 		log.debug("Building HTTP request for querying Experiment Descriptor with ID " + descriptorId);
 		HttpHeaders header = new HttpHeaders();
 		header.add("Content-Type", "application/json");
@@ -117,21 +117,20 @@ public class ExperimentCatalogueRestClient {
 				ArrayList<ExpDescriptor> resList = new ArrayList<>();
 				resList.add(res);
 				return new QueryExpDescriptorResponse(resList);
-			} else if (code.equals(HttpStatus.NOT_FOUND)) {
-				throw new NotExistingEntityException("Error during experiment descriptor retrieval: " + httpResponse.getBody());
-			} else if (code.equals(HttpStatus.BAD_REQUEST)) {
-				throw new MalformattedElementException("Error during experiment descriptor retrieval: " + httpResponse.getBody());
-			} else {
-				throw new FailedOperationException("Generic error during ELM interaction with portal catalogue");
-			}
-			
+			}else
+				return null;
+		} catch (HttpClientErrorException e) {
+			throw new FailedOperationException("Error during Experiment Descriptor retrieval : Client error");
+		} catch (HttpServerErrorException e) {
+			throw new FailedOperationException("Error during Experiment Descriptor retrieval : Server error");
+		} catch (UnknownHttpStatusCodeException e) {
+			throw new FailedOperationException("Error during Experiment Descriptor retrieval: Unknown error");
 		} catch (Exception e) {
-			log.debug("Error while interacting with portal catalogue.");
-			throw new FailedOperationException("Error while interacting with portal catalogue at url " + url);
+			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
 		}
 	}
 	
-	public QueryVsBlueprintResponse queryVsBlueprint(String blueprintId) throws NotExistingEntityException, FailedOperationException, MalformattedElementException {
+	public QueryVsBlueprintResponse queryVsBlueprint(String blueprintId) throws FailedOperationException {
 		log.debug("Building HTTP request for querying VS blueprint with ID " + blueprintId);
 		HttpHeaders header = new HttpHeaders();
 		header.add("Content-Type", "application/json");
@@ -156,21 +155,20 @@ public class ExperimentCatalogueRestClient {
 				//Generated the response from the single instance
                 //returned by the catalogue
 				return new QueryVsBlueprintResponse(queryList);
-			} else if (code.equals(HttpStatus.NOT_FOUND)) {
-				throw new NotExistingEntityException("Error during VS blueprint retrieval: " + httpResponse.getBody());
-			} else if (code.equals(HttpStatus.BAD_REQUEST)) {
-				throw new MalformattedElementException("Error during VS blueprint retrieval: " + httpResponse.getBody());
-			} else {
-				throw new FailedOperationException("Generic error during ELM interaction with portal catalogue");
-			}
-			
+			}else
+				return null;
+		} catch (HttpClientErrorException e) {
+			throw new FailedOperationException("Error during Vertical Service Blueprint retrieval : Client error");
+		} catch (HttpServerErrorException e) {
+			throw new FailedOperationException("Error during Vertical Service Blueprint retrieval : Server error");
+		} catch (UnknownHttpStatusCodeException e) {
+			throw new FailedOperationException("Error during Vertical Service Blueprint retrieval: Unknown error");
 		} catch (Exception e) {
-			log.debug("Error while interacting with portal catalogue.");
-			throw new FailedOperationException("Error while interacting with portal catalogue at url " + url);
+			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
 		}
 	}
-	
-	public QueryVsDescriptorResponse queryVsDescriptor(String descriptorId) throws NotExistingEntityException, FailedOperationException, MalformattedElementException {
+
+	public QueryVsDescriptorResponse queryVsDescriptor(String descriptorId) throws FailedOperationException {
 		log.debug("Building HTTP request for querying VS Descriptor with ID " + descriptorId);
 		HttpHeaders header = new HttpHeaders();
 		header.add("Content-Type", "application/json");
@@ -192,21 +190,20 @@ public class ExperimentCatalogueRestClient {
 				List<VsDescriptor> queryList = new ArrayList<>();
 				queryList.add(httpResponse.getBody());
 				return new QueryVsDescriptorResponse(queryList);
-			} else if (code.equals(HttpStatus.NOT_FOUND)) {
-				throw new NotExistingEntityException("Error during VS descriptor retrieval: " + httpResponse.getBody());
-			} else if (code.equals(HttpStatus.BAD_REQUEST)) {
-				throw new MalformattedElementException("Error during VS descriptor retrieval: " + httpResponse.getBody());
-			} else {
-				throw new FailedOperationException("Generic error during ELM interaction with portal catalogue");
-			}
-			
+			}else
+				return null;
+		} catch (HttpClientErrorException e) {
+			throw new FailedOperationException("Error during Vertical Service Descriptor retrieval : Client error");
+		} catch (HttpServerErrorException e) {
+			throw new FailedOperationException("Error during Vertical Service Descriptor retrieval : Server error");
+		} catch (UnknownHttpStatusCodeException e) {
+			throw new FailedOperationException("Error during Vertical Service Descriptor retrieval: Unknown error");
 		} catch (Exception e) {
-			log.debug("Error while interacting with portal catalogue.");
-			throw new FailedOperationException("Error while interacting with portal catalogue at url " + url);
+			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
 		}
 	}
 	
-	public QueryCtxBlueprintResponse queryCtxBlueprint(String blueprintId) throws NotExistingEntityException, FailedOperationException, MalformattedElementException {
+	public QueryCtxBlueprintResponse queryCtxBlueprint(String blueprintId) throws FailedOperationException {
 		log.debug("Building HTTP request for querying CTX blueprint with ID " + blueprintId);
 		HttpHeaders header = new HttpHeaders();
 		header.add("Content-Type", "application/json");
@@ -228,21 +225,20 @@ public class ExperimentCatalogueRestClient {
 				List<CtxBlueprintInfo> queryList = new ArrayList<>();
 				queryList.add(httpResponse.getBody());
 				return new QueryCtxBlueprintResponse(queryList);
-			} else if (code.equals(HttpStatus.NOT_FOUND)) {
-				throw new NotExistingEntityException("Error during CTX blueprint retrieval: " + httpResponse.getBody());
-			} else if (code.equals(HttpStatus.BAD_REQUEST)) {
-				throw new MalformattedElementException("Error during CTX blueprint retrieval: " + httpResponse.getBody());
-			} else {
-				throw new FailedOperationException("Generic error during ELM interaction with portal catalogue");
-			}
-			
+			}else
+				return null;
+		} catch (HttpClientErrorException e) {
+			throw new FailedOperationException("Error during Context Blueprint retrieval : Client error");
+		} catch (HttpServerErrorException e) {
+			throw new FailedOperationException("Error during Context Blueprint retrieval : Server error");
+		} catch (UnknownHttpStatusCodeException e) {
+			throw new FailedOperationException("Error during Context Blueprint retrieval: Unknown error");
 		} catch (Exception e) {
-			log.debug("Error while interacting with portal catalogue.");
-			throw new FailedOperationException("Error while interacting with portal catalogue at url " + url);
+			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
 		}
 	}
 	
-	public QueryCtxDescriptorResponse queryCtxDescriptor(String descriptorId) throws NotExistingEntityException, FailedOperationException, MalformattedElementException {
+	public QueryCtxDescriptorResponse queryCtxDescriptor(String descriptorId) throws FailedOperationException {
 		log.debug("Building HTTP request for querying CTX Descriptor with ID " + descriptorId);
 		HttpHeaders header = new HttpHeaders();
 		header.add("Content-Type", "application/json");
@@ -264,21 +260,20 @@ public class ExperimentCatalogueRestClient {
 				List<CtxDescriptor> queryList = new ArrayList<>();
 				queryList.add(httpResponse.getBody());
 				return new QueryCtxDescriptorResponse(queryList);
-			} else if (code.equals(HttpStatus.NOT_FOUND)) {
-				throw new NotExistingEntityException("Error during CTX descriptor retrieval: " + httpResponse.getBody());
-			} else if (code.equals(HttpStatus.BAD_REQUEST)) {
-				throw new MalformattedElementException("Error during CTX descriptor retrieval: " + httpResponse.getBody());
-			} else {
-				throw new FailedOperationException("Generic error during ELM interaction with portal catalogue");
-			}
-			
+			}else
+				return null;
+		} catch (HttpClientErrorException e) {
+			throw new FailedOperationException("Error during Context Descriptor retrieval : Client error");
+		} catch (HttpServerErrorException e) {
+			throw new FailedOperationException("Error during Context Descriptor retrieval : Server error");
+		} catch (UnknownHttpStatusCodeException e) {
+			throw new FailedOperationException("Error during Context Descriptor retrieval: Unknown error");
 		} catch (Exception e) {
-			log.debug("Error while interacting with portal catalogue.");
-			throw new FailedOperationException("Error while interacting with portal catalogue at url " + url);
+			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
 		}
 	}
 	
-	public QueryTestCaseBlueprintResponse queryTestCaseBlueprint(String blueprintId) throws NotExistingEntityException, FailedOperationException, MalformattedElementException {
+	public QueryTestCaseBlueprintResponse queryTestCaseBlueprint(String blueprintId) throws FailedOperationException {
 		log.debug("Building HTTP request for querying TC blueprint with ID " + blueprintId);
 		HttpHeaders header = new HttpHeaders();
 		header.add("Content-Type", "application/json");
@@ -300,21 +295,20 @@ public class ExperimentCatalogueRestClient {
 				List<TestCaseBlueprintInfo> queryList = new ArrayList<>();
 				queryList.add(httpResponse.getBody());
 				return new QueryTestCaseBlueprintResponse(queryList);
-			} else if (code.equals(HttpStatus.NOT_FOUND)) {
-				throw new NotExistingEntityException("Error during TC blueprint retrieval: " + httpResponse.getBody());
-			} else if (code.equals(HttpStatus.BAD_REQUEST)) {
-				throw new MalformattedElementException("Error during TC blueprint retrieval: " + httpResponse.getBody());
-			} else {
-				throw new FailedOperationException("Generic error during ELM interaction with portal catalogue");
-			}
-			
+			}else
+				return null;
+		} catch (HttpClientErrorException e) {
+			throw new FailedOperationException("Error during Test Case Blueprint retrieval : Client error");
+		} catch (HttpServerErrorException e) {
+			throw new FailedOperationException("Error during Test Case Blueprint retrieval : Server error");
+		} catch (UnknownHttpStatusCodeException e) {
+			throw new FailedOperationException("Error during Test Case Blueprint retrieval: Unknown error");
 		} catch (Exception e) {
-			log.debug("Error while interacting with portal catalogue.");
-			throw new FailedOperationException("Error while interacting with portal catalogue at url " + url);
+			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
 		}
 	}
 	
-	public QueryTestCaseDescriptorResponse queryTestCaseDescriptor(String descriptorId) throws NotExistingEntityException, FailedOperationException, MalformattedElementException {
+	public QueryTestCaseDescriptorResponse queryTestCaseDescriptor(String descriptorId) throws FailedOperationException {
 		log.debug("Building HTTP request for querying TC Descriptor with ID " + descriptorId);
 		HttpHeaders header = new HttpHeaders();
 		header.add("Content-Type", "application/json");
@@ -336,22 +330,20 @@ public class ExperimentCatalogueRestClient {
 				List<TestCaseDescriptor> queryList = new ArrayList<>();
 				queryList.add(httpResponse.getBody());
 				return new QueryTestCaseDescriptorResponse(queryList);
-			} else if (code.equals(HttpStatus.NOT_FOUND)) {
-				throw new NotExistingEntityException("Error during TC descriptor retrieval: " + httpResponse.getBody());
-			} else if (code.equals(HttpStatus.BAD_REQUEST)) {
-				throw new MalformattedElementException("Error during TC descriptor retrieval: " + httpResponse.getBody());
-			} else {
-				throw new FailedOperationException("Generic error during ELM interaction with portal catalogue");
-			}
-			
+			}else
+				return null;
+		} catch (HttpClientErrorException e) {
+			throw new FailedOperationException("Error during Test Case Descriptor retrieval : Client error");
+		} catch (HttpServerErrorException e) {
+			throw new FailedOperationException("Error during Test Case Descriptor retrieval : Server error");
+		} catch (UnknownHttpStatusCodeException e) {
+			throw new FailedOperationException("Error during Test Case Descriptor retrieval: Unknown error");
 		} catch (Exception e) {
-			log.debug("Error while interacting with portal catalogue.");
-			throw new FailedOperationException("Error while interacting with portal catalogue at url " + url);
+			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
 		}
 	}
 	
-	public NfvNsInstantiationInfo translateExpd(String expdId)
-			throws MalformattedElementException, FailedOperationException, NotExistingEntityException, MethodNotImplementedException {
+	public NfvNsInstantiationInfo translateExpd(String expdId) throws FailedOperationException {
 		log.debug("Building HTTP request for translation of Experiment Descriptor with ID " + expdId);
 		HttpHeaders header = new HttpHeaders();
 		header.add("Content-Type", "application/json");
@@ -371,18 +363,16 @@ public class ExperimentCatalogueRestClient {
 			if (code.equals(HttpStatus.OK)) {
 				log.debug("Experiment descriptor translation correctly retrieved");
 				return httpResponse.getBody();
-			} else if (code.equals(HttpStatus.NOT_FOUND)) {
-				throw new NotExistingEntityException("Error during experiment descriptor translation: " + httpResponse.getBody());
-			} else if (code.equals(HttpStatus.BAD_REQUEST)) {
-				throw new MalformattedElementException("Error during experiment descriptor translation: " + httpResponse.getBody());
-			} else {
-				throw new FailedOperationException("Generic error during ELM interaction with portal catalogue");
-			}
-			
+			}else
+				return null;
+		} catch (HttpClientErrorException e) {
+			throw new FailedOperationException("Error during Translated Experiment Descriptor retrieval : Client error");
+		} catch (HttpServerErrorException e) {
+			throw new FailedOperationException("Error during Translated Experiment Descriptor : Server error");
+		} catch (UnknownHttpStatusCodeException e) {
+			throw new FailedOperationException("Error during Translated Experiment Descriptor Unknown error");
 		} catch (Exception e) {
-			log.debug("Error while interacting with portal catalogue.");
-			throw new FailedOperationException("Error while interacting with portal catalogue at url " + url);
+			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
 		}
 	}
-	
 }

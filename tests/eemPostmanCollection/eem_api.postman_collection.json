@@ -1,0 +1,4907 @@
+{
+	"info": {
+		"_postman_id": "b2b6d798-5985-4735-bc51-4509d7fd9c5e",
+		"name": "Experiment Execution Management API",
+		"description": "5G EVE Experiment Execution Management ReST API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "eem",
+			"item": [
+				{
+					"name": "experiment executions",
+					"item": [
+						{
+							"name": "{id}",
+							"item": [
+								{
+									"name": "eemExperimentExecutionsIdGet",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "5b312fae-9ab2-45c9-904a-d5c68908447c",
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"var code = responseCode.code;",
+													"if (code === 200){",
+													"    console.log(\"experimentExecution : \" + JSON.stringify(jsonData));",
+													"}else{",
+													"    var detail = jsonData.detail;",
+													"    console.log(\"Error - Code : \" + code + \" Detail : \" + detail);",
+													"}",
+													"pm.test(\"Experiment Execution retrieved\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions/{{executionId}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions",
+												"{{executionId}}"
+											]
+										},
+										"description": "API to get experiment execution details"
+									},
+									"response": [
+										{
+											"name": "Return experiment execution details",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"executionId\": \"<string>\",\n \"state\": \"<string>\",\n \"errorMessage\": \"<string>\",\n \"reportUrl\": \"<string>\",\n \"testCaseDescriptorConfiguration\": [\n  {\n   \"execConfiguration\": \"<object>\",\n   \"tcDescriptorId\": \"<string>\"\n  },\n  {\n   \"execConfiguration\": \"<object>\",\n   \"tcDescriptorId\": \"<string>\"\n  }\n ],\n \"testCaseResult\": \"<object>\"\n}"
+										},
+										{
+											"name": "Operation forbidden",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Forbidden",
+											"code": 403,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation failed",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation not authorised",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Unauthorized",
+											"code": 401,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Identifier of the experiment execution not found",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Precondition Failed",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Precondition Failed",
+											"code": 412,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "eemExperimentExecutionsIdDelete",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "7e3dd948-4dc2-4749-bc07-ddf771cf4682",
+												"exec": [
+													"var code = responseCode.code;",
+													"if (code === 204){",
+													"    console.log(\"Experiment Execution deleted\");",
+													"}else{",
+													"    var jsonData = pm.response.json();",
+													"    var detail = jsonData.detail;",
+													"    console.log(\"Error - Code : \" + code + \" Detail : \" + detail);",
+													"}",
+													"pm.test(\"Experiment Execution deleted\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([204]);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions/{{executionId}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions",
+												"{{executionId}}"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Operation not authorised",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Unauthorized",
+											"code": 401,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation forbidden",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Forbidden",
+											"code": 403,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation failed",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "\"<object>\""
+										},
+										{
+											"name": "Identifier of the Experiment execution not found",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Return 204 No content upon action completion",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>"
+													]
+												}
+											},
+											"status": "No Content",
+											"code": 204,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "\"<object>\""
+										}
+									]
+								},
+								{
+									"name": "eemExperimentExecutionsIdOptions",
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "<string>",
+													"description": "id"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Forbidden",
+											"originalRequest": {
+												"method": "OPTIONS",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Forbidden",
+											"code": 403,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Return 200 OK upon action completion",
+											"originalRequest": {
+												"method": "OPTIONS",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "<object>"
+										},
+										{
+											"name": "No Content",
+											"originalRequest": {
+												"method": "OPTIONS",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>"
+													]
+												}
+											},
+											"status": "No Content",
+											"code": 204,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Unauthorized",
+											"originalRequest": {
+												"method": "OPTIONS",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Unauthorized",
+											"code": 401,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "eemExperimentExecutionsIdAbortPost",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "e09ab54b-4ab0-4773-83a4-5433cb51f411",
+												"exec": [
+													"var code = responseCode.code;",
+													"if (code === 200){",
+													"    console.log(\"Experiment Execution abort done\");",
+													"}else{",
+													"    var jsonData = pm.response.json();",
+													"    var detail = jsonData.detail;",
+													"    console.log(\"Error - Code : \" + code + \" Detail : \" + detail);",
+													"}",
+													"pm.test(\"Experiment Execution abort done\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions/{{executionId}}/abort",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions",
+												"{{executionId}}",
+												"abort"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Operation not authorised",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/abort",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"abort"
+													]
+												}
+											},
+											"status": "Unauthorized",
+											"code": 401,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Identifier of the experiment execution not found",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/abort",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"abort"
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation forbidden",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/abort",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"abort"
+													]
+												}
+											},
+											"status": "Forbidden",
+											"code": 403,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation failed",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/abort",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"abort"
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Created",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/abort",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"abort"
+													]
+												}
+											},
+											"status": "Created",
+											"code": 201,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Return 200 OK upon action completion",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/abort",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"abort"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "\"<object>\""
+										}
+									]
+								},
+								{
+									"name": "eemExperimentExecutionsIdPausePost",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "f680ae92-48d3-4bbc-873e-baa472bc1d60",
+												"exec": [
+													"var code = responseCode.code;",
+													"if (code === 200){",
+													"    console.log(\"Experiment Execution pause done\");",
+													"}else{",
+													"    var jsonData = pm.response.json();",
+													"    var detail = jsonData.detail;",
+													"    console.log(\"Error - Code : \" + code + \" Detail : \" + detail);",
+													"}",
+													"pm.test(\"Experiment Execution pause done\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions/{{executionId}}/pause",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions",
+												"{{executionId}}",
+												"pause"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Identifier of the experiment execution not found",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/pause",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"pause"
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Created",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/pause",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"pause"
+													]
+												}
+											},
+											"status": "Created",
+											"code": 201,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Operation not authorised",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/pause",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"pause"
+													]
+												}
+											},
+											"status": "Unauthorized",
+											"code": 401,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation forbidden",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/pause",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"pause"
+													]
+												}
+											},
+											"status": "Forbidden",
+											"code": 403,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Return 200 OK upon action completion",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/pause",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"pause"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "\"<object>\""
+										},
+										{
+											"name": "Operation failed",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/pause",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"pause"
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "eemExperimentExecutionsIdResumePost",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "2a192fd6-f426-4380-b56f-b9c180a6a44d",
+												"exec": [
+													"var code = responseCode.code;",
+													"if (code === 200){",
+													"    console.log(\"Experiment Execution resume done\");",
+													"}else{",
+													"    var jsonData = pm.response.json();",
+													"    var detail = jsonData.detail;",
+													"    console.log(\"Error - Code : \" + code + \" Detail : \" + detail);",
+													"}",
+													"pm.test(\"Experiment Execution resume done\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions/{{executionId}}/resume",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions",
+												"{{executionId}}",
+												"resume"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Identifier of the experiment execution not found",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/resume",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"resume"
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation forbidden",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/resume",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"resume"
+													]
+												}
+											},
+											"status": "Forbidden",
+											"code": 403,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation failed",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/resume",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"resume"
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation not authorised",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/resume",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"resume"
+													]
+												}
+											},
+											"status": "Unauthorized",
+											"code": 401,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Return 200 OK upon action completion",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/resume",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"resume"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "\"<object>\""
+										},
+										{
+											"name": "Created",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/resume",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"resume"
+													]
+												}
+											},
+											"status": "Created",
+											"code": 201,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "eemExperimentExecutionsIdRunPost",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "221fb2ae-341a-4b2f-85e6-4250a3dea33d",
+												"exec": [
+													"var code = responseCode.code;",
+													"if (code === 200){",
+													"    console.log(\"Experiment Execution run done\");",
+													"}else{",
+													"    var jsonData = pm.response.json();",
+													"    var detail = jsonData.detail;",
+													"    console.log(\"Error - Code : \" + code + \" Detail : \" + detail);",
+													"}",
+													"pm.test(\"Experiment Execution run done\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"executionId\": \"{{executionId}}\",\n    \"experimentDescriptorId\": \"{{experimentDescriptorId}}\",\n    \"nsInstanceId\": \"{{nsInstanceId}}\",\n    \"testCaseDescriptorConfiguration\": {\"{{tcDescriptorId}}\":{\"{{userParameter}}\":\"2000\"}}\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions/{{executionId}}/run?runType={{runType}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions",
+												"{{executionId}}",
+												"run"
+											],
+											"query": [
+												{
+													"key": "runType",
+													"value": "{{runType}}",
+													"description": "Determine the type of run. If not present, the default value is RUN_ALL"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Operation forbidden",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"executionId\": \"<string>\",\n    \"experimentDescriptorId\": \"<string>\",\n    \"nsInstanceId\": \"<string>\",\n    \"testCaseDescriptorConfiguration\": \"<object>\"\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/run?runType=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"run"
+													],
+													"query": [
+														{
+															"key": "runType",
+															"value": "<string>"
+														}
+													]
+												}
+											},
+											"status": "Forbidden",
+											"code": 403,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Created",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"executionId\": \"<string>\",\n    \"experimentDescriptorId\": \"<string>\",\n    \"nsInstanceId\": \"<string>\",\n    \"testCaseDescriptorConfiguration\": \"<object>\"\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/run?runType=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"run"
+													],
+													"query": [
+														{
+															"key": "runType",
+															"value": "<string>"
+														}
+													]
+												}
+											},
+											"status": "Created",
+											"code": 201,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Operation failed",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"executionId\": \"<string>\",\n    \"experimentDescriptorId\": \"<string>\",\n    \"nsInstanceId\": \"<string>\",\n    \"testCaseDescriptorConfiguration\": \"<object>\"\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/run?runType=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"run"
+													],
+													"query": [
+														{
+															"key": "runType",
+															"value": "<string>"
+														}
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Return 200 OK upon action completion",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"executionId\": \"<string>\",\n    \"experimentDescriptorId\": \"<string>\",\n    \"nsInstanceId\": \"<string>\",\n    \"testCaseDescriptorConfiguration\": \"<object>\"\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/run?runType=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"run"
+													],
+													"query": [
+														{
+															"key": "runType",
+															"value": "<string>"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "\"<object>\""
+										},
+										{
+											"name": "Identifier of the experiment execution not found",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"executionId\": \"<string>\",\n    \"experimentDescriptorId\": \"<string>\",\n    \"nsInstanceId\": \"<string>\",\n    \"testCaseDescriptorConfiguration\": \"<object>\"\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/run?runType=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"run"
+													],
+													"query": [
+														{
+															"key": "runType",
+															"value": "<string>"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Malformatted request",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"executionId\": \"<string>\",\n    \"experimentDescriptorId\": \"<string>\",\n    \"nsInstanceId\": \"<string>\",\n    \"testCaseDescriptorConfiguration\": \"<object>\"\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/run?runType=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"run"
+													],
+													"query": [
+														{
+															"key": "runType",
+															"value": "<string>"
+														}
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation not authorised",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"executionId\": \"<string>\",\n    \"experimentDescriptorId\": \"<string>\",\n    \"nsInstanceId\": \"<string>\",\n    \"testCaseDescriptorConfiguration\": \"<object>\"\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/run?runType=<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"run"
+													],
+													"query": [
+														{
+															"key": "runType",
+															"value": "<string>"
+														}
+													]
+												}
+											},
+											"status": "Unauthorized",
+											"code": 401,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "eemExperimentExecutionsIdStepPost",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "c25d7720-4550-4369-8660-5e52fc4fec3d",
+												"exec": [
+													"var code = responseCode.code;",
+													"if (code === 200){",
+													"    console.log(\"Experiment Execution step done\");",
+													"}else{",
+													"    var jsonData = pm.response.json();",
+													"    var detail = jsonData.detail;",
+													"    console.log(\"Error - Code : \" + code + \" Detail : \" + detail);",
+													"}",
+													"pm.test(\"Experiment Execution step done\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions/{{executionId}}/step",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions",
+												"{{executionId}}",
+												"step"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Identifier of the experiment execution not found",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/step",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"step"
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Return 200 OK upon action completion",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/step",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"step"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "\"<object>\""
+										},
+										{
+											"name": "Operation failed",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/step",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"step"
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation not authorised",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/step",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"step"
+													]
+												}
+											},
+											"status": "Unauthorized",
+											"code": 401,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation forbidden",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/step",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"step"
+													]
+												}
+											},
+											"status": "Forbidden",
+											"code": 403,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Created",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_executions/<string>/step",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_executions",
+														"<string>",
+														"step"
+													]
+												}
+											},
+											"status": "Created",
+											"code": 201,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "List all experiments available",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "f33ad0e0-cfd3-4a53-858d-924d211497c8",
+										"exec": [
+											"var jsonData = pm.response.json();",
+											"var code = responseCode.code;",
+											"if (code === 200){",
+											"    console.log(\"experimentExecutions : \" + JSON.stringify(jsonData));",
+											"}else{",
+											"    var detail = jsonData.detail;",
+											"    console.log(\"Error - Code : \" + code + \" Detail : \" + detail);",
+											"}",
+											"pm.test(\"Experiment Execution retrieved\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/eem/experiment_executions?state=",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										"experiment_executions"
+									],
+									"query": [
+										{
+											"key": "state",
+											"value": "",
+											"description": "Execution state of the experiment"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Not Found",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions?state=<string>",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											],
+											"query": [
+												{
+													"key": "state",
+													"value": "<string>"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Operation failed",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions?state=<string>",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											],
+											"query": [
+												{
+													"key": "state",
+													"value": "<string>"
+												}
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Operation forbidden",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions?state=<string>",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											],
+											"query": [
+												{
+													"key": "state",
+													"value": "<string>"
+												}
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "List of all experiments",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions?state=<string>",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											],
+											"query": [
+												{
+													"key": "state",
+													"value": "<string>"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "[\n {\n  \"executionId\": \"<string>\",\n  \"state\": \"<string>\",\n  \"errorMessage\": \"<string>\",\n  \"reportUrl\": \"<string>\",\n  \"testCaseDescriptorConfiguration\": [\n   {\n    \"execConfiguration\": \"<object>\",\n    \"tcDescriptorId\": \"<string>\"\n   },\n   {\n    \"execConfiguration\": \"<object>\",\n    \"tcDescriptorId\": \"<string>\"\n   }\n  ],\n  \"testCaseResult\": \"<object>\"\n },\n {\n  \"executionId\": \"<string>\",\n  \"state\": \"<string>\",\n  \"errorMessage\": \"<string>\",\n  \"reportUrl\": \"<string>\",\n  \"testCaseDescriptorConfiguration\": [\n   {\n    \"execConfiguration\": \"<object>\",\n    \"tcDescriptorId\": \"<string>\"\n   },\n   {\n    \"execConfiguration\": \"<object>\",\n    \"tcDescriptorId\": \"<string>\"\n   }\n  ],\n  \"testCaseResult\": \"<object>\"\n }\n]"
+								},
+								{
+									"name": "Operation not authorised",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions?state=<string>",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											],
+											"query": [
+												{
+													"key": "state",
+													"value": "<string>"
+												}
+											]
+										}
+									},
+									"status": "Unauthorized",
+									"code": 401,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Operation not implemented",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions?state=<string>",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											],
+											"query": [
+												{
+													"key": "state",
+													"value": "<string>"
+												}
+											]
+										}
+									},
+									"status": "Not Implemented",
+									"code": 501,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Requests a new experiment execution",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "3b12d6be-8f6d-4c7b-b049-587938fb9c7c",
+										"exec": [
+											"var jsonData = pm.response.json();",
+											"var code = responseCode.code;",
+											"if (code === 201){",
+											"    console.log(\"executionId : \" + JSON.stringify(jsonData));",
+											"    pm.environment.set(\"executionId\", jsonData);",
+											"}else{",
+											"    var detail = jsonData.detail;",
+											"    console.log(\"Error - Code : \" + code + \" Detail : \" + detail);",
+											"}",
+											"pm.test(\"Experiment Execution created\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/eem/experiment_executions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										"experiment_executions"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Operation forbidden",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Operation failed",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Experiment execution identifier",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "\"<string>\""
+								},
+								{
+									"name": "Operation not authorised",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											]
+										}
+									},
+									"status": "Unauthorized",
+									"code": 401,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "\"<string>\""
+								},
+								{
+									"name": "Precondition Failed",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											]
+										}
+									},
+									"status": "Precondition Failed",
+									"code": 412,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Not Found",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						},
+						{
+							"name": "eemExperimentExecutionsOptions",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "OPTIONS",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/eem/experiment_executions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										"experiment_executions"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "*/*"
+										}
+									],
+									"cookie": [],
+									"body": "<object>"
+								},
+								{
+									"name": "The Option operation is needed for compatibility reasons with JS     applications",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											]
+										}
+									},
+									"status": "No Content",
+									"code": 204,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "*/*"
+										}
+									],
+									"cookie": [],
+									"body": "<object>"
+								},
+								{
+									"name": "Unauthorized",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											]
+										}
+									},
+									"status": "Unauthorized",
+									"code": 401,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Forbidden",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_executions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_executions"
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "experiment notifications",
+					"item": [
+						{
+							"name": "eemExperimentNotificationsGet",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/eem/experiment_notifications",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										"experiment_notifications"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Not Found",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_notifications",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_notifications"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Forbidden",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_notifications",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_notifications"
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Default returned value in case the subscribers checks the notification endpoint",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_notifications",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_notifications"
+											]
+										}
+									},
+									"status": "No Content",
+									"code": 204,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "*/*"
+										}
+									],
+									"cookie": [],
+									"body": "<object>"
+								},
+								{
+									"name": "Unauthorized",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_notifications",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_notifications"
+											]
+										}
+									},
+									"status": "Unauthorized",
+									"code": 401,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_notifications",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_notifications"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "*/*"
+										}
+									],
+									"cookie": [],
+									"body": "<object>"
+								}
+							]
+						},
+						{
+							"name": "eemExperimentNotificationsPost",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"configurationChangeState\": \"<string>\",\n    \"executionId\": \"<string>\",\n    \"notificationInfo\": \"<string>\",\n    \"notificationError\": {\n        \"detail\": \"<string>\",\n        \"status\": \"<integer>\"\n    }\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/eem/experiment_notifications",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										"experiment_notifications"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Not Found",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"configurationChangeState\": \"<string>\",\n    \"executionId\": \"<string>\",\n    \"notificationInfo\": \"<string>\",\n    \"notificationError\": {\n        \"detail\": \"<string>\",\n        \"status\": \"<integer>\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_notifications",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_notifications"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Created",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"configurationChangeState\": \"<string>\",\n    \"executionId\": \"<string>\",\n    \"notificationInfo\": \"<string>\",\n    \"notificationError\": {\n        \"detail\": \"<string>\",\n        \"status\": \"<integer>\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_notifications",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_notifications"
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Unauthorized",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"configurationChangeState\": \"<string>\",\n    \"executionId\": \"<string>\",\n    \"notificationInfo\": \"<string>\",\n    \"notificationError\": {\n        \"detail\": \"<string>\",\n        \"status\": \"<integer>\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_notifications",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_notifications"
+											]
+										}
+									},
+									"status": "Unauthorized",
+									"code": 401,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"configurationChangeState\": \"<string>\",\n    \"executionId\": \"<string>\",\n    \"notificationInfo\": \"<string>\",\n    \"notificationError\": {\n        \"detail\": \"<string>\",\n        \"status\": \"<integer>\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_notifications",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_notifications"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "*/*"
+										}
+									],
+									"cookie": [],
+									"body": "<object>"
+								},
+								{
+									"name": "Forbidden",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"configurationChangeState\": \"<string>\",\n    \"executionId\": \"<string>\",\n    \"notificationInfo\": \"<string>\",\n    \"notificationError\": {\n        \"detail\": \"<string>\",\n        \"status\": \"<integer>\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_notifications",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_notifications"
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "No response body is sent as response of a notification",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"configurationChangeState\": \"<string>\",\n    \"executionId\": \"<string>\",\n    \"notificationInfo\": \"<string>\",\n    \"notificationError\": {\n        \"detail\": \"<string>\",\n        \"status\": \"<integer>\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_notifications",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_notifications"
+											]
+										}
+									},
+									"status": "No Content",
+									"code": 204,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "*/*"
+										}
+									],
+									"cookie": [],
+									"body": "<object>"
+								}
+							]
+						},
+						{
+							"name": "eemExperimentNotificationsOptions",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "OPTIONS",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/eem/experiment_notifications",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										"experiment_notifications"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Forbidden",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_notifications",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_notifications"
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "No content should be returned.",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_notifications",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_notifications"
+											]
+										}
+									},
+									"status": "No Content",
+									"code": 204,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "*/*"
+										}
+									],
+									"cookie": [],
+									"body": "<object>"
+								},
+								{
+									"name": "Unauthorized",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_notifications",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_notifications"
+											]
+										}
+									},
+									"status": "Unauthorized",
+									"code": 401,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_notifications",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_notifications"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "*/*"
+										}
+									],
+									"cookie": [],
+									"body": "<object>"
+								}
+							]
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "experiment subscriptions",
+					"item": [
+						{
+							"name": "{subscription Id}",
+							"item": [
+								{
+									"name": "eemExperimentSubscriptionsSubscriptionIdGet",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "50bfcf38-ffa9-44ee-a477-3a91668900ca",
+												"exec": [
+													"var jsonData = pm.response.json();",
+													"var code = responseCode.code;",
+													"if (code === 200){",
+													"    console.log(\"experimentExecution : \" + JSON.stringify(jsonData));",
+													"}else{",
+													"    var detail = jsonData.detail;",
+													"    console.log(\"Error - Code : \" + code + \" Detail : \" + detail);",
+													"}",
+													"pm.test(\"Experiment Execution retrieved\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions/{{subscriptionId}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions",
+												"{{subscriptionId}}"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Operation forbidden",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Forbidden",
+											"code": 403,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Return error details",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Returns experiment execution subscription for the id provided on the path",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"callbackURI\": \"<string>\",\n \"executionId\": \"<string>\",\n \"subscriptionId\": \"<string>\",\n \"subscriptionType\": \"<string>\"\n}"
+										},
+										{
+											"name": "Operation not implemented",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Not Implemented",
+											"code": 501,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation failed",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation not authorised",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Unauthorized",
+											"code": 401,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Bad request. Malformed request",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "eemExperimentSubscriptionsSubscriptionIdDelete",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "c9e98faf-c7f6-4825-a653-e6dce851d637",
+												"exec": [
+													"var code = responseCode.code;",
+													"if (code === 204){",
+													"    console.log(\"Experiment Execution Subscription deleted\");",
+													"}else{",
+													"    var jsonData = pm.response.json();",
+													"    var detail = jsonData.detail;",
+													"    console.log(\"Error - Code : \" + code + \" Detail : \" + detail);",
+													"}",
+													"pm.test(\"Experiment Execution Subscription deleted done\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([204]);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions/{{subscriptionId}}",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions",
+												"{{subscriptionId}}"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Operation failed",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation forbidden",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Forbidden",
+											"code": 403,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "No content is returned. Subscription is removed",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "No Content",
+											"code": 204,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "\"<object>\""
+										},
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "\"<object>\""
+										},
+										{
+											"name": "Return error details",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										},
+										{
+											"name": "Operation not authorised",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Unauthorized",
+											"code": 401,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+										}
+									]
+								},
+								{
+									"name": "eemExperimentSubscriptionsSubscriptionIdOptions",
+									"request": {
+										"auth": {
+											"type": "noauth"
+										},
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions/:subscriptionId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions",
+												":subscriptionId"
+											],
+											"variable": [
+												{
+													"key": "subscriptionId",
+													"value": "<string>",
+													"description": "subscriptionId"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "OPTIONS",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "<object>"
+										},
+										{
+											"name": "Forbidden",
+											"originalRequest": {
+												"method": "OPTIONS",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Forbidden",
+											"code": 403,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Unauthorized",
+											"originalRequest": {
+												"method": "OPTIONS",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "Unauthorized",
+											"code": 401,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "No content",
+											"originalRequest": {
+												"method": "OPTIONS",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/eem/experiment_subscriptions/<string>",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"eem",
+														"experiment_subscriptions",
+														"<string>"
+													]
+												}
+											},
+											"status": "No Content",
+											"code": 204,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "*/*"
+												}
+											],
+											"cookie": [],
+											"body": "<object>"
+										}
+									]
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "eemExperimentSubscriptionsGet",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "1ae47f43-356d-4ffc-88ce-4fc86fd9fd68",
+										"exec": [
+											"var jsonData = pm.response.json();",
+											"var code = responseCode.code;",
+											"if (code === 200){",
+											"    console.log(\"experimentExecution : \" + JSON.stringify(jsonData));",
+											"}else{",
+											"    var detail = jsonData.detail;",
+											"    console.log(\"Error - Code : \" + code + \" Detail : \" + detail);",
+											"}",
+											"pm.test(\"Experiment Execution retrieved\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										"experiment_subscriptions"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Return list of subscriptions to the Experiment Execution Manager",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "[\n {\n  \"callbackURI\": \"<string>\",\n  \"executionId\": \"<string>\",\n  \"subscriptionId\": \"<string>\",\n  \"subscriptionType\": \"<string>\"\n },\n {\n  \"callbackURI\": \"<string>\",\n  \"executionId\": \"<string>\",\n  \"subscriptionId\": \"<string>\",\n  \"subscriptionType\": \"<string>\"\n }\n]"
+								},
+								{
+									"name": "Operation failed",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Operation not authorised",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Unauthorized",
+									"code": 401,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Operation forbidden",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Operation not implemented",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Not Implemented",
+									"code": 501,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Not Found",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						},
+						{
+							"name": "eemExperimentSubscriptionsPost",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "6e37dd40-e452-426b-a2ac-1b3c02157d35",
+										"exec": [
+											"var jsonData = pm.response.json();",
+											"var code = responseCode.code;",
+											"if (code === 201){",
+											"    console.log(\"subscriptionId : \" + JSON.stringify(jsonData));",
+											"    pm.environment.set(\"subscriptionId\", jsonData);",
+											"}else{",
+											"    var detail = jsonData.detail;",
+											"    console.log(\"Error - Code : \" + code + \" Detail : \" + detail);",
+											"}",
+											"pm.test(\"Experiment Execution Subscription created\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"callbackURI\": \"{{callbackURI}}\",\n    \"executionId\": \"{{executionId}}\",\n    \"subscriptionType\": \"EXPERIMENT_EXECUTION_CHANGE_STATE\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										"experiment_subscriptions"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Creates a new subscription to the Execution Experiment Manager",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"callbackURI\": \"<string>\",\n    \"executionId\": \"<string>\",\n    \"subscriptionType\": \"<string>\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "\"<string>\""
+								},
+								{
+									"name": "Operation forbidden",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"callbackURI\": \"<string>\",\n    \"executionId\": \"<string>\",\n    \"subscriptionType\": \"<string>\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Precondition Failed",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"callbackURI\": \"<string>\",\n    \"executionId\": \"<string>\",\n    \"subscriptionType\": \"<string>\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Precondition Failed",
+									"code": 412,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"callbackURI\": \"<string>\",\n    \"executionId\": \"<string>\",\n    \"subscriptionType\": \"<string>\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "\"<string>\""
+								},
+								{
+									"name": "Subscription already exists",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"callbackURI\": \"<string>\",\n    \"executionId\": \"<string>\",\n    \"subscriptionType\": \"<string>\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "See Other",
+									"code": 303,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Not Found",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"callbackURI\": \"<string>\",\n    \"executionId\": \"<string>\",\n    \"subscriptionType\": \"<string>\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Operation failed",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"callbackURI\": \"<string>\",\n    \"executionId\": \"<string>\",\n    \"subscriptionType\": \"<string>\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Malformatted request",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"callbackURI\": \"<string>\",\n    \"executionId\": \"<string>\",\n    \"subscriptionType\": \"<string>\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Operation not authorised",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"callbackURI\": \"<string>\",\n    \"executionId\": \"<string>\",\n    \"subscriptionType\": \"<string>\"\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Unauthorized",
+									"code": 401,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								}
+							]
+						},
+						{
+							"name": "eemExperimentSubscriptionsOptions",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "OPTIONS",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										"experiment_subscriptions"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Operation forbidden",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Operation failed",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Operation not authorised",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Unauthorized",
+									"code": 401,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "No content is expected on OPTION ReST request",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "No Content",
+									"code": 204,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "\"<object>\""
+								},
+								{
+									"name": "Operation not implemented",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Not Implemented",
+									"code": 501,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "Return error details",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"detail\": \"<string>\",\n \"status\": \"<integer>\"\n}"
+								},
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/eem/experiment_subscriptions",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"eem",
+												"experiment_subscriptions"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "\"<object>\""
+								}
+							]
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "List API versions",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/eem/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"eem",
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Unauthorized",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/eem/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										""
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Forbidden",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/eem/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										""
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Not Found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/eem/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										""
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "200 response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/eem/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										""
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "\"<object>\""
+						},
+						{
+							"name": "300 response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/eem/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										""
+									]
+								}
+							},
+							"status": "Multiple Choices",
+							"code": 300,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "eemOptions",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "OPTIONS",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/eem/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"eem",
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "OPTIONS",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/eem/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										""
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "*/*"
+								}
+							],
+							"cookie": [],
+							"body": "<object>"
+						},
+						{
+							"name": "Forbidden",
+							"originalRequest": {
+								"method": "OPTIONS",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/eem/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										""
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "The Option operation is needed for compatibility reasons with JS applications",
+							"originalRequest": {
+								"method": "OPTIONS",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/eem/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										""
+									]
+								}
+							},
+							"status": "No Content",
+							"code": 204,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "*/*"
+								}
+							],
+							"cookie": [],
+							"body": "<object>"
+						},
+						{
+							"name": "Unauthorized",
+							"originalRequest": {
+								"method": "OPTIONS",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/eem/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"eem",
+										""
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"variable": [
+		{
+			"id": "baseUrl",
+			"key": "baseUrl",
+			"value": "//localhost:8080/",
+			"type": "string"
+		}
+	],
+	"protocolProfileBehavior": {}
+}

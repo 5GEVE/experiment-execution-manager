@@ -10,9 +10,11 @@ import it.nextworks.eem.rabbitMessage.*;
 import it.nextworks.eem.model.*;
 import it.nextworks.eem.model.enumerate.ExperimentState;
 import it.nextworks.eem.repo.ExperimentExecutionRepository;
-import it.nextworks.eem.sbi.jenkins.SbiJenkinsService;
-import it.nextworks.eem.sbi.runtimeConfigurator.SbiConfigurationService;
-import it.nextworks.eem.sbi.validationComponent.SbiValidationService;
+import it.nextworks.eem.sbi.expcatalogue.ExperimentCatalogueService;
+import it.nextworks.eem.sbi.jenkins.JenkinsService;
+import it.nextworks.eem.sbi.msno.MsnoService;
+import it.nextworks.eem.sbi.runtimeConfigurator.ConfigurationService;
+import it.nextworks.eem.sbi.validationComponent.ValidationService;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
@@ -31,6 +33,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Service
@@ -55,25 +58,48 @@ public class EemService{
     private EemSubscriptionService subscriptionService;
 
     @Autowired
-    private SbiJenkinsService jenkinsService;
+    private JenkinsService jenkinsService;
 
     @Autowired
-    private SbiValidationService validationService;
+    private ValidationService validationService;
 
     @Autowired
-    private SbiConfigurationService configurationService;
+    private ConfigurationService configurationService;
+
+    @Autowired
+    private ExperimentCatalogueService catalogueService;
+
+    @Autowired
+    private MsnoService msnoService;
 
     @Autowired
     private ExperimentExecutionRepository experimentExecutionRepository;
 
-    //TODO initializate EEIM for each experiment execution stored in db and not completed
+    @PostConstruct
+    private void initStoredExperimentExecution() throws FailedOperationException{
+        List<ExperimentExecution> experimentExecutions = experimentExecutionRepository.findAll();
+        for(ExperimentExecution experimentExecution : experimentExecutions)
+            if(!experimentExecution.getState().equals(ExperimentState.COMPLETED) && !experimentExecution.getState().equals(ExperimentState.ABORTED) && !experimentExecution.getState().equals(ExperimentState.FAILED)){
+                initNewExperimentExecutionInstanceManager(experimentExecution.getExecutionId());
+                log.info("Experiment Execution with Id {} restored in state {}", experimentExecution.getExecutionId(), experimentExecution.getState().toString());
+                log.debug("{}", experimentExecution.toString());
+            }
+    }
+
+    public List<ExperimentExecution> getExperimentExecutions(ExperimentState state) throws FailedOperationException{
+        log.info("Received request for getting Experiment Executions list");
+        if(state == null)
+            return experimentExecutionRepository.findAll();
+        else
+            return experimentExecutionRepository.findByState(state);
+    }
 
     public synchronized String createExperimentExecutionInstance() throws FailedOperationException{
         log.info("Received request for new Experiment Execution");
-        String executionId = UUID.randomUUID().toString();
+        String executionId = UUID.randomUUID().toString();//TODO use the id generated from the db?
         ExperimentExecution experimentExecution = new ExperimentExecution();
         experimentExecution.executionId(executionId)
-            .setState(ExperimentState.INIT);
+                .state(ExperimentState.INIT);
         experimentExecutionRepository.saveAndFlush(experimentExecution);
         initNewExperimentExecutionInstanceManager(executionId);
         log.info("Experiment Execution with Id {} created and stored", experimentExecution.getExecutionId());
@@ -96,10 +122,11 @@ public class EemService{
         if(!experimentExecutionOptional.isPresent())
             throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", experimentExecutionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
-        if(!experimentExecution.getState().equals(ExperimentState.INIT) && !experimentExecution.getState().equals(ExperimentState.FAILED) && !experimentExecution.getState().equals(ExperimentState.ABORTED) && !experimentExecution.getState().equals(ExperimentState.COMPLETED))//TODO PAUSED?
+        if(!experimentExecution.getState().equals(ExperimentState.INIT) && !experimentExecution.getState().equals(ExperimentState.FAILED) && !experimentExecution.getState().equals(ExperimentState.ABORTED) && !experimentExecution.getState().equals(ExperimentState.COMPLETED))
             throw new FailedOperationException(String.format("Experiment Execution with Id %s is neither in INIT or FAILED or ABORTED or COMPLETED state", experimentExecutionId));
         experimentExecutionRepository.delete(experimentExecutionOptional.get());
         experimentExecutionInstances.remove(experimentExecutionId);
+        subscriptionService.deleteAllSubscriptions(experimentExecutionId);
         log.info("Experiment Execution with Id {} deleted", experimentExecutionId);
     }
 
@@ -113,7 +140,12 @@ public class EemService{
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         if(!experimentExecution.getState().equals(ExperimentState.INIT))
             throw new FailedOperationException(String.format("Experiment Execution with Id %s is not in INIT state", executionId));
-
+        List<TestCaseExecutionConfiguration> testCaseExecutionConfigurations = new ArrayList<>();
+        request.getTestCaseDescriptorConfiguration().forEach((x, y) -> testCaseExecutionConfigurations.add(new TestCaseExecutionConfiguration(x, y)));
+        experimentExecution.experimentDescriptorId(request.getExperimentDescriptorId())
+                .nsInstanceId(request.getNsInstanceId())
+                .testCaseDescriptorConfiguration(testCaseExecutionConfigurations);
+        experimentExecutionRepository.saveAndFlush(experimentExecution);
         String topic = "lifecycle.run." + executionId;
         InternalMessage internalMessage;
         if(runType.equals("RUN_ALL"))
@@ -204,6 +236,16 @@ public class EemService{
         }
     }
 
+    public List<ExperimentExecutionSubscription> getExperimentExecutionSubscriptions() throws FailedOperationException{
+        log.info("Received request for getting Experiment Execution Subscription list");
+        return subscriptionService.getExperimentExecutionSubscriptions();
+    }
+
+    public ExperimentExecutionSubscription getExperimentExecutionSubscription(String subscriptionId) throws FailedOperationException, NotExistingEntityException{
+        log.info("Received request for getting Experiment Execution Subscription with Id {}", subscriptionId);
+        return subscriptionService.getExperimentExecutionSubscription(subscriptionId);
+    }
+
     public synchronized String subscribe(ExperimentExecutionSubscriptionRequest subscriptionRequest) throws FailedOperationException, NotExistingEntityException, MalformattedElementException{
         subscriptionRequest.isValid();
         String executionId = subscriptionRequest.getExecutionId();
@@ -219,9 +261,14 @@ public class EemService{
         subscriptionService.unsubscribe(subscriptionId);
     }
 
-    private void initNewExperimentExecutionInstanceManager(String experimentExecutionId) {
+    private void initNewExperimentExecutionInstanceManager(String experimentExecutionId) throws FailedOperationException{
         log.info("Initializing new Experiment Execution Instance Manager with Id {}", experimentExecutionId);
-        ExperimentExecutionInstanceManager eeim = new ExperimentExecutionInstanceManager(experimentExecutionId, experimentExecutionRepository, subscriptionService, jenkinsService, validationService, configurationService);
+        ExperimentExecutionInstanceManager eeim;
+        try {
+            eeim = new ExperimentExecutionInstanceManager(experimentExecutionId, experimentExecutionRepository, subscriptionService, jenkinsService, validationService, configurationService, catalogueService, msnoService);
+        }catch (NotExistingEntityException e) {
+            throw new FailedOperationException(String.format("Initialization of Experiment Execution Instance Manager with Id %s failed : %s", experimentExecutionId, e.getMessage()));
+        }
         createQueue(experimentExecutionId, eeim);
         experimentExecutionInstances.put(experimentExecutionId, eeim);
         log.debug("Experiment Execution Instance Manager with Id {} initialized", experimentExecutionId);
