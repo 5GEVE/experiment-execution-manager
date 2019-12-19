@@ -19,6 +19,7 @@ import it.nextworks.eem.sbi.msno.MsnoService;
 import it.nextworks.eem.sbi.runtimeConfigurator.ConfigurationService;
 import it.nextworks.eem.sbi.validationComponent.ValidationService;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.*;
+import it.nextworks.nfvmano.catalogue.blueprint.messages.*;
 import it.nextworks.nfvmano.libs.ifa.common.elements.Filter;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
@@ -115,38 +116,32 @@ public class ExperimentExecutionInstanceManager {
             switch (imt) {
                 case RUN_ALL: {
                     log.debug("Processing request to run all Experiment Execution with Id {}", executionId);
-                    RunAllExperimentInternalMessage msg = (RunAllExperimentInternalMessage) im;
-                    processRunAllRequest(msg);
+                    processRunAllRequest();
                     break;
                 }
                 case RUN_STEP: {
                     log.debug("Processing request to run step by step Experiment Execution with Id {}", executionId);
-                    RunStepExperimentInternalMessage msg = (RunStepExperimentInternalMessage) im;
-                    processRunStepRequest(msg);
+                    processRunStepRequest();
                     break;
                 }
                 case PAUSE: {
                     log.debug("Processing request to pause Experiment Execution with Id {}", executionId);
-                    PauseExperimentInternalMessage msg = (PauseExperimentInternalMessage) im;
-                    processPauseRequest(msg);
+                    processPauseRequest();
                     break;
                 }
                 case RESUME: {
                     log.debug("Processing request to resume Experiment Execution with Id {}", executionId);
-                    ResumeExperimentInternalMessage msg = (ResumeExperimentInternalMessage) im;
-                    processResumeRequest(msg);
+                    processResumeRequest();
                     break;
                 }
                 case STEP: {
                     log.debug("Processing request to run a Test Case of Experiment Execution with Id {}", executionId);
-                    StepExperimentInternalMessage msg = (StepExperimentInternalMessage) im;
-                    processStepRequest(msg);
+                    processStepRequest();
                     break;
                 }
                 case ABORT: {
                     log.debug("Processing request to abort Experiment Execution with Id {}", executionId);
-                    AbortExperimentInternalMessage msg = (AbortExperimentInternalMessage) im;
-                    processAbortRequest(msg);
+                    processAbortRequest();
                     break;
                 }
                 case TC_RESULT: {
@@ -183,26 +178,28 @@ public class ExperimentExecutionInstanceManager {
         }
     }
 
-    private void processRunAllRequest(RunAllExperimentInternalMessage msg){
-        if(updateAndNotifyExperimentExecutionState(ExperimentState.CONFIGURING))
+    private void processRunAllRequest(){
+        if(updateAndNotifyExperimentExecutionState(ExperimentState.CONFIGURING)) {
             log.info("Configuring Experiment Execution with Id {}", executionId);
-        retrieveAllInformation();
-        configurationService.configureExperiment(executionId, "RUN_ALL");
+            retrieveAllInformation();
+            configurationService.configureExperiment(executionId, "RUN_ALL");
+        }
     }
 
-    private void processRunStepRequest(RunStepExperimentInternalMessage msg){
-        if(updateAndNotifyExperimentExecutionState(ExperimentState.CONFIGURING))
+    private void processRunStepRequest(){
+        if(updateAndNotifyExperimentExecutionState(ExperimentState.CONFIGURING)) {
             log.info("Configuring Experiment Execution with Id {}", executionId);
-        retrieveAllInformation();
-        configurationService.configureExperiment(executionId, "RUN_IN_STEPS");
+            retrieveAllInformation();
+            configurationService.configureExperiment(executionId, "RUN_IN_STEPS");
+        }
     }
 
-    private void processPauseRequest(PauseExperimentInternalMessage msg){
+    private void processPauseRequest(){
         log.info("Pausing Experiment Execution with Id {}", executionId);
         interruptRunning = true;
     }
 
-    private void processResumeRequest(ResumeExperimentInternalMessage msg){
+    private void processResumeRequest(){
         if(updateAndNotifyExperimentExecutionState(ExperimentState.RUNNING)) {
             log.info("Resuming Experiment Execution with Id {}", executionId);
             runExperimentExecutionTestCase();
@@ -210,19 +207,20 @@ public class ExperimentExecutionInstanceManager {
         }
     }
 
-    private void processStepRequest(StepExperimentInternalMessage msg){
+    private void processStepRequest(){
         if(updateAndNotifyExperimentExecutionState(ExperimentState.RUNNING_STEP)) {
             log.info("Running a step of Experiment Execution with Id {}", executionId);
             runExperimentExecutionTestCase();
         }
     }
 
-    private void processAbortRequest(AbortExperimentInternalMessage msg){
+    private void processAbortRequest(){
         boolean abortNow = currentState.equals(ExperimentState.PAUSED);
-        if(updateAndNotifyExperimentExecutionState(ExperimentState.ABORTING))
+        if(updateAndNotifyExperimentExecutionState(ExperimentState.ABORTING)) {
             log.info("Aborting Experiment Execution with Id {}", executionId);
-        if(abortNow)
-            abortExeperimentExecution();
+            if (abortNow)
+                abortExeperimentExecution();
+        }
     }
 
     private void processTestCaseResult(TestCaseResultInternalMessage msg){
@@ -235,6 +233,10 @@ public class ExperimentExecutionInstanceManager {
         }
          */
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
+        if(!experimentExecutionOptional.isPresent()){
+            log.error("Experiment Execution with Id {} not found", executionId);
+            return;
+        }
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         ExecutionResult executionResult = new ExecutionResult();
         executionResult.result(msg.getResult());//TODO reportUrl?
@@ -304,6 +306,10 @@ public class ExperimentExecutionInstanceManager {
     private void retrieveAllInformation(){
         log.info("Retrieving all the information for Experiment Execution with Id {}", executionId);
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
+        if(!experimentExecutionOptional.isPresent()){
+            log.error("Experiment Execution with Id {} not found", executionId);
+            return;
+        }
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         String experimentDescriptorId = experimentExecution.getExperimentDescriptorId();
         String nsInstanceId = experimentExecution.getNsInstanceId();
@@ -313,18 +319,36 @@ public class ExperimentExecutionInstanceManager {
             GeneralizedQueryRequest request = new GeneralizedQueryRequest(filter, null);
             log.debug("Going to retrieve Experiment Descriptor with Id {}", experimentDescriptorId);
             parameters.put("ExpD_ID", experimentDescriptorId);
-            expDescriptor = catalogueService.queryExpDescriptor(request).getExpDescriptors().get(0);
+            QueryExpDescriptorResponse expDescriptorResponse = catalogueService.queryExpDescriptor(request);
+            if(expDescriptorResponse.getExpDescriptors().isEmpty()) {
+                log.error("Experiment Descriptor with Id {} not found", experimentDescriptorId);
+                manageExperimentExecutionError(String.format("Experiment Descriptor with Id %s not found", experimentDescriptorId));
+                return;
+            }
+            expDescriptor = expDescriptorResponse.getExpDescriptors().get(0);
             parameters.remove("ExpD_ID");
             String vsDescriptorId = expDescriptor.getVsDescriptorId();
             log.debug("Going to retrieve Vertical Service Descriptor with Id {}", vsDescriptorId);
             parameters.put("VSD_ID", vsDescriptorId);
-            vsDescriptor = catalogueService.queryVsDescriptor(request).getVsDescriptors().get(0);
+            QueryVsDescriptorResponse vsDescriptorResponse = catalogueService.queryVsDescriptor(request);
+            if(vsDescriptorResponse.getVsDescriptors().isEmpty()) {
+                log.error("Vertical Service Descriptor with Id {} not found", vsDescriptorId);
+                manageExperimentExecutionError(String.format("Vertical Service Descriptor with Id %s not found", vsDescriptorId));
+                return;
+            }
+            vsDescriptor = vsDescriptorResponse.getVsDescriptors().get(0);
             parameters.remove("VSD_ID");
             List<String> ctxDescriptorIds = expDescriptor.getCtxDescriptorIds();
             log.debug("Going to retrieve Context Descriptors with Ids {}", ctxDescriptorIds);
             for(String ctxDescriptorId : ctxDescriptorIds) {
                 parameters.put("CTXD_ID", ctxDescriptorId);
-                CtxDescriptor ctxDescriptor = catalogueService.queryCtxDescriptor(request).getCtxDescriptors().get(0);
+                QueryCtxDescriptorResponse ctxDescriptorResponse = catalogueService.queryCtxDescriptor(request);
+                if (ctxDescriptorResponse.getCtxDescriptors().isEmpty()) {
+                    log.error("Context Descriptor with Id {} not found", ctxDescriptorId);
+                    manageExperimentExecutionError(String.format("Context Descriptor with Id %s not found", ctxDescriptorId));
+                    return;
+                }
+                CtxDescriptor ctxDescriptor = ctxDescriptorResponse.getCtxDescriptors().get(0);
                 ctxDescriptors.add(ctxDescriptor);
                 parameters.remove("CTXD_ID");
             }
@@ -332,7 +356,13 @@ public class ExperimentExecutionInstanceManager {
             log.debug("Going to retrieve Test Case Descriptors with Ids {}", tcDescriptorIds);
             for(String tcDescriptorId : tcDescriptorIds) {
                 parameters.put("TCD_ID", tcDescriptorId);
-                TestCaseDescriptor tcDescriptor = catalogueService.queryTestCaseDescriptor(request).getTestCaseDescriptors().get(0);
+                QueryTestCaseDescriptorResponse tcDescriptorResponse = catalogueService.queryTestCaseDescriptor(request);
+                if(tcDescriptorResponse.getTestCaseDescriptors().isEmpty()) {
+                    log.error("Test Case Descriptor with Id {} not found", tcDescriptorId);
+                    manageExperimentExecutionError(String.format("Test Case Descriptor with Id %s not found", tcDescriptorId));
+                    return;
+                }
+                TestCaseDescriptor tcDescriptor = tcDescriptorResponse.getTestCaseDescriptors().get(0);
                 tcDescriptors.add(tcDescriptor);
                 parameters.remove("TCD_ID");
             }
@@ -340,32 +370,45 @@ public class ExperimentExecutionInstanceManager {
             log.debug("Going to retrieve Test Case Blueprints with Ids {}", tcBlueprintIds);
             for(String tcBlueprintId : tcBlueprintIds) {
                 parameters.put("TCB_ID", tcBlueprintId);
-                TestCaseBlueprint tcBlueprint = catalogueService.queryTestCaseBlueprint(request).getTestCaseBlueprints().get(0).getTestCaseBlueprint();
+                QueryTestCaseBlueprintResponse tcBlueprintResponse = catalogueService.queryTestCaseBlueprint(request);
+                if(tcBlueprintResponse.getTestCaseBlueprints().isEmpty()) {
+                    log.error("Test Case Blueprint with Id {} not found", tcBlueprintId);
+                    manageExperimentExecutionError(String.format("Test Case Blueprint with Id %s not found", tcBlueprintId));
+                    return;
+                }
+                TestCaseBlueprint tcBlueprint = tcBlueprintResponse.getTestCaseBlueprints().get(0).getTestCaseBlueprint();
                 tcBlueprints.add(tcBlueprint);
                 parameters.remove("TCB_ID");
             }
             log.debug("Going to retrieve NsInstance with Id {}", nsInstanceId);
             parameters.put("NS_ID", nsInstanceId);
             nsInstance = msnoService.queryNs(request);
+            if(nsInstance == null){
+                log.error("Ns Instance with Id {} not found", nsInstanceId);
+                manageExperimentExecutionError(String.format("Ns Instance with Id %s not found", nsInstanceId));
+                return;
+            }
             parameters.remove("NS_ID");
+            translateTestCases();
         }catch (FailedOperationException | MalformattedElementException e){
             manageExperimentExecutionError(e.getMessage());
         }
-        translateTestCases();
     }
 
     private void translateTestCases(){
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
+        if(!experimentExecutionOptional.isPresent()){
+            log.error("Experiment Execution with Id {} not found", executionId);
+            return;
+        }
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         List<TestCaseExecutionConfiguration> executionConfigurations = experimentExecution.getTestCaseDescriptorConfiguration();
-        tcDescriptors.forEach(x -> log.debug("testcaseDescriptor {} \n", x.toString()));//TODO remove
         for(TestCaseExecutionConfiguration executionConfiguration : executionConfigurations)
             for(TestCaseDescriptor tcDescriptor : tcDescriptors)
                 if(tcDescriptor.getTestCaseDescriptorId().equals(executionConfiguration.getTcDescriptorId())) {
                     log.debug("Replacing userParameters {} with executionConfigurations {} for Test Case with Id {}", tcDescriptor.getUserParameters(), executionConfiguration.getExecConfiguration(), tcDescriptor.getTestCaseDescriptorId());
                     executionConfiguration.getExecConfiguration().forEach((x, y) -> tcDescriptor.getUserParameters().replace(x, y));
                 }
-        tcDescriptors.forEach(x -> log.debug("testcaseDescriptor {} \n", x.toString()));//TODO remove
         //TODO create robot files
         Set<String> executionResultIds = experimentExecution.getTestCaseResult().keySet();//TODO put only test cases not present inside testCaseResult of experiment Execution (needed for resuming the experiment)
         //TODO remove

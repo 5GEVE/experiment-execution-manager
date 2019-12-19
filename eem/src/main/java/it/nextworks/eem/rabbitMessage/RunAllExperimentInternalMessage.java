@@ -21,21 +21,6 @@ import it.nextworks.eem.model.ExperimentExecutionRequest;
 
 public class RunAllExperimentInternalMessage extends InternalMessage {
 
-	@JsonProperty("request")
-	private ExperimentExecutionRequest request;
-	
 	@JsonCreator
-	public RunAllExperimentInternalMessage(@JsonProperty("request") ExperimentExecutionRequest request) {
-		this.type = InternalMessageType.RUN_ALL;
-		this.request = request;
-	}
-
-	
-	/**
-	 * @return the request
-	 */
-	public ExperimentExecutionRequest getRequest() {
-		return request;
-	}
-
+	public RunAllExperimentInternalMessage() { this.type = InternalMessageType.RUN_ALL; }
 }

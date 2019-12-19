@@ -25,7 +25,7 @@ public class ConfigurationChangeNotification   {
    * Gets or Sets configurationChangeState
    */
   public enum ConfigurationChangeStateEnum {
-    CONFIGURING("CONFIGURING"),
+    CONFIGURING("CONFIGURING"),//TODO needed?
     
     CONFIGURED("CONFIGURED"),
     
@@ -35,7 +35,13 @@ public class ConfigurationChangeNotification   {
     
     VALIDATED("VALIDATED"),
     
-    VALIDATION_ERROR("VALIDATION_ERROR");
+    VALIDATION_FAILED("VALIDATION_FAILED"),
+
+    RUNNING("RUNNING"),
+
+    RUNNING_DONE("RUNNING_DONE"),
+
+    RUNNING_FAILED("RUNNING_FAILED");
 
     private String value;
 

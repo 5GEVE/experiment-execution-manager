@@ -130,9 +130,8 @@ public class EemService{
         log.info("Experiment Execution with Id {} deleted", experimentExecutionId);
     }
 
-    public synchronized void runExperimentExecution(ExperimentExecutionRequest request, String runType) throws FailedOperationException, NotExistingEntityException, MalformattedElementException {
+    public synchronized void runExperimentExecution(String executionId, ExperimentExecutionRequest request, String runType) throws FailedOperationException, NotExistingEntityException, MalformattedElementException {
         request.isValid();
-        String executionId = request.getExecutionId();
         log.info("Received request for running Experiment Execution with Id {}", executionId);
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         if(!experimentExecutionOptional.isPresent())
@@ -149,9 +148,9 @@ public class EemService{
         String topic = "lifecycle.run." + executionId;
         InternalMessage internalMessage;
         if(runType.equals("RUN_ALL"))
-            internalMessage = new RunAllExperimentInternalMessage(request);
+            internalMessage = new RunAllExperimentInternalMessage();
         else
-            internalMessage = new RunStepExperimentInternalMessage(request);
+            internalMessage = new RunStepExperimentInternalMessage();
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {

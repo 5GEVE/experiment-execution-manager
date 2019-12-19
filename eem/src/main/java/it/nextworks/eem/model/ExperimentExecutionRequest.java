@@ -22,9 +22,6 @@ public class ExperimentExecutionRequest   {
   @JsonProperty("experimentDescriptorId")
   private String experimentDescriptorId = null;
 
-  @JsonProperty("executionId")
-  private String executionId = null;
-
   @JsonProperty("testCaseDescriptorConfiguration")
   private TestCaseDescrConfigMap testCaseDescriptorConfiguration = null;
 
@@ -68,26 +65,6 @@ public class ExperimentExecutionRequest   {
     this.experimentDescriptorId = experimentDescriptorId;
   }
 
-  public ExperimentExecutionRequest executionId(String executionId) {
-    this.executionId = executionId;
-    return this;
-  }
-
-  /**
-   * Get executionId
-   * @return executionId
-  **/
-  @ApiModelProperty(required = true, value = "")
-      @NotNull
-
-    public String getExecutionId() {
-    return executionId;
-  }
-
-  public void setExecutionId(String executionId) {
-    this.executionId = executionId;
-  }
-
   public ExperimentExecutionRequest testCaseDescriptorConfiguration(TestCaseDescrConfigMap testCaseDescriptorConfiguration) {
     this.testCaseDescriptorConfiguration = testCaseDescriptorConfiguration;
     return this;
@@ -120,13 +97,12 @@ public class ExperimentExecutionRequest   {
     ExperimentExecutionRequest experimentExecutionRequest = (ExperimentExecutionRequest) o;
     return Objects.equals(this.nsInstanceId, experimentExecutionRequest.nsInstanceId) &&
         Objects.equals(this.experimentDescriptorId, experimentExecutionRequest.experimentDescriptorId) &&
-        Objects.equals(this.executionId, experimentExecutionRequest.executionId) &&
         Objects.equals(this.testCaseDescriptorConfiguration, experimentExecutionRequest.testCaseDescriptorConfiguration);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(nsInstanceId, experimentDescriptorId, executionId, testCaseDescriptorConfiguration);
+    return Objects.hash(nsInstanceId, experimentDescriptorId, testCaseDescriptorConfiguration);
   }
 
   @Override
@@ -136,7 +112,6 @@ public class ExperimentExecutionRequest   {
     
     sb.append("    nsInstanceId: ").append(toIndentedString(nsInstanceId)).append("\n");
     sb.append("    experimentDescriptorId: ").append(toIndentedString(experimentDescriptorId)).append("\n");
-    sb.append("    executionId: ").append(toIndentedString(executionId)).append("\n");
     sb.append("    testCaseDescriptorConfiguration: ").append(toIndentedString(testCaseDescriptorConfiguration)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -155,8 +130,6 @@ public class ExperimentExecutionRequest   {
 
   @JsonIgnore
   public void isValid() throws MalformattedElementException {
-    if(executionId == null)
-      throw new MalformattedElementException("executionId cannot be null");
     if(nsInstanceId == null)
       throw new MalformattedElementException("nsInstanceId cannot be null");
     if(experimentDescriptorId == null)

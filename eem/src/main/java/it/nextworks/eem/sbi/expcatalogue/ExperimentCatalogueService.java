@@ -41,12 +41,9 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 
 	private static final Logger log = LoggerFactory.getLogger(ExperimentCatalogueService.class);
 	
-	@Value("${portal.catalogue.address}")
-	private String catalogueAddress;
-	
-	@Value("${portal.catalogue.port}")
-	private String cataloguePort;
-	
+	@Value("${portal.catalogue.host}")
+	private String catalogueHost;
+
 	private ExperimentCatalogueRestClient experimentCatalogueRestClient;
 	
 	public ExperimentCatalogueService() {}
@@ -298,7 +295,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	@PostConstruct
 	private void initCatalogueRestClient() {
 		log.debug("Initializing Experiment Catalogue REST client");
-		String portalCatalogueBaseUrl = "http://" + catalogueAddress + ":" + cataloguePort;
+		String portalCatalogueBaseUrl = "http://" + catalogueHost;
 		experimentCatalogueRestClient = new ExperimentCatalogueRestClient(portalCatalogueBaseUrl);
 		log.debug("Experiment Catalogue REST client initialized with base URL: " + portalCatalogueBaseUrl);
 	}
