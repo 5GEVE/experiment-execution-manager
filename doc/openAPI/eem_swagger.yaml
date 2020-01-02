@@ -829,7 +829,13 @@ definitions:
           - CONFIGURATION_FAILED
           - VALIDATING
           - VALIDATED
-          - VALIDATION_ERROR
+          - VALIDATION_FAILED
+          - RUNNING
+          - RUNNING_DONE
+          - RUNNING_FAILED
+          - ABORTING
+          - ABORTED
+          - ABORTING_FAILED
       executionId:
         type: string
       notificationError:
@@ -906,12 +912,9 @@ definitions:
   ExperimentExecutionRequest:
     type: object
     required:
-      - executionId
       - experimentDescriptorId
       - nsInstanceId
     properties:
-      executionId:
-        type: string
       experimentDescriptorId:
         type: string
       nsInstanceId:

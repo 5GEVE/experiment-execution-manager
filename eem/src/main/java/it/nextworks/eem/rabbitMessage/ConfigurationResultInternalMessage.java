@@ -26,15 +26,11 @@ public class ConfigurationResultInternalMessage extends InternalMessage {
 	@JsonProperty("result")
 	private String result;
 
-	@JsonProperty("runType")
-	private String runType;
-
 	@JsonCreator
-	public ConfigurationResultInternalMessage(@JsonProperty("result") String result, @JsonProperty("runType") String runType, @JsonProperty("failed") boolean failed) {
+	public ConfigurationResultInternalMessage(@JsonProperty("result") String result, @JsonProperty("failed") boolean failed) {
 		this.type = InternalMessageType.CONFIGURATION_RESULT;
 		this.result = result;
 		this.failed = failed;
-		this.runType = runType;
 	}
 
 	/**
@@ -49,8 +45,4 @@ public class ConfigurationResultInternalMessage extends InternalMessage {
 	 */
 	public boolean isFailed() { return failed; }
 
-	/**
-	 * @return runType
-	 */
-	public String getRunType() { return runType; }
 }

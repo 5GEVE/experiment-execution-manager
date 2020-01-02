@@ -69,6 +69,9 @@ public class ExperimentExecution {
   @JsonProperty("errorMessage")
   private String errorMessage;
 
+  @JsonIgnore
+  private String runType;
+
   public Long getId() {
     return id;
   }
@@ -247,6 +250,20 @@ public class ExperimentExecution {
     this.errorMessage = errorMessage;
   }
 
+
+  public ExperimentExecution runType(String runType) {
+    this.runType = runType;
+    return this;
+  }
+
+  public String getRunType() {
+    return runType;
+  }
+
+  public void setRunType(String runType) {
+    this.runType = runType;
+  }
+
   @Override
   public boolean equals(java.lang.Object o) {
     if (this == o) {
@@ -261,20 +278,14 @@ public class ExperimentExecution {
         Objects.equals(this.state, experimentExecutionResponse.state) &&
         Objects.equals(this.testCaseDescriptorConfiguration, experimentExecutionResponse.testCaseDescriptorConfiguration) &&
         Objects.equals(this.testCaseResult, experimentExecutionResponse.testCaseResult) &&
+        Objects.equals(this.runType, experimentExecutionResponse.runType) &&
+        Objects.equals(this.errorMessage, experimentExecutionResponse.errorMessage) &&
         Objects.equals(this.reportUrl, experimentExecutionResponse.reportUrl);
-  }
-
-  private boolean testCaseExecutionConfigurationEquals(List<TestCaseExecutionConfiguration> list1, List<TestCaseExecutionConfiguration> list2){
-    boolean equals = true;
-    if(list1.size() != list2.size())
-      return false;
-
-    return equals;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, executionId, state, testCaseDescriptorConfiguration, testCaseResult, reportUrl);
+    return Objects.hash(id, executionId, state, testCaseDescriptorConfiguration, testCaseResult, reportUrl, runType, errorMessage);
   }
 
   @Override
@@ -285,9 +296,11 @@ public class ExperimentExecution {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    executionId: ").append(toIndentedString(executionId)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
+    sb.append("    runType: ").append(toIndentedString(runType)).append("\n");
     sb.append("    testCaseResult: ").append(toIndentedString(testCaseResult)).append("\n");
     sb.append("    testCaseDescriptorConfiguration: ").append(toIndentedString(testCaseDescriptorConfiguration)).append("\n");
     sb.append("    reportUrl: ").append(toIndentedString(reportUrl)).append("\n");
+    sb.append("    errorMessage: ").append(toIndentedString(errorMessage)).append("\n");
     sb.append("}");
     return sb.toString();
   }

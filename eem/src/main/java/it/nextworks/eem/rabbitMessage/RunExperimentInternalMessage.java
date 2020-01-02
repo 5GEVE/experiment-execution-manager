@@ -19,8 +19,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.nextworks.eem.model.ExperimentExecutionRequest;
 
-public class RunStepExperimentInternalMessage extends InternalMessage {
+public class RunExperimentInternalMessage extends InternalMessage {
 
 	@JsonCreator
-	public RunStepExperimentInternalMessage() { this.type = InternalMessageType.RUN_STEP; }
+	public RunExperimentInternalMessage() { this.type = InternalMessageType.RUN; }
 }

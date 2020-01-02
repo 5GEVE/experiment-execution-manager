@@ -17,10 +17,31 @@ package it.nextworks.eem.rabbitMessage;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import it.nextworks.eem.model.ExperimentExecutionRequest;
 
-public class RunAllExperimentInternalMessage extends InternalMessage {
+public class AbortingResultInternalMessage extends InternalMessage {
+
+	@JsonProperty("failed")
+	private boolean failed;
+
+	@JsonProperty("result")
+	private String result;
 
 	@JsonCreator
-	public RunAllExperimentInternalMessage() { this.type = InternalMessageType.RUN_ALL; }
+	public AbortingResultInternalMessage(@JsonProperty("result") String result, @JsonProperty("failed") boolean failed) {
+		this.type = InternalMessageType.ABORTING_RESULT;
+		this.result = result;
+		this.failed = failed;
+	}
+
+	/**
+	 * @return the result
+	 */
+	public String getResult() {
+		return result;
+	}
+
+	/**
+	 * @return failed
+	 */
+	public boolean isFailed() { return failed; }
 }

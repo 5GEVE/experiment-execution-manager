@@ -1,9 +1,9 @@
-**/.idea/**
-**/*.javac
-**/target/**
-**/*.log
-**/.classpath
-**/.settings/**
-**/.project
-**/*.iml
+.idea
+*.javac
+target
+*.log
+.classpath
+.settings
+.project
+*.iml
 

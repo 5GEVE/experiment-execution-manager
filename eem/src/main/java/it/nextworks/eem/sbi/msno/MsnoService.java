@@ -32,6 +32,7 @@ public class MsnoService {
 
     public MsnoService() {}
 
+    //TODO uncomment and test
     @PostConstruct
     private void initMsnoClient() {
         log.debug("Initializing MSNO REST client");

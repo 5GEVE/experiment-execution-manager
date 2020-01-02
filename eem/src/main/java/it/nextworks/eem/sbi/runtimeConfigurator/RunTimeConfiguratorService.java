@@ -1,4 +1,4 @@
-package it.nextworks.eem.sbi.jenkins;
+package it.nextworks.eem.sbi.runtimeConfigurator;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.nextworks.eem.configuration.ConfigurationParameters;
-import it.nextworks.eem.rabbitMessage.*;
+import it.nextworks.eem.rabbitMessage.AbortingResultInternalMessage;
+import it.nextworks.eem.rabbitMessage.ConfigurationResultInternalMessage;
+import it.nextworks.eem.rabbitMessage.InternalMessage;
+import it.nextworks.eem.rabbitMessage.TestCaseResultInternalMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.TopicExchange;
@@ -19,11 +22,9 @@ import org.springframework.stereotype.Service;
 @Service
 @ConditionalOnProperty(
         value="eem.sbi.service.jenkins",
-        havingValue = "true",
-        matchIfMissing = true)
-public class JenkinsService {
-
-    private static final Logger log = LoggerFactory.getLogger(JenkinsService.class);
+        havingValue = "false")
+public class RunTimeConfiguratorService {
+    private static final Logger log = LoggerFactory.getLogger(RunTimeConfiguratorService.class);
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -32,9 +33,15 @@ public class JenkinsService {
     @Qualifier(ConfigurationParameters.eemQueueExchange)
     private TopicExchange messageExchange;
 
-    public void runTestCase(String executionId, String tcDescriptorId, String robotFile){//TODO change type of robotFile
+    public void configureExperiment(String executionId){
         new Thread(() -> {
-            runningStuff(executionId, tcDescriptorId, robotFile);
+            configurationStuff(executionId);
+        }).start();
+    }
+
+    public void runTestCase(String executionId, String tcDescriptorId, String testCaseFile){
+        new Thread(() -> {
+            runningStuff(executionId, tcDescriptorId, testCaseFile);
         }).start();
     }
 
@@ -44,7 +51,30 @@ public class JenkinsService {
         }).start();
     }
 
-    private void runningStuff(String executionId, String tcDescriptorId, String robotFile){//TODO modify name
+    private void configurationStuff(String executionId){//TODO modify name
+        //TODO configure the experiment
+        try {//TODO remove
+            log.debug("Configuring the experiment");
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            log.debug("Sleep error");
+        }
+        //TODO remove, handled via Notification Endpoint
+        //configuration ok
+        String result = "OK";
+        String topic = "lifecycle.configurationResult." + executionId;
+        InternalMessage internalMessage = new ConfigurationResultInternalMessage(result, false);
+        try {
+            sendMessageToQueue(internalMessage, topic);
+        } catch (JsonProcessingException e) {
+            log.error("Error while translating internal scheduling message in Json format");
+            manageConfigurationError("Error while translating internal scheduling message in Json format", executionId);
+        }
+        //configuration ko
+        //manageConfigurationError();
+    }
+
+    private void runningStuff(String executionId, String tcDescriptorId, String testCaseFile){//TODO modify name
         //TODO run test case and get result
         try {//TODO remove
             log.debug("Running the experiment");
@@ -52,6 +82,7 @@ public class JenkinsService {
         } catch (InterruptedException e) {
             log.debug("Sleep error");
         }
+        //TODO remove, handled via Notification Endpoint
         //test ok
         String result = "OK";
         String topic = "lifecycle.testCaseResult." + executionId;
@@ -66,7 +97,7 @@ public class JenkinsService {
         //manageTestCaseError();
     }
 
-    private void abortStuff(String executionId, String tcDescriptorId){//TODO modify name
+    private void abortStuff(String executionId, String tcDescriptorId){
         //TODO abort test case
         try {//TODO remove
             log.debug("Aborting the experiment");
@@ -74,6 +105,7 @@ public class JenkinsService {
         } catch (InterruptedException e) {
             log.debug("Sleep error");
         }
+        //TODO remove, handled via Notification Endpoint
         //aborting ok
         String result = "OK";
         String topic = "lifecycle.abortingResult." + executionId;
@@ -86,6 +118,19 @@ public class JenkinsService {
         }
         //aborting ko
         //manageAbortingError();
+    }
+
+    private void manageConfigurationError(String errorMessage, String executionId){
+        log.error("Configuration of Experiment Execution with Id {} failed : {}", executionId, errorMessage);
+        errorMessage = String.format("Configuration of Experiment Execution with Id %s failed : %s", executionId, errorMessage);
+        String topic = "lifecycle.configurationResult." + executionId;
+        InternalMessage internalMessage = new ConfigurationResultInternalMessage(errorMessage, true);
+        try {
+            sendMessageToQueue(internalMessage, topic);
+        } catch (JsonProcessingException e) {
+            log.error("Error while translating internal scheduling message in Json format");
+            log.debug(null, e);
+        }
     }
 
     private void manageTestCaseError(String errorMessage, String executionId, String tcDescriptorId){

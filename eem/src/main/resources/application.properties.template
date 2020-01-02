@@ -19,5 +19,7 @@ server.port=8080
 spring.rabbitmq.host=localhost
 ##PORTAL CATALOGUE
 portal.catalogue.host=_CATALOGUE_
-#MSNO
+##MSNO
 msno.host=_MSNO_
+##USE JENKINS
+eem.sbi.service.jenkins=true
