@@ -22,15 +22,15 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "msgType")
 @JsonSubTypes({
-		@Type(value = RunAllExperimentInternalMessage.class, name = "RUN_ALL"),
-		@Type(value = RunStepExperimentInternalMessage.class, name = "RUN_STEP"),
+		@Type(value = RunExperimentInternalMessage.class, name = "RUN"),
 		@Type(value = AbortExperimentInternalMessage.class, name = "ABORT"),
 		@Type(value = PauseExperimentInternalMessage.class, name = "PAUSE"),
 		@Type(value = StepExperimentInternalMessage.class, name = "STEP"),
 		@Type(value = ResumeExperimentInternalMessage.class, name = "RESUME"),
 		@Type(value = TestCaseResultInternalMessage.class, name = "TC_RESULT"),
 		@Type(value = ValidationResultInternalMessage.class, name = "VALIDATION_RESULT"),
-		@Type(value = ConfigurationResultInternalMessage.class, name = "CONFIGURATION_RESULT")
+		@Type(value = ConfigurationResultInternalMessage.class, name = "CONFIGURATION_RESULT"),
+		@Type(value = AbortingResultInternalMessage.class, name = "ABORTING_RESULT"),
 })
 public abstract class InternalMessage {
 	

@@ -4,6 +4,7 @@ import it.nextworks.eem.engine.EemService;
 import it.nextworks.eem.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
+import it.nextworks.eem.model.enumerate.ExperimentRunType;
 import it.nextworks.eem.model.enumerate.ExperimentState;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
@@ -176,13 +177,12 @@ public class EemApiController implements EemApi {
         }
     }
 
-    //TODO why executionId is both in the url and in the body? If we keep both, check also if the one in the url is correct (just add a check if both are equals)
-    public ResponseEntity<?> eemExperimentExecutionsIdRunPost(@ApiParam(value = "" ,required=true )  @RequestBody ExperimentExecutionRequest body, @ApiParam(value = "",required=true) @PathVariable("id") String id, @ApiParam(value = "Determine the type of run. If not present, the default value is RUN_ALL" , allowableValues="RUN_IN_STEPS, RUN_ALL") @RequestParam(value="runType", required=false) String runType) {
+    public ResponseEntity<?> eemExperimentExecutionsIdRunPost(@ApiParam(value = "" ,required=true )  @RequestBody ExperimentExecutionRequest body, @ApiParam(value = "",required=true) @PathVariable("id") String id, @ApiParam(value = "Determine the type of run. If not present, the default value is RUN_ALL" , allowableValues="RUN_IN_STEPS, RUN_ALL") @RequestParam(value="runType", required=false) ExperimentRunType runType) {
         String accept = request.getHeader("Accept");
         try{
-            if(runType == null || !runType.equals("RUN_IN_STEPS"))
-                runType = "RUN_ALL";
-            eemService.runExperimentExecution(body, runType);
+            if(runType == null)
+                runType = ExperimentRunType.RUN_ALL;
+            eemService.runExperimentExecution(id, body, runType);
             return new ResponseEntity<Void>(HttpStatus.OK);
         }catch(FailedOperationException e){
             log.debug(null, e);

@@ -56,11 +56,6 @@ public class ExperimentLcmRestClient {
 			HttpStatus code = httpResponse.getStatusCode();
 			if (code.equals(HttpStatus.OK))
 				log.debug("Experiment Execution state change notification sent correctly");
-			/*
-			} else if (code.equals(HttpStatus.BAD_REQUEST)) {
-				log.debug("Error sending Experiment Execution state change notification : {} ", httpResponse.getBody());
-				throw new MalformattedElementException("Error sending Experiment Execution state change notification : " + httpResponse.getBody());
-			}*/
 		} catch (HttpClientErrorException e) {
 			throw new FailedOperationException("Error sending Experiment Execution state change notification : Client error");
 		} catch (HttpServerErrorException e) {

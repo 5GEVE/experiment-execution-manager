@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.nextworks.eem.configuration.ConfigurationParameters;
+import it.nextworks.eem.model.enumerate.ExperimentRunType;
 import it.nextworks.eem.rabbitMessage.*;
 import it.nextworks.eem.model.*;
 import it.nextworks.eem.model.enumerate.ExperimentState;
@@ -13,7 +14,7 @@ import it.nextworks.eem.repo.ExperimentExecutionRepository;
 import it.nextworks.eem.sbi.expcatalogue.ExperimentCatalogueService;
 import it.nextworks.eem.sbi.jenkins.JenkinsService;
 import it.nextworks.eem.sbi.msno.MsnoService;
-import it.nextworks.eem.sbi.runtimeConfigurator.ConfigurationService;
+import it.nextworks.eem.sbi.runtimeConfigurator.RunTimeConfiguratorService;
 import it.nextworks.eem.sbi.validationComponent.ValidationService;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
@@ -36,6 +37,16 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.*;
 
+/*
+TODO modificare macchina a stati EEM
+
+- Aggiungere freccia da VALIDATING a FAILED
+- Da RUNNING a PAUSED invertire verso frecce
+- Eliminare freccia da PAUSED a VALIDATING ed aggiungerla da RUNNING_STEP a VALIDATING
+- Aggiungere freccia da RUNNING_STEP ad ABORTING
+
+*/
+
 @Service
 public class EemService{
 
@@ -57,14 +68,14 @@ public class EemService{
     @Autowired
     private EemSubscriptionService subscriptionService;
 
-    @Autowired
+    @Autowired(required=false)
     private JenkinsService jenkinsService;
 
-    @Autowired
+    @Autowired(required=false)
     private ValidationService validationService;
 
-    @Autowired
-    private ConfigurationService configurationService;
+    @Autowired(required=false)
+    private RunTimeConfiguratorService runTimeConfiguratorService;
 
     @Autowired
     private ExperimentCatalogueService catalogueService;
@@ -77,6 +88,7 @@ public class EemService{
 
     @PostConstruct
     private void initStoredExperimentExecution() throws FailedOperationException{
+        //Loads Experiment Executions stored and initializes the corresponding EEIM
         List<ExperimentExecution> experimentExecutions = experimentExecutionRepository.findAll();
         for(ExperimentExecution experimentExecution : experimentExecutions)
             if(!experimentExecution.getState().equals(ExperimentState.COMPLETED) && !experimentExecution.getState().equals(ExperimentState.ABORTED) && !experimentExecution.getState().equals(ExperimentState.FAILED)){
@@ -130,9 +142,8 @@ public class EemService{
         log.info("Experiment Execution with Id {} deleted", experimentExecutionId);
     }
 
-    public synchronized void runExperimentExecution(ExperimentExecutionRequest request, String runType) throws FailedOperationException, NotExistingEntityException, MalformattedElementException {
+    public synchronized void runExperimentExecution(String executionId, ExperimentExecutionRequest request, ExperimentRunType runType) throws FailedOperationException, NotExistingEntityException, MalformattedElementException {
         request.isValid();
-        String executionId = request.getExecutionId();
         log.info("Received request for running Experiment Execution with Id {}", executionId);
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         if(!experimentExecutionOptional.isPresent())
@@ -140,18 +151,18 @@ public class EemService{
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         if(!experimentExecution.getState().equals(ExperimentState.INIT))
             throw new FailedOperationException(String.format("Experiment Execution with Id %s is not in INIT state", executionId));
+        //Put user parameters to be overwritten for the given run inside the experiment execution object
         List<TestCaseExecutionConfiguration> testCaseExecutionConfigurations = new ArrayList<>();
         request.getTestCaseDescriptorConfiguration().forEach((x, y) -> testCaseExecutionConfigurations.add(new TestCaseExecutionConfiguration(x, y)));
         experimentExecution.experimentDescriptorId(request.getExperimentDescriptorId())
                 .nsInstanceId(request.getNsInstanceId())
-                .testCaseDescriptorConfiguration(testCaseExecutionConfigurations);
+                .testCaseDescriptorConfiguration(testCaseExecutionConfigurations)
+                .runType(runType);
         experimentExecutionRepository.saveAndFlush(experimentExecution);
+        experimentExecutionInstances.get(executionId).setRunType(runType);
+
         String topic = "lifecycle.run." + executionId;
-        InternalMessage internalMessage;
-        if(runType.equals("RUN_ALL"))
-            internalMessage = new RunAllExperimentInternalMessage(request);
-        else
-            internalMessage = new RunStepExperimentInternalMessage(request);
+        InternalMessage internalMessage = new RunExperimentInternalMessage();;
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
@@ -166,8 +177,8 @@ public class EemService{
         if(!experimentExecutionOptional.isPresent())
             throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", experimentExecutionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
-        if(!experimentExecution.getState().equals(ExperimentState.RUNNING) && !experimentExecution.getState().equals(ExperimentState.PAUSED))
-            throw new FailedOperationException(String.format("Experiment Execution with Id %s is neither in RUNNING or PAUSED state", experimentExecutionId));
+        if(!experimentExecution.getState().equals(ExperimentState.RUNNING) && !experimentExecution.getState().equals(ExperimentState.RUNNING_STEP) && !experimentExecution.getState().equals(ExperimentState.PAUSED))
+            throw new FailedOperationException(String.format("Experiment Execution with Id %s is neither in RUNNING or RUNNING_STEP or PAUSED state", experimentExecutionId));
 
         String topic = "lifecycle.abort." + experimentExecutionId;
         InternalMessage internalMessage = new AbortExperimentInternalMessage();
@@ -249,10 +260,14 @@ public class EemService{
     public synchronized String subscribe(ExperimentExecutionSubscriptionRequest subscriptionRequest) throws FailedOperationException, NotExistingEntityException, MalformattedElementException{
         subscriptionRequest.isValid();
         String executionId = subscriptionRequest.getExecutionId();
-        log.info("Received subscribe request to Experiment Execution with Id {}", executionId);
-        Optional<ExperimentExecution> experimentExecution = experimentExecutionRepository.findByExecutionId(executionId);
-        if(!experimentExecution.isPresent())
-            throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", executionId));
+        if(executionId.equals("*")){
+            log.info("Received subscribe request to all Experiment Executions");
+        }else {
+            log.info("Received subscribe request to Experiment Execution with Id {}", executionId);
+            Optional<ExperimentExecution> experimentExecution = experimentExecutionRepository.findByExecutionId(executionId);
+            if (!experimentExecution.isPresent())
+                throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", executionId));
+        }
         return subscriptionService.subscribe(subscriptionRequest);
     }
 
@@ -265,7 +280,7 @@ public class EemService{
         log.info("Initializing new Experiment Execution Instance Manager with Id {}", experimentExecutionId);
         ExperimentExecutionInstanceManager eeim;
         try {
-            eeim = new ExperimentExecutionInstanceManager(experimentExecutionId, experimentExecutionRepository, subscriptionService, jenkinsService, validationService, configurationService, catalogueService, msnoService);
+            eeim = new ExperimentExecutionInstanceManager(experimentExecutionId, experimentExecutionRepository, subscriptionService, jenkinsService, validationService, runTimeConfiguratorService, catalogueService, msnoService);
         }catch (NotExistingEntityException e) {
             throw new FailedOperationException(String.format("Initialization of Experiment Execution Instance Manager with Id %s failed : %s", experimentExecutionId, e.getMessage()));
         }

@@ -22,11 +22,8 @@ public class MsnoService {
 
     private DefaultApi restClient;
 
-    @Value("${msno.address}")
-    private String msnoAddress;
-
-    @Value("${msno.port}")
-    private String msnoPort;
+    @Value("${msno.host}")
+    private String msnoHost;
 
     private String version = "v1";
     private String accept = "application/json";
@@ -35,12 +32,13 @@ public class MsnoService {
 
     public MsnoService() {}
 
+    //TODO uncomment and test
     @PostConstruct
     private void initMsnoClient() {
         log.debug("Initializing MSNO REST client");
         /*
         ApiClient ac = new ApiClient();
-        String url = "http://" + msnoAddress + ":" + msnoPort + "/nslcm/v1";
+        String url = "http://" + msnoHost + "/nslcm/v1";
         ac.setBasePath(url);
          */
     }
@@ -61,7 +59,7 @@ public class MsnoService {
         } catch (Exception e) {
             throw new FailedOperationException("Failure when interacting with NFVO : " + e.getMessage());
         }
-         */
+        */
         return null;
     }
 }

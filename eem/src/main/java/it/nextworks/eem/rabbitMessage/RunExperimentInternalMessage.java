@@ -19,23 +19,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.nextworks.eem.model.ExperimentExecutionRequest;
 
-public class RunAllExperimentInternalMessage extends InternalMessage {
+public class RunExperimentInternalMessage extends InternalMessage {
 
-	@JsonProperty("request")
-	private ExperimentExecutionRequest request;
-	
 	@JsonCreator
-	public RunAllExperimentInternalMessage(@JsonProperty("request") ExperimentExecutionRequest request) {
-		this.type = InternalMessageType.RUN_ALL;
-		this.request = request;
-	}
-
-	
-	/**
-	 * @return the request
-	 */
-	public ExperimentExecutionRequest getRequest() {
-		return request;
-	}
-
+	public RunExperimentInternalMessage() { this.type = InternalMessageType.RUN; }
 }

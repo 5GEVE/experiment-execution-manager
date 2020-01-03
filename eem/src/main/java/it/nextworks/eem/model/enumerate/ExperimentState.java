@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
  * Execution state of the experiment
  */
 public enum ExperimentState {
-  INIT("INIT"),
+    INIT("INIT"),
     CONFIGURING("CONFIGURING"),
     RUNNING("RUNNING"),
     RUNNING_STEP("RUNNING_STEP"),

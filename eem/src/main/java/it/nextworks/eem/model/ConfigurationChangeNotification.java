@@ -35,7 +35,19 @@ public class ConfigurationChangeNotification   {
     
     VALIDATED("VALIDATED"),
     
-    VALIDATION_ERROR("VALIDATION_ERROR");
+    VALIDATION_FAILED("VALIDATION_FAILED"),
+
+    RUNNING("RUNNING"),
+
+    RUNNING_DONE("RUNNING_DONE"),
+
+    RUNNING_FAILED("RUNNING_FAILED"),
+
+    ABORTING("ABORTING"),
+
+    ABORTED("ABORTED"),
+
+    ABORTING_FAILED("ABORTING_FAILED");
 
     private String value;
 

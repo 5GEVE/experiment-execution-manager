@@ -11,6 +11,7 @@ import it.nextworks.eem.model.ConfigurationChangeNotification;
 import it.nextworks.eem.model.ErrorInfo;
 import it.nextworks.eem.model.ExperimentExecution;
 import it.nextworks.eem.model.ExperimentExecutionSubscriptionRequest;
+import it.nextworks.eem.model.enumerate.ExperimentRunType;
 import it.nextworks.eem.model.enumerate.ExperimentState;
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
@@ -124,7 +125,7 @@ public interface EemApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    ResponseEntity<?> eemExperimentExecutionsIdRunPost(@ApiParam(value = "" ,required=true )  @RequestBody ExperimentExecutionRequest body, @ApiParam(value = "",required=true) @PathVariable("id") String id, @ApiParam(value = "Determine the type of run. If not present, the default value is RUN_ALL" , allowableValues="RUN_IN_STEPS, RUN_ALL") @RequestParam(value="runType", required=false) String runType);
+    ResponseEntity<?> eemExperimentExecutionsIdRunPost(@ApiParam(value = "" ,required=true )  @RequestBody ExperimentExecutionRequest body, @ApiParam(value = "",required=true) @PathVariable("id") String id, @ApiParam(value = "Determine the type of run. If not present, the default value is RUN_ALL" , allowableValues="RUN_IN_STEPS, RUN_ALL") @RequestParam(value="runType", required=false) ExperimentRunType runType);
 
 
     @ApiOperation(value = "", nickname = "eemExperimentExecutionsIdStepPost", notes = "", tags={ "EEM Operations", })

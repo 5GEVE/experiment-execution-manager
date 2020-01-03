@@ -6,7 +6,6 @@ spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults=false
 spring.jpa.database-platform=org.hibernate.dialect.PostgreSQL9Dialect
 spring.jpa.show-sql=false
 spring.jpa.open-in-view=false
-#spring.jpa.hibernate.ddl-auto=create-drop
 spring.jpa.hibernate.ddl-auto=update
 ##SWAGGER
 springfox.documentation.swagger.v2.path=/api-docs
@@ -19,8 +18,8 @@ server.port=8080
 ##RABBITMQ
 spring.rabbitmq.host=localhost
 ##PORTAL CATALOGUE
-portal.catalogue.host=10.30.8.33:8082
+portal.catalogue.host=_CATALOGUE_
 ##MSNO
-msno.host=localhost:8085
+msno.host=_MSNO_
 ##USE JENKINS
-eem.sbi.service.jenkins=false
+eem.sbi.service.jenkins=true

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.nextworks.eem.model.ExecutionResult;
 import it.nextworks.eem.model.TestCaseExecutionConfiguration;
+import it.nextworks.eem.model.enumerate.ExperimentRunType;
 import it.nextworks.eem.rabbitMessage.*;
 import it.nextworks.eem.model.ExperimentExecution;
 import it.nextworks.eem.model.ExperimentExecutionStateChangeNotification;
@@ -16,9 +17,10 @@ import it.nextworks.eem.repo.ExperimentExecutionRepository;
 import it.nextworks.eem.sbi.expcatalogue.ExperimentCatalogueService;
 import it.nextworks.eem.sbi.jenkins.JenkinsService;
 import it.nextworks.eem.sbi.msno.MsnoService;
-import it.nextworks.eem.sbi.runtimeConfigurator.ConfigurationService;
+import it.nextworks.eem.sbi.runtimeConfigurator.RunTimeConfiguratorService;
 import it.nextworks.eem.sbi.validationComponent.ValidationService;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.*;
+import it.nextworks.nfvmano.catalogue.blueprint.messages.*;
 import it.nextworks.nfvmano.libs.ifa.common.elements.Filter;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
@@ -39,11 +41,12 @@ public class ExperimentExecutionInstanceManager {
 
     private String executionId;
     private ExperimentState currentState;
+    private ExperimentRunType runType;
 
     private JenkinsService jenkinsService;
     private ValidationService validationService;
     private EemSubscriptionService subscriptionService;
-    private ConfigurationService configurationService;
+    private RunTimeConfiguratorService runTimeConfiguratorService;
     private ExperimentCatalogueService catalogueService;
     private MsnoService msnoService;
     private ExperimentExecutionRepository experimentExecutionRepository;
@@ -60,40 +63,62 @@ public class ExperimentExecutionInstanceManager {
     //Key: tcDescriptorId, Value: robotFile
     private Map<String, String> testCases = new LinkedHashMap<>();//TODO change value type in RobotFile format, change also inside RUN_TEST_CASE message
     private Iterator<Map.Entry<String, String>> testCasesIterator;
+    private Map.Entry<String, String> runningTestCase;
 
-    public ExperimentExecutionInstanceManager(String executionId, ExperimentExecutionRepository experimentExecutionRepository, EemSubscriptionService subscriptionService, JenkinsService jenkinsService, ValidationService validationService, ConfigurationService configurationService, ExperimentCatalogueService catalogueService, MsnoService msnoService) throws NotExistingEntityException
+    public ExperimentExecutionInstanceManager(String executionId, ExperimentExecutionRepository experimentExecutionRepository, EemSubscriptionService subscriptionService, JenkinsService jenkinsService, ValidationService validationService, RunTimeConfiguratorService runTimeConfiguratorService, ExperimentCatalogueService catalogueService, MsnoService msnoService) throws NotExistingEntityException
     {
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         if(!experimentExecutionOptional.isPresent())
             throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", executionId));
         this.executionId = executionId;
         this.currentState = experimentExecutionOptional.get().getState();
+        this.runType = experimentExecutionOptional.get().getRunType();
         this.experimentExecutionRepository = experimentExecutionRepository;
         this.subscriptionService = subscriptionService;
         this.interruptRunning = false;
         this.jenkinsService = jenkinsService;
         this.validationService = validationService;
-        this.configurationService = configurationService;
+        this.runTimeConfiguratorService = runTimeConfiguratorService;
         this.catalogueService = catalogueService;
         this.msnoService = msnoService;
-        if(!this.currentState.equals(ExperimentState.INIT))
-            retrieveAllInformation();
+        //Retrieve again all information for stored experiment executions
+        if(!this.currentState.equals(ExperimentState.INIT)) {
+            try {
+                retrieveAllInformation();
+            }catch (FailedOperationException e){
+                log.error(e.getMessage());
+                manageExperimentExecutionError(e.getMessage());
+            }
+        }
+        //Restart experiment executions based on the current state
         switch(currentState){
             case CONFIGURING:
-                configurationService.configureExperiment(executionId, "RUN_ALL");//TODO distinguish between RUN_ALL and RUN_IN_STEPS
+                if(jenkinsService != null)//Configuration is done by Jenkins during test case execution
+                    processConfigurationResult(new ConfigurationResultInternalMessage("Configuration done by Jenkins", false));
+                else
+                    runTimeConfiguratorService.configureExperiment(executionId);
                 break;
             case RUNNING: case RUNNING_STEP:
                 runExperimentExecutionTestCase();
                 break;
             case VALIDATING:
-                validationService.validateExperiment(executionId);
+                if(jenkinsService != null)//Validation is done by Jenkins during test case execution
+                    processValidationResult(new ValidationResultInternalMessage("Validation done by Jenkins", false));
+                else
+                    validationService.validateExperiment(executionId);
                 break;
             case ABORTING:
-                abortExeperimentExecution();
+                //Consider last test case has been already aborted
+                if (updateAndNotifyExperimentExecutionState(ExperimentState.ABORTED))
+                    log.info("Experiment Execution with Id {} aborted", executionId);
                 break;
             default:
                 log.debug("There aren't pending operations for Experiment Execution with Id {}", executionId);
         }
+    }
+
+    public void setRunType(ExperimentRunType runType){
+        this.runType = runType;
     }
 
     /**
@@ -113,42 +138,33 @@ public class ExperimentExecutionInstanceManager {
             InternalMessageType imt = im.getType();
 
             switch (imt) {
-                case RUN_ALL: {
-                    log.debug("Processing request to run all Experiment Execution with Id {}", executionId);
-                    RunAllExperimentInternalMessage msg = (RunAllExperimentInternalMessage) im;
-                    processRunAllRequest(msg);
-                    break;
-                }
-                case RUN_STEP: {
-                    log.debug("Processing request to run step by step Experiment Execution with Id {}", executionId);
-                    RunStepExperimentInternalMessage msg = (RunStepExperimentInternalMessage) im;
-                    processRunStepRequest(msg);
+                //Messages from NBI
+                case RUN: {
+                    log.debug("Processing request to run Experiment Execution with Id {}", executionId);
+                    processRunRequest();
                     break;
                 }
                 case PAUSE: {
                     log.debug("Processing request to pause Experiment Execution with Id {}", executionId);
-                    PauseExperimentInternalMessage msg = (PauseExperimentInternalMessage) im;
-                    processPauseRequest(msg);
+                    processPauseRequest();
                     break;
                 }
                 case RESUME: {
                     log.debug("Processing request to resume Experiment Execution with Id {}", executionId);
-                    ResumeExperimentInternalMessage msg = (ResumeExperimentInternalMessage) im;
-                    processResumeRequest(msg);
+                    processResumeRequest();
                     break;
                 }
                 case STEP: {
                     log.debug("Processing request to run a Test Case of Experiment Execution with Id {}", executionId);
-                    StepExperimentInternalMessage msg = (StepExperimentInternalMessage) im;
-                    processStepRequest(msg);
+                    processStepRequest();
                     break;
                 }
                 case ABORT: {
                     log.debug("Processing request to abort Experiment Execution with Id {}", executionId);
-                    AbortExperimentInternalMessage msg = (AbortExperimentInternalMessage) im;
-                    processAbortRequest(msg);
+                    processAbortRequest();
                     break;
                 }
+                //Messages from SBI Services
                 case TC_RESULT: {
                     TestCaseResultInternalMessage msg = (TestCaseResultInternalMessage) im;
                     log.debug("Processing result of Test Case with Id {} of Experiment Execution with Id {}", msg.getTcDescriptorId(), executionId);
@@ -163,6 +179,11 @@ public class ExperimentExecutionInstanceManager {
                     ConfigurationResultInternalMessage msg = (ConfigurationResultInternalMessage) im;
                     log.debug("Processing configuration result of Experiment Execution with Id {}", executionId);
                     processConfigurationResult(msg);
+                    break;
+                } case ABORTING_RESULT: {
+                    AbortingResultInternalMessage msg = (AbortingResultInternalMessage) im;
+                    log.debug("Processing configuration result of Experiment Execution with Id {}", executionId);
+                    processAbortingResult(msg);
                     break;
                 }
                 default:
@@ -179,30 +200,33 @@ public class ExperimentExecutionInstanceManager {
             log.debug(null, e);
             manageExperimentExecutionError("IO error when receiving json message: " + e.getMessage());
         } catch (Exception e){
-            log.debug("Unhandled Exception");
+            log.debug("Unhandled Exception", e);
         }
     }
 
-    private void processRunAllRequest(RunAllExperimentInternalMessage msg){
-        if(updateAndNotifyExperimentExecutionState(ExperimentState.CONFIGURING))
+    private void processRunRequest(){
+        if(updateAndNotifyExperimentExecutionState(ExperimentState.CONFIGURING)) {
             log.info("Configuring Experiment Execution with Id {}", executionId);
-        retrieveAllInformation();
-        configurationService.configureExperiment(executionId, "RUN_ALL");
+            try {
+                retrieveAllInformation();
+            }catch (FailedOperationException e){
+                log.error(e.getMessage());
+                manageExperimentExecutionError(e.getMessage());
+                return;
+            }
+            if(jenkinsService != null)//Configuration is done by Jenkins during test case execution
+                processConfigurationResult(new ConfigurationResultInternalMessage("Configuration done by Jenkins", false));
+            else
+                runTimeConfiguratorService.configureExperiment(executionId);
+        }
     }
 
-    private void processRunStepRequest(RunStepExperimentInternalMessage msg){
-        if(updateAndNotifyExperimentExecutionState(ExperimentState.CONFIGURING))
-            log.info("Configuring Experiment Execution with Id {}", executionId);
-        retrieveAllInformation();
-        configurationService.configureExperiment(executionId, "RUN_IN_STEPS");
-    }
-
-    private void processPauseRequest(PauseExperimentInternalMessage msg){
+    private void processPauseRequest(){
         log.info("Pausing Experiment Execution with Id {}", executionId);
         interruptRunning = true;
     }
 
-    private void processResumeRequest(ResumeExperimentInternalMessage msg){
+    private void processResumeRequest(){
         if(updateAndNotifyExperimentExecutionState(ExperimentState.RUNNING)) {
             log.info("Resuming Experiment Execution with Id {}", executionId);
             runExperimentExecutionTestCase();
@@ -210,53 +234,74 @@ public class ExperimentExecutionInstanceManager {
         }
     }
 
-    private void processStepRequest(StepExperimentInternalMessage msg){
+    private void processStepRequest(){
         if(updateAndNotifyExperimentExecutionState(ExperimentState.RUNNING_STEP)) {
             log.info("Running a step of Experiment Execution with Id {}", executionId);
             runExperimentExecutionTestCase();
         }
     }
 
-    private void processAbortRequest(AbortExperimentInternalMessage msg){
+    private void processAbortRequest(){
         boolean abortNow = currentState.equals(ExperimentState.PAUSED);
-        if(updateAndNotifyExperimentExecutionState(ExperimentState.ABORTING))
+        if(updateAndNotifyExperimentExecutionState(ExperimentState.ABORTING)) {
             log.info("Aborting Experiment Execution with Id {}", executionId);
-        if(abortNow)
-            abortExeperimentExecution();
+            if(abortNow){
+                //If PAUSED, there is no need to abort a test case run
+                if (updateAndNotifyExperimentExecutionState(ExperimentState.ABORTED))
+                    log.info("Experiment Execution with Id {} aborted", executionId);
+            }
+            else if(jenkinsService != null)
+                jenkinsService.abortTestCase(executionId, runningTestCase.getKey());
+            else
+                runTimeConfiguratorService.abortTestCase(executionId, runningTestCase.getKey());
+        }
     }
 
     private void processTestCaseResult(TestCaseResultInternalMessage msg){
         String testCaseId = msg.getTcDescriptorId();
         log.info("Processing result of Test Case with Id {} of Experiment Execution with Id {}", testCaseId, executionId);
         /*
+        //If a test case run fails, all the experiment execution fails
         if(msg.isFailed()) {
             manageExperimentExecutionError(msg.getResult());
             return;
         }
          */
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
+        if(!experimentExecutionOptional.isPresent()){
+            log.error("Experiment Execution with Id {} not found", executionId);
+            return;
+        }
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         ExecutionResult executionResult = new ExecutionResult();
         executionResult.result(msg.getResult());//TODO reportUrl?
         experimentExecution.addTestCaseResult(testCaseId, executionResult);
         experimentExecutionRepository.saveAndFlush(experimentExecution);
         log.info("Experiment Execution Test Case with Id {} completed", testCaseId);
+        //Remove completed test case from the list
         testCasesIterator.remove();
-        if(currentState.equals(ExperimentState.ABORTING)) {
-            abortExeperimentExecution();
+        //Abort experiment execution if requested
+        if(currentState.equals(ExperimentState.ABORTING) && updateAndNotifyExperimentExecutionState(ExperimentState.ABORTED)) {
+            log.info("Experiment Execution with Id {} aborted", executionId);
             return;
         }
         if(testCases.size() == 0){
+            //Validate experiment execution if test cases are no longer present
             if(updateAndNotifyExperimentExecutionState(ExperimentState.VALIDATING)) {
                 log.info("Validating Experiment Execution with Id {}", executionId);
-                validationService.validateExperiment(executionId);
+                if(jenkinsService != null)//Validation is done by Jenkins during test case execution
+                    processValidationResult(new ValidationResultInternalMessage("Validation done by Jenkins", false));
+                else
+                    validationService.validateExperiment(executionId);//TODO pass data to validate
             }
         }else if(currentState.equals(ExperimentState.RUNNING_STEP) || (currentState.equals(ExperimentState.RUNNING) && interruptRunning)) {
+            //Pause experiment execution if the run type is RUN_IN_STEPS or if requested
             if(updateAndNotifyExperimentExecutionState(ExperimentState.PAUSED)) {
                 interruptRunning = false;
                 log.info("Experiment Execution with Id {} paused", executionId);
             }
         }else if(currentState.equals(ExperimentState.RUNNING)){
+            //Run another test case if run type is RUN_ALL
             runExperimentExecutionTestCase();
         }else {
             log.debug("State of the Execution Experiment is not correct");
@@ -279,31 +324,48 @@ public class ExperimentExecutionInstanceManager {
             manageExperimentExecutionError(msg.getResult());
             return;
         }
-        if(msg.getRunType().equals("RUN_ALL")){
+        if(runType.equals(ExperimentRunType.RUN_ALL)){
+            //Run the first test case if run type is RUN_ALL
             if(updateAndNotifyExperimentExecutionState(ExperimentState.RUNNING)) {
                 log.info("Running Experiment Execution with Id {}", executionId);
                 runExperimentExecutionTestCase();
             }
         }else {
+            //Pause experiment execution if the run type is RUN_IN_STEPS
             if(updateAndNotifyExperimentExecutionState(ExperimentState.PAUSED))
                 log.info("Experiment Execution with Id {} paused", executionId);
         }
         log.info("Configuration of Experiment Execution with Id {} completed", executionId);
     }
 
+    private void processAbortingResult(AbortingResultInternalMessage msg){
+        if(msg.isFailed()) {
+            manageExperimentExecutionError(msg.getResult());
+            return;
+        }
+        if (updateAndNotifyExperimentExecutionState(ExperimentState.ABORTED))
+            log.info("Experiment Execution with Id {} aborted", executionId);
+    }
+
     private void runExperimentExecutionTestCase(){
         if(testCasesIterator.hasNext()) {
-            Map.Entry<String, String> testCaseToRun = testCasesIterator.next();
-            String tcDescriptorId = testCaseToRun.getKey();
+            //Take the first test case from the list
+            runningTestCase = testCasesIterator.next();
+            String tcDescriptorId = runningTestCase.getKey();
             log.info("Running Experiment Execution Test Case with Id {}", tcDescriptorId);
-            jenkinsService.runTestCase(executionId, tcDescriptorId, testCaseToRun.getValue());
+            if(jenkinsService != null)
+                jenkinsService.runTestCase(executionId, tcDescriptorId, runningTestCase.getValue());
+            else
+                runTimeConfiguratorService.runTestCase(executionId, tcDescriptorId, runningTestCase.getValue());
         }else
             log.debug("No more Test Cases to run");
     }
 
-    private void retrieveAllInformation(){
+    private void retrieveAllInformation() throws FailedOperationException {
         log.info("Retrieving all the information for Experiment Execution with Id {}", executionId);
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
+        if(!experimentExecutionOptional.isPresent())
+            throw new FailedOperationException(String.format("Experiment Execution with Id %s not found", executionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         String experimentDescriptorId = experimentExecution.getExperimentDescriptorId();
         String nsInstanceId = experimentExecution.getNsInstanceId();
@@ -311,62 +373,89 @@ public class ExperimentExecutionInstanceManager {
             Map<String, String> parameters = new HashMap<>();
             Filter filter = new Filter(parameters);
             GeneralizedQueryRequest request = new GeneralizedQueryRequest(filter, null);
+            //Retrieve Experiment Descriptor
             log.debug("Going to retrieve Experiment Descriptor with Id {}", experimentDescriptorId);
             parameters.put("ExpD_ID", experimentDescriptorId);
-            expDescriptor = catalogueService.queryExpDescriptor(request).getExpDescriptors().get(0);
+            QueryExpDescriptorResponse expDescriptorResponse = catalogueService.queryExpDescriptor(request);
+            if(expDescriptorResponse.getExpDescriptors().isEmpty())
+                throw new FailedOperationException(String.format("Experiment Descriptor with Id %s not found", experimentDescriptorId));
+            expDescriptor = expDescriptorResponse.getExpDescriptors().get(0);
             parameters.remove("ExpD_ID");
+            //Retrieve Vertical Service Descriptor
             String vsDescriptorId = expDescriptor.getVsDescriptorId();
             log.debug("Going to retrieve Vertical Service Descriptor with Id {}", vsDescriptorId);
             parameters.put("VSD_ID", vsDescriptorId);
-            vsDescriptor = catalogueService.queryVsDescriptor(request).getVsDescriptors().get(0);
+            QueryVsDescriptorResponse vsDescriptorResponse = catalogueService.queryVsDescriptor(request);
+            if(vsDescriptorResponse.getVsDescriptors().isEmpty())
+                throw new FailedOperationException(String.format("Vertical Service Descriptor with Id %s not found", vsDescriptorId));
+            vsDescriptor = vsDescriptorResponse.getVsDescriptors().get(0);
             parameters.remove("VSD_ID");
+            //Retrieve Context Descriptors
             List<String> ctxDescriptorIds = expDescriptor.getCtxDescriptorIds();
             log.debug("Going to retrieve Context Descriptors with Ids {}", ctxDescriptorIds);
             for(String ctxDescriptorId : ctxDescriptorIds) {
                 parameters.put("CTXD_ID", ctxDescriptorId);
-                CtxDescriptor ctxDescriptor = catalogueService.queryCtxDescriptor(request).getCtxDescriptors().get(0);
+                QueryCtxDescriptorResponse ctxDescriptorResponse = catalogueService.queryCtxDescriptor(request);
+                if (ctxDescriptorResponse.getCtxDescriptors().isEmpty())
+                    throw new FailedOperationException(String.format("Context Descriptor with Id %s not found", ctxDescriptorId));
+                CtxDescriptor ctxDescriptor = ctxDescriptorResponse.getCtxDescriptors().get(0);
                 ctxDescriptors.add(ctxDescriptor);
                 parameters.remove("CTXD_ID");
             }
+            //Retrieve Test Case Descriptors
             List<String> tcDescriptorIds = expDescriptor.getTestCaseDescriptorIds();
             log.debug("Going to retrieve Test Case Descriptors with Ids {}", tcDescriptorIds);
             for(String tcDescriptorId : tcDescriptorIds) {
                 parameters.put("TCD_ID", tcDescriptorId);
-                TestCaseDescriptor tcDescriptor = catalogueService.queryTestCaseDescriptor(request).getTestCaseDescriptors().get(0);
+                QueryTestCaseDescriptorResponse tcDescriptorResponse = catalogueService.queryTestCaseDescriptor(request);
+                if(tcDescriptorResponse.getTestCaseDescriptors().isEmpty())
+                    throw new FailedOperationException(String.format("Test Case Descriptor with Id %s not found", tcDescriptorId));
+                TestCaseDescriptor tcDescriptor = tcDescriptorResponse.getTestCaseDescriptors().get(0);
                 tcDescriptors.add(tcDescriptor);
                 parameters.remove("TCD_ID");
             }
+            //Retrieve Test Case Blueprints
             List<String> tcBlueprintIds = tcDescriptors.stream().map(TestCaseDescriptor::getTestCaseBlueprintId).collect(Collectors.toList());
             log.debug("Going to retrieve Test Case Blueprints with Ids {}", tcBlueprintIds);
             for(String tcBlueprintId : tcBlueprintIds) {
                 parameters.put("TCB_ID", tcBlueprintId);
-                TestCaseBlueprint tcBlueprint = catalogueService.queryTestCaseBlueprint(request).getTestCaseBlueprints().get(0).getTestCaseBlueprint();
+                QueryTestCaseBlueprintResponse tcBlueprintResponse = catalogueService.queryTestCaseBlueprint(request);
+                if(tcBlueprintResponse.getTestCaseBlueprints().isEmpty())
+                    throw new FailedOperationException(String.format("Test Case Blueprint with Id %s not found", tcBlueprintId));
+                TestCaseBlueprint tcBlueprint = tcBlueprintResponse.getTestCaseBlueprints().get(0).getTestCaseBlueprint();
                 tcBlueprints.add(tcBlueprint);
                 parameters.remove("TCB_ID");
             }
+            //Retrieve NsInstance
             log.debug("Going to retrieve NsInstance with Id {}", nsInstanceId);
             parameters.put("NS_ID", nsInstanceId);
             nsInstance = msnoService.queryNs(request);
             parameters.remove("NS_ID");
-        }catch (FailedOperationException | MalformattedElementException e){
-            manageExperimentExecutionError(e.getMessage());
+            translateTestCases();
+        }catch (MalformattedElementException e){
+            throw new FailedOperationException(e.getMessage());
         }
-        translateTestCases();
     }
 
-    private void translateTestCases(){
+    private void translateTestCases() throws FailedOperationException{
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
+        if(!experimentExecutionOptional.isPresent())
+            throw new FailedOperationException(String.format("Experiment Execution with Id %s not found", executionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
+        //Override user parameters inside test case descriptor
         List<TestCaseExecutionConfiguration> executionConfigurations = experimentExecution.getTestCaseDescriptorConfiguration();
-        tcDescriptors.forEach(x -> log.debug("testcaseDescriptor {} \n", x.toString()));//TODO remove
         for(TestCaseExecutionConfiguration executionConfiguration : executionConfigurations)
             for(TestCaseDescriptor tcDescriptor : tcDescriptors)
                 if(tcDescriptor.getTestCaseDescriptorId().equals(executionConfiguration.getTcDescriptorId())) {
                     log.debug("Replacing userParameters {} with executionConfigurations {} for Test Case with Id {}", tcDescriptor.getUserParameters(), executionConfiguration.getExecConfiguration(), tcDescriptor.getTestCaseDescriptorId());
                     executionConfiguration.getExecConfiguration().forEach((x, y) -> tcDescriptor.getUserParameters().replace(x, y));
                 }
-        tcDescriptors.forEach(x -> log.debug("testcaseDescriptor {} \n", x.toString()));//TODO remove
-        //TODO create robot files
+        if(jenkinsService != null) {
+            //TODO create robot files
+        }else{
+            //TODO create test case files
+        }
+        //Put in the list only test cases not completed, i.e. we have no results of
         Set<String> executionResultIds = experimentExecution.getTestCaseResult().keySet();//TODO put only test cases not present inside testCaseResult of experiment Execution (needed for resuming the experiment)
         //TODO remove
         if(!executionResultIds.contains("testCase1"))
@@ -375,22 +464,16 @@ public class ExperimentExecutionInstanceManager {
             testCases.put("testCase2", "test");
         if(!executionResultIds.contains("testCase3"))
             testCases.put("testCase3", "test");
-
+        //Initialize test case iterator
         testCasesIterator = testCases.entrySet().iterator();
     }
 
     private void manageExperimentExecutionError(String errorMessage){
-        log.error("Exeperiment Execution with Id {} failed : {}", executionId, errorMessage);
+        log.error("Experiment Execution with Id {} failed : {}", executionId, errorMessage);
         if(updateAndNotifyExperimentExecutionState(ExperimentState.FAILED)) {
             Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
             experimentExecutionOptional.ifPresent(experimentExecution -> experimentExecutionRepository.saveAndFlush(experimentExecution.errorMessage(errorMessage)));
         }
-    }
-
-    private void abortExeperimentExecution(){
-        //TODO abort experiment execution
-        if (updateAndNotifyExperimentExecutionState(ExperimentState.ABORTED))
-            log.info("Experiment Execution with Id {} aborted", executionId);
     }
 
     private boolean updateAndNotifyExperimentExecutionState(ExperimentState newState){
@@ -402,15 +485,17 @@ public class ExperimentExecutionInstanceManager {
         }
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         experimentExecutionOptional.ifPresent(experimentExecution -> experimentExecutionRepository.saveAndFlush(experimentExecution.state(currentState)));
+        //Send notification to subscribers
         ExperimentExecutionStateChangeNotification msg = new ExperimentExecutionStateChangeNotification(executionId, currentState);
         subscriptionService.notifyExperimentExecutionStateChange(msg, previousState);
         return true;
     }
 
     private boolean isStateChangeAllowed(ExperimentState currentState, ExperimentState newState){
+        //Map allowed state change
         switch (newState){
             case FAILED:
-                return currentState.equals(ExperimentState.CONFIGURING) ||
+                return  currentState.equals(ExperimentState.CONFIGURING) ||
                         currentState.equals(ExperimentState.RUNNING) ||
                         currentState.equals(ExperimentState.RUNNING_STEP) ||
                         currentState.equals(ExperimentState.VALIDATING);
@@ -422,9 +507,10 @@ public class ExperimentExecutionInstanceManager {
                 return currentState.equals(ExperimentState.ABORTING);
             case RUNNING:
                 return currentState.equals(ExperimentState.CONFIGURING) ||
-                        currentState.equals(ExperimentState.PAUSED);
+                        (currentState.equals(ExperimentState.PAUSED) && runType.equals(ExperimentRunType.RUN_ALL));
             case ABORTING:
                 return currentState.equals(ExperimentState.RUNNING) ||
+                        currentState.equals(ExperimentState.RUNNING_STEP) ||
                         currentState.equals(ExperimentState.PAUSED);
             case COMPLETED:
                 return currentState.equals(ExperimentState.VALIDATING);

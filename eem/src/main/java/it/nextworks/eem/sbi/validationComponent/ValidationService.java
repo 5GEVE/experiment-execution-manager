@@ -14,9 +14,13 @@ import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Service
+@ConditionalOnProperty(
+        value="eem.sbi.service.jenkins",
+        havingValue = "false")
 public class ValidationService {
 
     private static final Logger log = LoggerFactory.getLogger(ValidationService.class);
@@ -42,7 +46,9 @@ public class ValidationService {
         } catch (InterruptedException e) {
             log.debug("Sleep error");
         }
-        //test ok
+
+        //TODO remove, handled via Notification Endpoint
+        //validation ok
         String validation = "OK";
         String topic = "lifecycle.validation." + executionId;
         InternalMessage internalMessage = new ValidationResultInternalMessage("Validation ok", false);
@@ -52,7 +58,7 @@ public class ValidationService {
             log.error("Error while translating internal scheduling message in Json format");
             manageValidationError("Error while translating internal scheduling message in Json format", executionId);
         }
-        //test ko
+        //validation ko
         //manageValidationError();
     }
 
