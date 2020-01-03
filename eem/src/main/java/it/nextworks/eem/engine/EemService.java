@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.nextworks.eem.configuration.ConfigurationParameters;
+import it.nextworks.eem.model.enumerate.ExperimentRunType;
 import it.nextworks.eem.rabbitMessage.*;
 import it.nextworks.eem.model.*;
 import it.nextworks.eem.model.enumerate.ExperimentState;
@@ -37,7 +38,7 @@ import javax.annotation.PostConstruct;
 import java.util.*;
 
 /*
-TODO midificare macchina a stati EEM
+TODO modificare macchina a stati EEM
 
 - Aggiungere freccia da VALIDATING a FAILED
 - Da RUNNING a PAUSED invertire verso frecce
@@ -87,6 +88,7 @@ public class EemService{
 
     @PostConstruct
     private void initStoredExperimentExecution() throws FailedOperationException{
+        //Loads Experiment Executions stored and initializes the corresponding EEIM
         List<ExperimentExecution> experimentExecutions = experimentExecutionRepository.findAll();
         for(ExperimentExecution experimentExecution : experimentExecutions)
             if(!experimentExecution.getState().equals(ExperimentState.COMPLETED) && !experimentExecution.getState().equals(ExperimentState.ABORTED) && !experimentExecution.getState().equals(ExperimentState.FAILED)){
@@ -140,7 +142,7 @@ public class EemService{
         log.info("Experiment Execution with Id {} deleted", experimentExecutionId);
     }
 
-    public synchronized void runExperimentExecution(String executionId, ExperimentExecutionRequest request, String runType) throws FailedOperationException, NotExistingEntityException, MalformattedElementException {
+    public synchronized void runExperimentExecution(String executionId, ExperimentExecutionRequest request, ExperimentRunType runType) throws FailedOperationException, NotExistingEntityException, MalformattedElementException {
         request.isValid();
         log.info("Received request for running Experiment Execution with Id {}", executionId);
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
@@ -149,6 +151,7 @@ public class EemService{
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         if(!experimentExecution.getState().equals(ExperimentState.INIT))
             throw new FailedOperationException(String.format("Experiment Execution with Id %s is not in INIT state", executionId));
+        //Put user parameters to be overwritten for the given run inside the experiment execution object
         List<TestCaseExecutionConfiguration> testCaseExecutionConfigurations = new ArrayList<>();
         request.getTestCaseDescriptorConfiguration().forEach((x, y) -> testCaseExecutionConfigurations.add(new TestCaseExecutionConfiguration(x, y)));
         experimentExecution.experimentDescriptorId(request.getExperimentDescriptorId())
@@ -157,6 +160,7 @@ public class EemService{
                 .runType(runType);
         experimentExecutionRepository.saveAndFlush(experimentExecution);
         experimentExecutionInstances.get(executionId).setRunType(runType);
+
         String topic = "lifecycle.run." + executionId;
         InternalMessage internalMessage = new RunExperimentInternalMessage();;
         try {
@@ -256,10 +260,14 @@ public class EemService{
     public synchronized String subscribe(ExperimentExecutionSubscriptionRequest subscriptionRequest) throws FailedOperationException, NotExistingEntityException, MalformattedElementException{
         subscriptionRequest.isValid();
         String executionId = subscriptionRequest.getExecutionId();
-        log.info("Received subscribe request to Experiment Execution with Id {}", executionId);
-        Optional<ExperimentExecution> experimentExecution = experimentExecutionRepository.findByExecutionId(executionId);
-        if(!experimentExecution.isPresent())
-            throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", executionId));
+        if(executionId.equals("*")){
+            log.info("Received subscribe request to all Experiment Executions");
+        }else {
+            log.info("Received subscribe request to Experiment Execution with Id {}", executionId);
+            Optional<ExperimentExecution> experimentExecution = experimentExecutionRepository.findByExecutionId(executionId);
+            if (!experimentExecution.isPresent())
+                throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", executionId));
+        }
         return subscriptionService.subscribe(subscriptionRequest);
     }
 

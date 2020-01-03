@@ -55,7 +55,7 @@ public class RunTimeConfiguratorService {
         //TODO configure the experiment
         try {//TODO remove
             log.debug("Configuring the experiment");
-            Thread.sleep(1000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             log.debug("Sleep error");
         }

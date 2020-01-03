@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
+import it.nextworks.eem.model.enumerate.ExperimentRunType;
 import it.nextworks.eem.model.enumerate.ExperimentState;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import org.hibernate.annotations.*;
@@ -70,7 +71,7 @@ public class ExperimentExecution {
   private String errorMessage;
 
   @JsonIgnore
-  private String runType;
+  private ExperimentRunType runType;
 
   public Long getId() {
     return id;
@@ -251,16 +252,16 @@ public class ExperimentExecution {
   }
 
 
-  public ExperimentExecution runType(String runType) {
+  public ExperimentExecution runType(ExperimentRunType runType) {
     this.runType = runType;
     return this;
   }
 
-  public String getRunType() {
+  public ExperimentRunType getRunType() {
     return runType;
   }
 
-  public void setRunType(String runType) {
+  public void setRunType(ExperimentRunType runType) {
     this.runType = runType;
   }
 

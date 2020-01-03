@@ -73,8 +73,7 @@ public class ExperimentCatalogueRestClient {
 			if (code.equals(HttpStatus.OK)) {
 				log.debug("Experiment blueprint correctly retrieved");
 
-				//Generated the response based on the single expblueprintinfo returned by the
-                //catalogue to be more generic.
+				//Generated response based on the single expblueprintinfo returned by the catalogue to be more generic
                 List<ExpBlueprintInfo> queryList = new ArrayList<>();
                 queryList.add(httpResponse.getBody());
 
@@ -110,8 +109,7 @@ public class ExperimentCatalogueRestClient {
 			HttpStatus code = httpResponse.getStatusCode();
 			
 			if (code.equals(HttpStatus.OK)) {
-				//Modified this to match the API from the Catalogue, but mantained the query as return to avoid affecting
-				//the rest of the code.
+				//Modified this to match the API from the Catalogue, but maintained the query as return to avoid affecting the rest of the code
 				log.debug("Experiment descriptor correctly retrieved");
 				ExpDescriptor res = httpResponse.getBody();
 				ArrayList<ExpDescriptor> resList = new ArrayList<>();
@@ -152,8 +150,7 @@ public class ExperimentCatalogueRestClient {
 				List<VsBlueprintInfo> queryList = new ArrayList<>();
 				queryList.add(httpResponse.getBody());
 
-				//Generated the response from the single instance
-                //returned by the catalogue
+				//Generated the response from the single instance returned by the catalogue
 				return new QueryVsBlueprintResponse(queryList);
 			}else
 				return null;

@@ -65,7 +65,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	@Override
 	public QueryExpBlueprintResponse queryExpBlueprint(GeneralizedQueryRequest request) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to query experiment blueprint");
-		//The ELM is only allowed to request the experiment blueprint given its ID
+		//The EEM is only allowed to request the experiment blueprint given its ID
 		String experimentBlueprintId;
 		try {
 			experimentBlueprintId = request.getFilter().getParameters().get("ExpB_ID");
@@ -80,7 +80,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	@Override
 	public QueryExpDescriptorResponse queryExpDescriptor(GeneralizedQueryRequest request) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to query experiment descriptor");
-        //The ELM is only allowed to request the experiment descriptor given its ID
+        //The EEM is only allowed to request the experiment descriptor given its ID
 		String experimentDescriptorId;
 		try {
 			experimentDescriptorId = request.getFilter().getParameters().get("ExpD_ID");
@@ -95,7 +95,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	@Override
     public QueryVsBlueprintResponse queryVsBlueprint(GeneralizedQueryRequest request) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to query vertical service blueprint");
-		//The ELM is only allowed to request the vertical service blueprint given its ID
+		//The EEM is only allowed to request the vertical service blueprint given its ID
 		String blueprintId;
 		try {
 			blueprintId = request.getFilter().getParameters().get("VSB_ID");
@@ -110,7 +110,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	@Override
 	public QueryVsDescriptorResponse queryVsDescriptor(GeneralizedQueryRequest request) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to query VS descriptor");
-        //The ELM is only allowed to request the VS descriptor given its ID
+        //The EEM is only allowed to request the VS descriptor given its ID
 		String descriptorId;
 		try {
 			descriptorId = request.getFilter().getParameters().get("VSD_ID");
@@ -125,7 +125,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	@Override
 	public QueryCtxBlueprintResponse queryCtxBlueprint(GeneralizedQueryRequest request) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to query context blueprint");
-		//The ELM is only allowed to request the context blueprint given its ID
+		//The EEM is only allowed to request the context blueprint given its ID
 		String blueprintId;
 		try {
 			blueprintId = request.getFilter().getParameters().get("CTXB_ID");
@@ -140,7 +140,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	@Override
 	public QueryCtxDescriptorResponse queryCtxDescriptor(GeneralizedQueryRequest request) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to query CTXD descriptor");
-        //The ELM is only allowed to request the CTX descriptor given its ID
+        //The EEM is only allowed to request the CTX descriptor given its ID
 		String descriptorId;
 		try {
 			descriptorId = request.getFilter().getParameters().get("CTXD_ID");
@@ -155,7 +155,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	@Override
 	public QueryTestCaseBlueprintResponse queryTestCaseBlueprint(GeneralizedQueryRequest request) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to query TC blueprint");
-		//The ELM is only allowed to request the TC blueprint given its ID
+		//The EEM is only allowed to request the TC blueprint given its ID
 		String blueprintId;
 		try {
 			blueprintId = request.getFilter().getParameters().get("TCB_ID");
@@ -170,7 +170,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	@Override
 	public QueryTestCaseDescriptorResponse queryTestCaseDescriptor(GeneralizedQueryRequest request) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to query TC descriptor");
-        //The ELM is only allowed to request the TC descriptor given its ID
+        //The EEM is only allowed to request the TC descriptor given its ID
 		String descriptorId;
 		try {
 			descriptorId = request.getFilter().getParameters().get("TCD_ID");

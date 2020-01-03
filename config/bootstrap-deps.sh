@@ -37,8 +37,7 @@ sudo apt install rabbitmq-server -y
 ## installing nfv-ifa-libs
 git clone https://github.com/nextworks-it/nfv-ifa-libs.git
 cd  nfv-ifa-libs
-##to be changed
-git checkout feat-librefactor
+git checkout v1.0
 cd NFV_MANO_LIBS_COMMON
 mvn clean install
 cd ../NFV_MANO_LIBS_DESCRIPTORS
@@ -61,6 +60,7 @@ cd ../EVE_BLUEPRINTS_CATALOGUE_INTERFACES
 mvn clean install
 cd ../TranslatorServiceInterface
 mvn clean install
+cd ../..
 
 ## installing nfvo-drivers
 git clone https://github.com/nextworks-it/nfvo-drivers.git
