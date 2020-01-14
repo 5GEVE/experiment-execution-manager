@@ -1,19 +1,26 @@
 package it.nextworks.eem.engine;
 
+import com.offbytwo.jenkins.JenkinsServer;
 import it.nextworks.eem.model.*;
 import it.nextworks.eem.model.enumerate.ExperimentState;
 import it.nextworks.eem.model.enumerate.SubscriptionType;
 import it.nextworks.eem.repo.ExperimentExecutionRepository;
 import it.nextworks.eem.repo.ExperimentExecutionSubscriptionRepository;
+import it.nextworks.eem.sbi.jenkins.JenkinsService;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -28,10 +35,25 @@ public class EEMServiceTests {
     EemService eemService;
 
     @Autowired
+    JenkinsService jenkinsService;
+
+    @Autowired
     ExperimentExecutionRepository experimentExecutionRepository;
 
     @Autowired
     ExperimentExecutionSubscriptionRepository experimentExecutionSubscriptionRepository;
+
+    @Value("${jenkins.uri}")
+    private String jenkinsUri;
+
+
+    @Value("${jenkins.username}")
+    private String jenkinsUsername;
+
+
+    @Value("${jenkins.password}")
+    private String jenkinsPassword;
+
 
     @Test
     @Ignore
@@ -109,4 +131,48 @@ public class EEMServiceTests {
         Optional<ExperimentExecutionSubscription> experimentExecutionSubscription = experimentExecutionSubscriptionRepository.findBySubscriptionId(subscriptionId);
         assertFalse(experimentExecutionSubscription.isPresent());
     }
+
+    @Test
+    @Ignore
+    public void readFileFromFolder(){
+        ClassLoader classLoader = getClass().getClassLoader();
+
+        URL resource = classLoader.getResource("job-template.xml");
+        if (resource == null) {
+            throw new IllegalArgumentException("file is not found!");
+        } else {
+            File template = new File(resource.getFile());
+            String line;
+
+            try (FileReader reader = new FileReader(template);
+                 BufferedReader br = new BufferedReader(reader)) {
+
+                while ((line = br.readLine()) != null) {
+                    System.out.println(line);
+                }
+            } catch (FileNotFoundException e) {
+                log.error("Template file not found");
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+
+
+    @Test
+    @Ignore
+    public void disableJob() throws URISyntaxException, IOException, InterruptedException {
+        //JenkinsClient jenkinsClient = JenkinsClient.builder().endPoint(jenkinsUri).credentials(jenkinsUsername+":"+jenkinsPassword).build();
+
+
+        JenkinsServer jenkinsServer = new JenkinsServer(new URI(jenkinsUri), jenkinsUsername, jenkinsPassword);
+
+        String name = "yourJobName";
+
+        System.out.println(jenkinsServer.getJob(name).getLastBuild().Stop());
+    }
+
 }
