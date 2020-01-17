@@ -11,6 +11,7 @@ import it.nextworks.eem.configuration.ConfigurationParameters;
 import it.nextworks.eem.rabbitMessage.AbortingResultInternalMessage;
 import it.nextworks.eem.rabbitMessage.InternalMessage;
 import it.nextworks.eem.rabbitMessage.TestCaseResultInternalMessage;
+import it.nextworks.eem.sbi.expcatalogue.ExperimentCatalogueRestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.TopicExchange;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,15 +40,15 @@ public class JenkinsService {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    @Value("${jenkins.uri}")
-    private String jenkinsUri;
+    @Value("${eem.jenkins.uri}")
+    private String jenkinsURI;
 
 
-    @Value("${jenkins.username}")
+    @Value("${eem.jenkins.username}")
     private String jenkinsUsername;
 
 
-    @Value("${jenkins.password}")
+    @Value("${eem.jenkins.password}")
     private String jenkinsPassword;
 
     private JenkinsServer jenkinsServer;
@@ -56,8 +58,19 @@ public class JenkinsService {
     private TopicExchange messageExchange;
 
     public JenkinsService() throws URISyntaxException {
-        jenkinsServer = new JenkinsServer(new URI(jenkinsUri), jenkinsUsername, jenkinsPassword);
+
     }
+
+    @PostConstruct
+    private void initJenkinsService() throws URISyntaxException {
+        log.debug("Initializing Jenkins Service");
+        log.debug("################### {}, ###################### {}, ##################### {}",
+                jenkinsURI,
+                jenkinsUsername,
+                jenkinsPassword);
+        jenkinsServer = new JenkinsServer(new URI(jenkinsURI), jenkinsUsername, jenkinsPassword);
+    }
+
 
     public void runTestCase(String executionId, String tcDescriptorId, String robotFile){//TODO change type of robotFile
         new Thread(() -> {
