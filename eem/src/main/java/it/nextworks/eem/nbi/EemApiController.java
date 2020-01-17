@@ -235,7 +235,7 @@ public class EemApiController implements EemApi {
         if (accept != null && accept.contains("application/json")) {
             try {
                 String response = eemService.createExperimentExecutionInstance();
-                return new ResponseEntity<String>(gson.toJson(response), HttpStatus.CREATED);
+                return new ResponseEntity<String>(response, HttpStatus.CREATED);
             } catch(FailedOperationException e){
                 log.debug(null, e);
                 log.error(e.getMessage());
@@ -297,7 +297,7 @@ public class EemApiController implements EemApi {
         if (accept != null && accept.contains("application/json")) {
             try {
                 String response = eemService.subscribe(body);
-                return new ResponseEntity<String>(gson.toJson(response), HttpStatus.CREATED);
+                return new ResponseEntity<String>(response, HttpStatus.CREATED);
             } catch(FailedOperationException e){
                 log.debug(null, e);
                 log.error(e.getMessage());
