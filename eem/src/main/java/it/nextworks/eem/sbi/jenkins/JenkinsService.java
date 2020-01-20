@@ -11,7 +11,6 @@ import it.nextworks.eem.configuration.ConfigurationParameters;
 import it.nextworks.eem.rabbitMessage.AbortingResultInternalMessage;
 import it.nextworks.eem.rabbitMessage.InternalMessage;
 import it.nextworks.eem.rabbitMessage.TestCaseResultInternalMessage;
-import it.nextworks.eem.sbi.expcatalogue.ExperimentCatalogueRestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.TopicExchange;
@@ -91,7 +90,7 @@ public class JenkinsService {
         log.debug("Getting the template file from resources");
         File configFile = getFileFromResources("job-template.xml");
         log.debug("Translating the received template to concrete configXML job file");
-        String jenkinsJobDescription = createConfigXMLFileFromTemplate(configFile, tcDescriptorId, robotFile);
+        String jenkinsJobDescription = createConfigXMLFileFromTemplate(configFile, executionId, tcDescriptorId, robotFile);
         log.debug("Creating a new jenkins job with executionId: {} and configFile {}", executionId, jenkinsJobDescription);
         try {
             jenkinsServer.createJob(name, jenkinsJobDescription);
@@ -226,7 +225,7 @@ public class JenkinsService {
         return mapper;
     }
 
-    private String createConfigXMLFileFromTemplate(File template, String name,  String robotCode){
+    private String createConfigXMLFileFromTemplate(File template, String executionId, String tcDescriptorId,  String robotCode){
         String configXML = "";
 
         try (FileReader reader = new FileReader(template);
@@ -257,8 +256,9 @@ public class JenkinsService {
 
 
         configXML = configXML.replace("__ROBOT_FILE__", robotFileInConfig);
-        configXML = configXML.replace("_JOB__DESCRIPTION__","Job for experiment: " + name );
-        configXML = configXML.replace("__EXECUTION_ID__", name);
+        configXML = configXML.replace("_JOB__DESCRIPTION__","Job for experiment execution : " + executionId + " test case " + tcDescriptorId );
+        configXML = configXML.replace("__EXECUTION_ID__", executionId);
+        configXML = configXML.replace("__TCD_ID__", tcDescriptorId);
 
 
         log.debug("Generated Jenkins job file after substitution {}", configXML );
