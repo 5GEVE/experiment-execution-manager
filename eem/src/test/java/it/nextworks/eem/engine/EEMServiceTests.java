@@ -1,6 +1,7 @@
 package it.nextworks.eem.engine;
 
 import com.offbytwo.jenkins.JenkinsServer;
+import com.offbytwo.jenkins.model.FolderJob;
 import it.nextworks.eem.model.*;
 import it.nextworks.eem.model.enumerate.ExperimentState;
 import it.nextworks.eem.model.enumerate.SubscriptionType;
@@ -43,15 +44,15 @@ public class EEMServiceTests {
     @Autowired
     ExperimentExecutionSubscriptionRepository experimentExecutionSubscriptionRepository;
 
-    @Value("${jenkins.uri}")
+    @Value("${eem.jenkins.uri}")
     private String jenkinsUri;
 
 
-    @Value("${jenkins.username}")
+    @Value("${eem.jenkins.username}")
     private String jenkinsUsername;
 
 
-    @Value("${jenkins.password}")
+    @Value("${eem.jenkins.password}")
     private String jenkinsPassword;
 
 
@@ -133,28 +134,50 @@ public class EEMServiceTests {
     }
 
     @Test
-    @Ignore
-    public void readFileFromFolder(){
+    //@Ignore
+    public void readFileFromFolder() throws URISyntaxException {
         ClassLoader classLoader = getClass().getClassLoader();
-
+        String jobname = "tst";
         URL resource = classLoader.getResource("job-template.xml");
         if (resource == null) {
             throw new IllegalArgumentException("file is not found!");
         } else {
             File template = new File(resource.getFile());
             String line;
-
+            String configXML = "";
             try (FileReader reader = new FileReader(template);
                  BufferedReader br = new BufferedReader(reader)) {
 
                 while ((line = br.readLine()) != null) {
-                    System.out.println(line);
+                    configXML = configXML.concat(line);
                 }
+                String robotFile = "*** Settings ***\nLibrary&#009;SSHLibrary\nLibrary&#009;String\nLibrary&#009;Collections\nLibrary&#009;BuiltIn\n*** Test Cases ***\nExecution Test Case\n&#009;&#009;Log&#009;Robot Execution Done $$var$$.delay";
+
+                String lines[] = robotFile.split("\\r?\\n");
+
+                String robotFileInConfig = "";
+                for (int i = 0; i < lines.length; i++){
+                    log.debug("echo -e" + lines[i] + " >> ${WORKSPACE}/executionFile.robot");
+                    robotFileInConfig = robotFileInConfig.concat("echo \"" + lines[i] + "\" >> ${WORKSPACE}/executionFile.robot").concat("\n");
+                }
+                log.debug(robotFileInConfig);
+                configXML = configXML.replace("__ROBOT_FILE__", robotFileInConfig);
+                configXML = configXML.replace("_JOB__DESCRIPTION__","Job for experiment: " + jobname );
+                configXML = configXML.replace("__EXECUTION_ID__", jobname);
+                log.debug(configXML);
+//                jenkinsServer.createFolder("PROVA4");
+//                FolderJob folderJob = new FolderJob("PROVA4",  jenkinsUri+"/job/PROVA4/");
+
             } catch (FileNotFoundException e) {
-                log.error("Template file not found");
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
+            } catch (IOException e1) {
+                log.error(e1.getMessage());
+            }
+            JenkinsServer jenkinsServer = new JenkinsServer(new URI(jenkinsUri), jenkinsUsername, jenkinsPassword);
+            try {
+                jenkinsServer.createJob(jobname, configXML);
+            } catch (IOException e1) {
+                log.error(e1.getMessage());
             }
         }
 
@@ -172,7 +195,10 @@ public class EEMServiceTests {
 
         String name = "yourJobName";
 
+
         System.out.println(jenkinsServer.getJob(name).getLastBuild().Stop());
     }
+
+
 
 }

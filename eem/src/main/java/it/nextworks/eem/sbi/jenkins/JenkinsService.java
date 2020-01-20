@@ -86,33 +86,34 @@ public class JenkinsService {
 
     private void runningJenkinsJob(String executionId, String tcDescriptorId, String robotFile){
         String result = "";
+        String name = "Execution " + executionId + " tcb " + tcDescriptorId;
         log.debug("Running the experiment");
         log.debug("Getting the template file from resources");
         File configFile = getFileFromResources("job-template.xml");
         log.debug("Translating the received template to concrete configXML job file");
-        String jenkinsJobDescription = createConfigXMLFileFromTemplate(configFile, executionId, robotFile);
-        log.debug("Creating a new jenkins job with executionId: " + executionId);
+        String jenkinsJobDescription = createConfigXMLFileFromTemplate(configFile, tcDescriptorId, robotFile);
+        log.debug("Creating a new jenkins job with executionId: {} and configFile {}", executionId, jenkinsJobDescription);
         try {
-            jenkinsServer.createJob("Execution "+ executionId, jenkinsJobDescription);
+            jenkinsServer.createJob(name, jenkinsJobDescription);
         } catch(IOException e1) {
-            log.error("Failed to create jenkins job");
+            log.error("Failed to create jenkins job {}", e1.getMessage());
             manageTestCaseError("Failed to create jenkins job", executionId, tcDescriptorId);
             return;
         }
         // RUN EXPERIMENT
         log.debug("Executing the experiment with executionId: " + executionId);
         try{
-            jenkinsServer.getJob("Execution "+ executionId).build();
+            jenkinsServer.getJob(name).build();
         } catch(IOException e2){
-            log.error("Failed to build jenkins job with name {}", "Execution "+ executionId);
+            log.error("Failed to build jenkins job with name {}. Error {}", name, e2.getMessage());
             manageTestCaseError("Failed to build jenkins job with name" + "Execution "+ executionId, executionId, tcDescriptorId);
             return;
         }
         // LOOP UNTIL TERMINATION IS DONE
         try{
-            result = getJenkinsJobResult("Execution "+ executionId);
+            result = getJenkinsJobResult(name);
         } catch(IOException e3){
-            log.error("Failed to retrieve jenkins job with name {}", "Execution "+ executionId);
+            log.error("Failed to retrieve jenkins job with name {} with error {}", "Execution "+ executionId, e3.getMessage());
             manageTestCaseError("Failed to retrieve jenkins job with name" + "Execution "+ executionId, executionId, tcDescriptorId);
             return;
         }
@@ -130,7 +131,7 @@ public class JenkinsService {
         //TODO abort test case
 
         //Check if Job is running (color has _anime)
-        String name = "Execution "+ executionId;
+        String name = "Execution " + executionId + " tcb " + tcDescriptorId;
         JobWithDetails jobInfo = null;
 
         try{
@@ -180,8 +181,8 @@ public class JenkinsService {
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            log.debug(null, e);
+            log.error("Error while translating internal scheduling message in Json format {}", e.getMessage());
+
         }
     }
 
@@ -233,18 +234,34 @@ public class JenkinsService {
 
             String line;
             while ((line = br.readLine()) != null) {
-                configXML.concat(line);
+                log.debug("LINE: {}", line);
+                configXML = configXML.concat(line);
             }
         } catch (FileNotFoundException e) {
             log.error("Template file not found");
             e.printStackTrace();
         } catch (IOException e) {
+            log.error("Template file not found");
             e.printStackTrace();
         }
-        configXML = configXML.replace("__ROBOT_FILE__", robotCode);
+        log.debug("Generated Jenkins job file before substitution: {}", configXML );
+
+
+        String lines[] = robotCode.split("\\r?\\n");
+
+        String robotFileInConfig = "";
+        for (int i = 0; i < lines.length; i++){
+            log.debug("echo -e" + lines[i] + " >> ${WORKSPACE}/executionFile.robot");
+            robotFileInConfig = robotFileInConfig.concat("echo \"" + lines[i] + "\" >> ${WORKSPACE}/executionFile.robot").concat("\n");
+        }
+
+
+        configXML = configXML.replace("__ROBOT_FILE__", robotFileInConfig);
         configXML = configXML.replace("_JOB__DESCRIPTION__","Job for experiment: " + name );
         configXML = configXML.replace("__EXECUTION_ID__", name);
 
+
+        log.debug("Generated Jenkins job file after substitution {}", configXML );
         return configXML;
     }
 
@@ -272,6 +289,7 @@ public class JenkinsService {
         while(jobInfo.isInQueue()){
             try{
                 Thread.sleep(10000);
+                jobInfo = jenkinsServer.getJob(name);
             } catch(InterruptedException e1){
                 log.error(e1.getMessage());
                 return "FAILED";

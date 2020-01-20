@@ -65,7 +65,10 @@ public class ExperimentExecutionInstanceManager {
     private Iterator<Map.Entry<String, String>> testCasesIterator;
     private Map.Entry<String, String> runningTestCase;
 
-    public ExperimentExecutionInstanceManager(String executionId, ExperimentExecutionRepository experimentExecutionRepository, EemSubscriptionService subscriptionService, JenkinsService jenkinsService, ValidationService validationService, RunTimeConfiguratorService runTimeConfiguratorService, ExperimentCatalogueService catalogueService, MsnoService msnoService) throws NotExistingEntityException
+
+    private String validationBaseUrl;
+
+    public ExperimentExecutionInstanceManager(String executionId, ExperimentExecutionRepository experimentExecutionRepository, EemSubscriptionService subscriptionService, JenkinsService jenkinsService, ValidationService validationService, RunTimeConfiguratorService runTimeConfiguratorService, ExperimentCatalogueService catalogueService, MsnoService msnoService, String validationBaseUrl) throws NotExistingEntityException
     {
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         if(!experimentExecutionOptional.isPresent())
@@ -81,6 +84,7 @@ public class ExperimentExecutionInstanceManager {
         this.runTimeConfiguratorService = runTimeConfiguratorService;
         this.catalogueService = catalogueService;
         this.msnoService = msnoService;
+        this.validationBaseUrl = validationBaseUrl;
         //Retrieve again all information for stored experiment executions
         if(!this.currentState.equals(ExperimentState.INIT)) {
             try {
@@ -274,7 +278,7 @@ public class ExperimentExecutionInstanceManager {
         }
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         ExecutionResult executionResult = new ExecutionResult();
-        executionResult.result(msg.getResult());//TODO reportUrl?
+        executionResult.result(msg.getResult());
         experimentExecution.addTestCaseResult(testCaseId, executionResult);
         experimentExecutionRepository.saveAndFlush(experimentExecution);
         log.info("Experiment Execution Test Case with Id {} completed", testCaseId);
@@ -286,6 +290,8 @@ public class ExperimentExecutionInstanceManager {
             return;
         }
         if(testCases.size() == 0){
+            experimentExecution.reportUrl(this.validationBaseUrl + executionId + "/index.html");
+            // TODO: jenkinsIP/EXEC_ID/index.html
             //Validate experiment execution if test cases are no longer present
             if(updateAndNotifyExperimentExecutionState(ExperimentState.VALIDATING)) {
                 log.info("Validating Experiment Execution with Id {}", executionId);
@@ -450,6 +456,7 @@ public class ExperimentExecutionInstanceManager {
                     log.debug("Replacing userParameters {} with executionConfigurations {} for Test Case with Id {}", tcDescriptor.getUserParameters(), executionConfiguration.getExecConfiguration(), tcDescriptor.getTestCaseDescriptorId());
                     executionConfiguration.getExecConfiguration().forEach((x, y) -> tcDescriptor.getUserParameters().replace(x, y));
                 }
+        // TODO: Aggiungere i parametri di traduzione
         if(jenkinsService != null) {
             //TODO create robot files
         }else{

@@ -12,16 +12,15 @@
     <concurrentBuild>false</concurrentBuild>
     <builders>
         <hudson.tasks.Shell>
-            <command>echo "Starting job"
-                set +e
-                echo __ROBOT_FILE__ > ${WORKSPACE}/executionFile.robot
-                robot -d ${WORKSPACE}/output/ ${WORKSPACE}/executionFile.robot
-                mkdir -p /var/www/html/__EXECUTION_ID__
-                robotmetrics --output output.xml --email false
-                sudo rm output.xml
-                sudo mv metrics*.html /var/www/html/__EXECUTION_ID__/index.html
-                sudo mv report.html /var/www/html/__EXECUTION_ID__/report.html
-                sudo mv log.html /var/www/html/__EXECUTION_ID__/log.html
+            <command>echo "Starting job"&#xD;
+                __ROBOT_FILE__&#xD;
+                robot -d ${WORKSPACE}/output/ ${WORKSPACE}/executionFile.robot&#xD;
+                mkdir -p /var/www/html/__EXECUTION_ID__&#xD;
+                robotmetrics --output ${WORKSPACE}/output/output.xml --email false&#xD;
+                sudo rm ${WORKSPACE}/output/output.xml&#xD;
+                sudo mv metrics*.html /var/www/html/__EXECUTION_ID__/index.html&#xD;
+                sudo mv ${WORKSPACE}/output/report.html /var/www/html/__EXECUTION_ID__/report.html&#xD;
+                sudo mv ${WORKSPACE}/output/log.html /var/www/html/__EXECUTION_ID__/log.html&#xD;
             </command>
         </hudson.tasks.Shell>
     </builders>

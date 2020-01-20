@@ -35,6 +35,7 @@ public class ExecutionResult   {
   private String result = null;
 
   //TODO add boolean failed?
+  private String resultUrl;
 
   public Long getId() {
     return id;
