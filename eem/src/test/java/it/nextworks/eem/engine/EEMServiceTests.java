@@ -134,7 +134,7 @@ public class EEMServiceTests {
     }
 
     @Test
-    //@Ignore
+    @Ignore
     public void readFileFromFolder() throws URISyntaxException {
         ClassLoader classLoader = getClass().getClassLoader();
         String jobname = "tst";

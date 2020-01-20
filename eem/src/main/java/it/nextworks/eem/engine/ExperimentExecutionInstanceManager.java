@@ -291,6 +291,7 @@ public class ExperimentExecutionInstanceManager {
         }
         if(testCases.size() == 0){
             experimentExecution.reportUrl(this.validationBaseUrl + executionId + "/index.html");
+            experimentExecutionRepository.saveAndFlush(experimentExecution);
             // TODO: jenkinsIP/EXEC_ID/index.html
             //Validate experiment execution if test cases are no longer present
             if(updateAndNotifyExperimentExecutionState(ExperimentState.VALIDATING)) {

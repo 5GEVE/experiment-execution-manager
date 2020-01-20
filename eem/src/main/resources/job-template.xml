@@ -15,9 +15,10 @@
             <command>echo "Starting job"&#xD;
                 __ROBOT_FILE__&#xD;
                 robot -d ${WORKSPACE}/output/ ${WORKSPACE}/executionFile.robot&#xD;
-                mkdir -p /var/www/html/__EXECUTION_ID__&#xD;
-                robotmetrics --output ${WORKSPACE}/output/output.xml --email false&#xD;
-                sudo rm ${WORKSPACE}/output/output.xml&#xD;
+                if [ ! -d /var/www/html/__EXECUTION_ID__ ]; then mkdir -p /var/www/html/__EXECUTION_ID__; fi&#xD;
+                cp ${WORKSPACE}/output/output.xml /var/www/html/__EXECUTION_ID__/output-__TCD_ID__.xml
+                rebot -o ${WORKSPACE}/output/output-merged.xml /var/www/html/__EXECUTION_ID__/output*.xml
+                robotmetrics --output ${WORKSPACE}/output/output.xml --email false --logo "5GEVE_logo_with_title.png"&#xD;
                 sudo mv metrics*.html /var/www/html/__EXECUTION_ID__/index.html&#xD;
                 sudo mv ${WORKSPACE}/output/report.html /var/www/html/__EXECUTION_ID__/report.html&#xD;
                 sudo mv ${WORKSPACE}/output/log.html /var/www/html/__EXECUTION_ID__/log.html&#xD;
