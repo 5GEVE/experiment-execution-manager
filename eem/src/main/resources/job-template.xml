@@ -1,0 +1,30 @@
+<project>
+    <actions/>
+    <description>__JOB__DESCRIPTION__</description>
+    <keepDependencies>false</keepDependencies>
+    <properties/>
+    <scm class="hudson.scm.NullSCM"/>
+    <canRoam>true</canRoam>
+    <disabled>false</disabled>
+    <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+    <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <triggers/>
+    <concurrentBuild>false</concurrentBuild>
+    <builders>
+        <hudson.tasks.Shell>
+            <command>echo "Starting job"&#xD;
+                __ROBOT_FILE__&#xD;
+                robot -d ${WORKSPACE}/output/ ${WORKSPACE}/executionFile.robot&#xD;
+                if [ ! -d /var/www/html/__EXECUTION_ID__ ]; then mkdir -p /var/www/html/__EXECUTION_ID__; fi&#xD;
+                cp ${WORKSPACE}/output/output.xml /var/www/html/__EXECUTION_ID__/output-__TCD_ID__.xml&#xD;
+                rebot -o ${WORKSPACE}/output/output-merged.xml /var/www/html/__EXECUTION_ID__/output*.xml&#xD;
+                robotmetrics --output ${WORKSPACE}/output/output-merged.xml --email false --logo "5GEVE_logo_with_title.png"&#xD;
+                sudo mv metrics*.html /var/www/html/__EXECUTION_ID__/index.html&#xD;
+                sudo mv ${WORKSPACE}/output/report.html /var/www/html/__EXECUTION_ID__/report.html&#xD;
+                sudo mv ${WORKSPACE}/output/log.html /var/www/html/__EXECUTION_ID__/log.html&#xD;
+            </command>
+        </hudson.tasks.Shell>
+    </builders>
+    <publishers/>
+    <buildWrappers/>
+</project>

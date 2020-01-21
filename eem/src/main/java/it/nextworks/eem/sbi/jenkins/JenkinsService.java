@@ -5,16 +5,27 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.offbytwo.jenkins.JenkinsServer;
+import com.offbytwo.jenkins.model.JobWithDetails;
 import it.nextworks.eem.configuration.ConfigurationParameters;
-import it.nextworks.eem.rabbitMessage.*;
+import it.nextworks.eem.rabbitMessage.AbortingResultInternalMessage;
+import it.nextworks.eem.rabbitMessage.InternalMessage;
+import it.nextworks.eem.rabbitMessage.TestCaseResultInternalMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 @Service
 @ConditionalOnProperty(
@@ -28,64 +39,150 @@ public class JenkinsService {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
+    @Value("${eem.jenkins.uri}")
+    private String jenkinsURI;
+
+
+    @Value("${eem.jenkins.username}")
+    private String jenkinsUsername;
+
+
+    @Value("${eem.jenkins.password}")
+    private String jenkinsPassword;
+
+    private JenkinsServer jenkinsServer;
+
     @Autowired
     @Qualifier(ConfigurationParameters.eemQueueExchange)
     private TopicExchange messageExchange;
 
+    public JenkinsService() throws URISyntaxException {
+
+    }
+
+    @PostConstruct
+    private void initJenkinsService() throws URISyntaxException {
+        log.debug("Initializing Jenkins Service");
+        log.debug("################### {}, ###################### {}, ##################### {}",
+                jenkinsURI,
+                jenkinsUsername,
+                jenkinsPassword);
+        jenkinsServer = new JenkinsServer(new URI(jenkinsURI), jenkinsUsername, jenkinsPassword);
+    }
+
+
     public void runTestCase(String executionId, String tcDescriptorId, String robotFile){//TODO change type of robotFile
         new Thread(() -> {
-            runningStuff(executionId, tcDescriptorId, robotFile);
+            runningJenkinsJob(executionId, tcDescriptorId, robotFile);
         }).start();
     }
 
     public void abortTestCase(String executionId, String tcDescriptorId){
         new Thread(() -> {
-            abortStuff(executionId, tcDescriptorId);
+            abortJenkinsJob(executionId, tcDescriptorId);
         }).start();
     }
 
-    private void runningStuff(String executionId, String tcDescriptorId, String robotFile){//TODO modify name
-        //TODO run test case and get result
-        try {//TODO remove
-            log.debug("Running the experiment");
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            log.debug("Sleep error");
+    private void runningJenkinsJob(String executionId, String tcDescriptorId, String robotFile){
+        String result = "";
+        String name = "Execution_" + executionId + "__tcb_" + tcDescriptorId;
+        log.debug("Running the experiment");
+        log.debug("Getting the template file from resources");
+        File configFile = getFileFromResources("job-template.xml");
+        log.debug("Translating the received template to concrete configXML job file");
+        String jenkinsJobDescription = createConfigXMLFileFromTemplate(configFile, executionId, tcDescriptorId, robotFile);
+        log.debug("Creating a new jenkins job with executionId: {} and configFile {}", executionId, jenkinsJobDescription);
+        try {
+            jenkinsServer.createJob(name, jenkinsJobDescription);
+        } catch(IOException e1) {
+            log.error("Failed to create jenkins job {}", e1.getMessage());
+            manageTestCaseError("Failed to create jenkins job", executionId, tcDescriptorId);
+            return;
         }
-        //test ok
-        String result = "OK";
+        // RUN EXPERIMENT
+        log.debug("Executing the experiment with executionId: " + executionId);
+        try{
+            jenkinsServer.getJob(name).build();
+        } catch(IOException e2){
+            log.error("Failed to build jenkins job with name {}. Error {}", name, e2.getMessage());
+            manageTestCaseError("Failed to build jenkins job with name" + "Execution "+ executionId, executionId, tcDescriptorId);
+            return;
+        }
+        // LOOP UNTIL TERMINATION IS DONE
+        try{
+            result = getJenkinsJobResult(name);
+        } catch(IOException e3){
+            log.error("Failed to retrieve jenkins job with name {} with error {}", "Execution "+ executionId, e3.getMessage());
+            manageTestCaseError("Failed to retrieve jenkins job with name" + "Execution "+ executionId, executionId, tcDescriptorId);
+            return;
+        }
+
+        switch(result){
+            case "OK": manageTestCaseOK(result, executionId, tcDescriptorId); break;
+            case "FAILED": manageTestCaseError(result, executionId, tcDescriptorId); break;
+            case "ABORTED": manageTestCaseError(result, executionId, tcDescriptorId); break;
+            default: manageTestCaseError(result, executionId, tcDescriptorId); break;
+        }
+
+    }
+
+    private void abortJenkinsJob(String executionId, String tcDescriptorId) {
+        //TODO abort test case
+
+        //Check if Job is running (color has _anime)
+        String name = "Execution_" + executionId + "__tcb_" + tcDescriptorId;
+        JobWithDetails jobInfo = null;
+
+        try{
+            jobInfo = jenkinsServer.getJob(name);
+        } catch (IOException e1){
+            log.error("Failed to abort jenkins job with name {}", name);
+            manageAbortingError("Failed to abort jenkins job with name" + name, executionId);
+            return;
+        }
+        try {
+            if (jobInfo.getLastBuild().details().isBuilding()) {
+                jobInfo.getLastBuild().Stop();
+            } else {
+                log.error("Failed to abort jenkins job with name {} cause no running tasks are active", name);
+                manageAbortingError("Failed to abort jenkins job with name {} cause no running tasks are active" + name, executionId);
+            }
+        } catch(IOException e1){
+            log.error("Failed to abort jenkins job with name {} cause {}", name, e1.getMessage());
+            manageAbortingError("Failed to abort jenkins job with name" + name, executionId);
+        }
+        try{
+            jobInfo = jenkinsServer.getJob(name);
+            if(jobInfo.getLastBuild().details().getResult().name().equalsIgnoreCase("ABORTED")){
+                String result = "OK";
+                String topic = "lifecycle.abortingResult." + executionId;
+                InternalMessage internalMessage = new AbortingResultInternalMessage(result, false);
+                try {
+                    sendMessageToQueue(internalMessage, topic);
+                } catch (JsonProcessingException e) {
+                    log.error("Error while translating internal scheduling message in Json format");
+                    manageAbortingError("Error while translating internal scheduling message in Json format", executionId);
+                }
+            } else {
+                log.error("Failed to abort jenkins job with name {} ", name);
+                manageAbortingError("Failed to abort jenkins job with name" + name, executionId);
+            }
+        } catch(IOException e2){
+            log.error("Failed to abort jenkins job with name {} cause {}", name, e2.getMessage());
+            manageAbortingError("Failed to abort jenkins job with name" + name, executionId);
+        }
+
+    }
+
+    private void manageTestCaseOK(String result, String executionId, String tcDescriptorId){
         String topic = "lifecycle.testCaseResult." + executionId;
         InternalMessage internalMessage = new TestCaseResultInternalMessage(result, tcDescriptorId, false);
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            manageTestCaseError("Error while translating internal scheduling message in Json format", executionId, tcDescriptorId);
-        }
-        //test ko
-        //manageTestCaseError();
-    }
+            log.error("Error while translating internal scheduling message in Json format {}", e.getMessage());
 
-    private void abortStuff(String executionId, String tcDescriptorId){//TODO modify name
-        //TODO abort test case
-        try {//TODO remove
-            log.debug("Aborting the experiment");
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            log.debug("Sleep error");
         }
-        //aborting ok
-        String result = "OK";
-        String topic = "lifecycle.abortingResult." + executionId;
-        InternalMessage internalMessage = new AbortingResultInternalMessage(result, false);
-        try {
-            sendMessageToQueue(internalMessage, topic);
-        } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            manageAbortingError("Error while translating internal scheduling message in Json format", executionId);
-        }
-        //aborting ko
-        //manageAbortingError();
     }
 
     private void manageTestCaseError(String errorMessage, String executionId, String tcDescriptorId){
@@ -127,4 +224,103 @@ public class JenkinsService {
         mapper.registerModule(new JavaTimeModule());
         return mapper;
     }
+
+    private String createConfigXMLFileFromTemplate(File template, String executionId, String tcDescriptorId,  String robotCode){
+        String configXML = "";
+
+        try (FileReader reader = new FileReader(template);
+             BufferedReader br = new BufferedReader(reader)) {
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                log.debug("LINE: {}", line);
+                configXML = configXML.concat(line);
+            }
+        } catch (FileNotFoundException e) {
+            log.error("Template file not found");
+            e.printStackTrace();
+        } catch (IOException e) {
+            log.error("Template file not found");
+            e.printStackTrace();
+        }
+        log.debug("Generated Jenkins job file before substitution: {}", configXML );
+
+
+        String lines[] = robotCode.split("\\|");
+
+        String robotFileInConfig = "";
+        for (int i = 0; i < lines.length; i++){
+            log.debug("echo -e" + lines[i] + " >> ${WORKSPACE}/executionFile.robot");
+            robotFileInConfig = robotFileInConfig.concat("echo \"" + lines[i] + "\" >> ${WORKSPACE}/executionFile.robot").concat("\n");
+        }
+
+
+        configXML = configXML.replace("__ROBOT_FILE__", robotFileInConfig);
+        configXML = configXML.replace("_JOB__DESCRIPTION__","Job for experiment execution : " + executionId + " test case " + tcDescriptorId );
+        configXML = configXML.replace("__EXECUTION_ID__", executionId);
+        configXML = configXML.replace("__TCD_ID__", tcDescriptorId);
+
+
+        log.debug("Generated Jenkins job file after substitution {}", configXML );
+        return configXML;
+    }
+
+
+    private File getFileFromResources(String fileName) {
+
+        ClassLoader classLoader = getClass().getClassLoader();
+
+        URL resource = classLoader.getResource(fileName);
+        if (resource == null) {
+            throw new IllegalArgumentException("file is not found!");
+        } else {
+            return new File(resource.getFile());
+        }
+
+    }
+
+    private String getJenkinsJobResult(String name) throws IOException {
+        log.debug("Getting job details for jenkins job: " + name);
+        //JobInfo jobInfo = jenkinsClient.api().jobsApi().jobInfo(null, name);
+        JobWithDetails jobInfo = jenkinsServer.getJob(name);
+        boolean isRunningJob = true;
+
+        //TODO ADD Check if task is in queue
+        while(jobInfo.isInQueue()){
+            try{
+                Thread.sleep(10000);
+                jobInfo = jenkinsServer.getJob(name);
+            } catch(InterruptedException e1){
+                log.error(e1.getMessage());
+                return "FAILED";
+            }
+        }
+        log.debug("Looping till job is still running");
+        while ( !jobInfo.hasFirstBuildRun() || jobInfo.getLastBuild().details().isBuilding()
+        ) {
+            log.debug("Not yet results for jenkins job {}", name);
+            try{
+                Thread.sleep(30000);
+            } catch(InterruptedException e2){
+                log.error(e2.getMessage());
+                return "FAILED";
+            }
+            jobInfo = jenkinsServer.getJob(name);
+        }
+
+        // In case of aborted job
+        if (jobInfo.getLastBuild().details().getResult().name().equalsIgnoreCase("ABORTED")) {
+            log.info("Job was aborted");
+            return "ABORTED";
+        }
+        // When job is done, notification is sent to the EEM
+        if (jobInfo.getLastBuild().details().getResult().name().equalsIgnoreCase("SUCCESS") ) {
+            log.info("Job terminated correctly. Status of the job is {}", jobInfo.getLastBuild().details().getResult().name());
+            return "OK";
+        } else {
+            log.info("Job terminated correctly. Status of the job is {}", jobInfo.getLastBuild().details().getResult().name());
+            return "FAILED";
+        }
+    }
+
 }

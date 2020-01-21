@@ -65,7 +65,10 @@ public class ExperimentExecutionInstanceManager {
     private Iterator<Map.Entry<String, String>> testCasesIterator;
     private Map.Entry<String, String> runningTestCase;
 
-    public ExperimentExecutionInstanceManager(String executionId, ExperimentExecutionRepository experimentExecutionRepository, EemSubscriptionService subscriptionService, JenkinsService jenkinsService, ValidationService validationService, RunTimeConfiguratorService runTimeConfiguratorService, ExperimentCatalogueService catalogueService, MsnoService msnoService) throws NotExistingEntityException
+
+    private String validationBaseUrl;
+
+    public ExperimentExecutionInstanceManager(String executionId, ExperimentExecutionRepository experimentExecutionRepository, EemSubscriptionService subscriptionService, JenkinsService jenkinsService, ValidationService validationService, RunTimeConfiguratorService runTimeConfiguratorService, ExperimentCatalogueService catalogueService, MsnoService msnoService, String validationBaseUrl) throws NotExistingEntityException
     {
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         if(!experimentExecutionOptional.isPresent())
@@ -81,6 +84,7 @@ public class ExperimentExecutionInstanceManager {
         this.runTimeConfiguratorService = runTimeConfiguratorService;
         this.catalogueService = catalogueService;
         this.msnoService = msnoService;
+        this.validationBaseUrl = validationBaseUrl;
         //Retrieve again all information for stored experiment executions
         if(!this.currentState.equals(ExperimentState.INIT)) {
             try {
@@ -274,7 +278,7 @@ public class ExperimentExecutionInstanceManager {
         }
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         ExecutionResult executionResult = new ExecutionResult();
-        executionResult.result(msg.getResult());//TODO reportUrl?
+        executionResult.result(msg.getResult());
         experimentExecution.addTestCaseResult(testCaseId, executionResult);
         experimentExecutionRepository.saveAndFlush(experimentExecution);
         log.info("Experiment Execution Test Case with Id {} completed", testCaseId);
@@ -286,6 +290,9 @@ public class ExperimentExecutionInstanceManager {
             return;
         }
         if(testCases.size() == 0){
+            experimentExecution.reportUrl(this.validationBaseUrl + executionId + "/index.html");
+            experimentExecutionRepository.saveAndFlush(experimentExecution);
+            // TODO: jenkinsIP/EXEC_ID/index.html
             //Validate experiment execution if test cases are no longer present
             if(updateAndNotifyExperimentExecutionState(ExperimentState.VALIDATING)) {
                 log.info("Validating Experiment Execution with Id {}", executionId);
@@ -444,19 +451,37 @@ public class ExperimentExecutionInstanceManager {
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         //Override user parameters inside test case descriptor
         List<TestCaseExecutionConfiguration> executionConfigurations = experimentExecution.getTestCaseDescriptorConfiguration();
+        Set<String> executionResultIds = experimentExecution.getTestCaseResult().keySet();//TODO put only test cases not present inside testCaseResult of experiment Execution (needed for resuming the experiment)
         for(TestCaseExecutionConfiguration executionConfiguration : executionConfigurations)
             for(TestCaseDescriptor tcDescriptor : tcDescriptors)
                 if(tcDescriptor.getTestCaseDescriptorId().equals(executionConfiguration.getTcDescriptorId())) {
                     log.debug("Replacing userParameters {} with executionConfigurations {} for Test Case with Id {}", tcDescriptor.getUserParameters(), executionConfiguration.getExecConfiguration(), tcDescriptor.getTestCaseDescriptorId());
                     executionConfiguration.getExecConfiguration().forEach((x, y) -> tcDescriptor.getUserParameters().replace(x, y));
+
                 }
-        if(jenkinsService != null) {
+        for (TestCaseBlueprint tcb: tcBlueprints){
+            log.debug("Cycling on tcBlueprint {}", tcb.getTestcaseBlueprintId());
+            for(TestCaseDescriptor tcDescriptor : tcDescriptors){
+                if( tcb.getTestcaseBlueprintId().equalsIgnoreCase(tcDescriptor.getTestCaseBlueprintId())){
+                    log.debug("Found tcdescriptor with blueprintid {}", tcDescriptor.getTestCaseBlueprintId());
+                    String updatedScript = tcb.getScript();
+                    for ( Map.Entry<String, String> map : tcDescriptor.getUserParameters().entrySet()){
+                        updatedScript = updatedScript.replace(tcb.getUserParameters().get(map.getKey()), map.getValue());
+
+                    }
+                    if (!executionResultIds.contains(tcDescriptor.getTestCaseDescriptorId()))
+                        testCases.put(tcDescriptor.getTestCaseDescriptorId(), updatedScript);
+                }
+            }
+
+        }
+        // TODO: Update infrastructureParams on the script
+/*        if(jenkinsService != null) {
             //TODO create robot files
         }else{
             //TODO create test case files
         }
         //Put in the list only test cases not completed, i.e. we have no results of
-        Set<String> executionResultIds = experimentExecution.getTestCaseResult().keySet();//TODO put only test cases not present inside testCaseResult of experiment Execution (needed for resuming the experiment)
         //TODO remove
         if(!executionResultIds.contains("testCase1"))
             testCases.put("testCase1", "test");
@@ -465,6 +490,7 @@ public class ExperimentExecutionInstanceManager {
         if(!executionResultIds.contains("testCase3"))
             testCases.put("testCase3", "test");
         //Initialize test case iterator
+        */
         testCasesIterator = testCases.entrySet().iterator();
     }
 

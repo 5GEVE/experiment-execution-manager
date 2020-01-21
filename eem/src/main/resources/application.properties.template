@@ -23,3 +23,8 @@ portal.catalogue.host=_CATALOGUE_
 msno.host=_MSNO_
 ##USE JENKINS
 eem.sbi.service.jenkins=true
+## Jenkins Data
+eem.jenkins.uri=http://10.0.8.30:8080
+eem.jenkins.username=admin
+eem.jenkins.password=admin
+eem.jenkins.validation.url=http://10.0.8.30/

@@ -86,6 +86,9 @@ public class EemService{
     @Autowired
     private ExperimentExecutionRepository experimentExecutionRepository;
 
+    @Value("${eem.jenkins.validation.url}")
+    private String validationBaseUrl;
+
     @PostConstruct
     private void initStoredExperimentExecution() throws FailedOperationException{
         //Loads Experiment Executions stored and initializes the corresponding EEIM
@@ -280,7 +283,7 @@ public class EemService{
         log.info("Initializing new Experiment Execution Instance Manager with Id {}", experimentExecutionId);
         ExperimentExecutionInstanceManager eeim;
         try {
-            eeim = new ExperimentExecutionInstanceManager(experimentExecutionId, experimentExecutionRepository, subscriptionService, jenkinsService, validationService, runTimeConfiguratorService, catalogueService, msnoService);
+            eeim = new ExperimentExecutionInstanceManager(experimentExecutionId, experimentExecutionRepository, subscriptionService, jenkinsService, validationService, runTimeConfiguratorService, catalogueService, msnoService, validationBaseUrl);
         }catch (NotExistingEntityException e) {
             throw new FailedOperationException(String.format("Initialization of Experiment Execution Instance Manager with Id %s failed : %s", experimentExecutionId, e.getMessage()));
         }
