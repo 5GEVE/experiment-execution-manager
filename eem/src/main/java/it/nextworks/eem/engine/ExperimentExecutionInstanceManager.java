@@ -451,20 +451,31 @@ public class ExperimentExecutionInstanceManager {
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         //Override user parameters inside test case descriptor
         List<TestCaseExecutionConfiguration> executionConfigurations = experimentExecution.getTestCaseDescriptorConfiguration();
+        Set<String> executionResultIds = experimentExecution.getTestCaseResult().keySet();//TODO put only test cases not present inside testCaseResult of experiment Execution (needed for resuming the experiment)
         for(TestCaseExecutionConfiguration executionConfiguration : executionConfigurations)
             for(TestCaseDescriptor tcDescriptor : tcDescriptors)
                 if(tcDescriptor.getTestCaseDescriptorId().equals(executionConfiguration.getTcDescriptorId())) {
                     log.debug("Replacing userParameters {} with executionConfigurations {} for Test Case with Id {}", tcDescriptor.getUserParameters(), executionConfiguration.getExecConfiguration(), tcDescriptor.getTestCaseDescriptorId());
                     executionConfiguration.getExecConfiguration().forEach((x, y) -> tcDescriptor.getUserParameters().replace(x, y));
+                    for (TestCaseBlueprint tcb: tcBlueprints){
+                        if( tcb.getTestcaseBlueprintId().equalsIgnoreCase(tcDescriptor.getTestCaseBlueprintId())){
+                            String updatedScript = tcb.getScript();
+                            for ( Map.Entry<String, String> map : tcDescriptor.getUserParameters().entrySet()){
+                                updatedScript = updatedScript.replace(tcb.getUserParameters().get(map.getKey()), map.getValue());
+
+                            }
+                            if (!executionResultIds.contains(tcDescriptor.getTestCaseDescriptorId()))
+                                testCases.put(tcDescriptor.getTestCaseDescriptorId(), updatedScript);
+                        }
+                    }
                 }
-        // TODO: Aggiungere i parametri di traduzione
-        if(jenkinsService != null) {
+        // TODO: Update infrastructureParams on the script
+/*        if(jenkinsService != null) {
             //TODO create robot files
         }else{
             //TODO create test case files
         }
         //Put in the list only test cases not completed, i.e. we have no results of
-        Set<String> executionResultIds = experimentExecution.getTestCaseResult().keySet();//TODO put only test cases not present inside testCaseResult of experiment Execution (needed for resuming the experiment)
         //TODO remove
         if(!executionResultIds.contains("testCase1"))
             testCases.put("testCase1", "test");
@@ -473,6 +484,7 @@ public class ExperimentExecutionInstanceManager {
         if(!executionResultIds.contains("testCase3"))
             testCases.put("testCase3", "test");
         //Initialize test case iterator
+        */
         testCasesIterator = testCases.entrySet().iterator();
     }
 
