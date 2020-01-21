@@ -151,9 +151,8 @@ public class EEMServiceTests {
                 while ((line = br.readLine()) != null) {
                     configXML = configXML.concat(line);
                 }
-                String robotFile = "*** Settings ***\nLibrary&#009;SSHLibrary\nLibrary&#009;String\nLibrary&#009;Collections\nLibrary&#009;BuiltIn\n*** Test Cases ***\nExecution Test Case\n&#009;&#009;Log&#009;Robot Execution Done $$var$$.delay";
-
-                String lines[] = robotFile.split("\\r?\\n");
+                String robotFile = "*** Settings ***|Library&#009;SSHLibrary|Library&#009;String|Library&#009;Collections|Library&#009;BuiltIn|*** Test Cases ***|Execution Test Case|&#009;&#009;Log&#009;Robot Execution Done $$var$$.delay";
+                String lines[] = robotFile.split("\\|");
 
                 String robotFileInConfig = "";
                 for (int i = 0; i < lines.length; i++){

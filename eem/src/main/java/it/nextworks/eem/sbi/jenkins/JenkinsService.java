@@ -85,7 +85,7 @@ public class JenkinsService {
 
     private void runningJenkinsJob(String executionId, String tcDescriptorId, String robotFile){
         String result = "";
-        String name = "Execution " + executionId + " tcb " + tcDescriptorId;
+        String name = "Execution_" + executionId + "__tcb_" + tcDescriptorId;
         log.debug("Running the experiment");
         log.debug("Getting the template file from resources");
         File configFile = getFileFromResources("job-template.xml");
@@ -130,7 +130,7 @@ public class JenkinsService {
         //TODO abort test case
 
         //Check if Job is running (color has _anime)
-        String name = "Execution " + executionId + " tcb " + tcDescriptorId;
+        String name = "Execution_" + executionId + "__tcb_" + tcDescriptorId;
         JobWithDetails jobInfo = null;
 
         try{
@@ -246,7 +246,7 @@ public class JenkinsService {
         log.debug("Generated Jenkins job file before substitution: {}", configXML );
 
 
-        String lines[] = robotCode.split("\\r?\\n");
+        String lines[] = robotCode.split("\\|");
 
         String robotFileInConfig = "";
         for (int i = 0; i < lines.length; i++){
