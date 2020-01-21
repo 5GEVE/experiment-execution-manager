@@ -457,18 +457,24 @@ public class ExperimentExecutionInstanceManager {
                 if(tcDescriptor.getTestCaseDescriptorId().equals(executionConfiguration.getTcDescriptorId())) {
                     log.debug("Replacing userParameters {} with executionConfigurations {} for Test Case with Id {}", tcDescriptor.getUserParameters(), executionConfiguration.getExecConfiguration(), tcDescriptor.getTestCaseDescriptorId());
                     executionConfiguration.getExecConfiguration().forEach((x, y) -> tcDescriptor.getUserParameters().replace(x, y));
-                    for (TestCaseBlueprint tcb: tcBlueprints){
-                        if( tcb.getTestcaseBlueprintId().equalsIgnoreCase(tcDescriptor.getTestCaseBlueprintId())){
-                            String updatedScript = tcb.getScript();
-                            for ( Map.Entry<String, String> map : tcDescriptor.getUserParameters().entrySet()){
-                                updatedScript = updatedScript.replace(tcb.getUserParameters().get(map.getKey()), map.getValue());
 
-                            }
-                            if (!executionResultIds.contains(tcDescriptor.getTestCaseDescriptorId()))
-                                testCases.put(tcDescriptor.getTestCaseDescriptorId(), updatedScript);
-                        }
-                    }
                 }
+        for (TestCaseBlueprint tcb: tcBlueprints){
+            log.debug("Cycling on tcBlueprint {}", tcb.getTestcaseBlueprintId());
+            for(TestCaseDescriptor tcDescriptor : tcDescriptors){
+                if( tcb.getTestcaseBlueprintId().equalsIgnoreCase(tcDescriptor.getTestCaseBlueprintId())){
+                    log.debug("Found tcdescriptor with blueprintid {}", tcDescriptor.getTestCaseBlueprintId());
+                    String updatedScript = tcb.getScript();
+                    for ( Map.Entry<String, String> map : tcDescriptor.getUserParameters().entrySet()){
+                        updatedScript = updatedScript.replace(tcb.getUserParameters().get(map.getKey()), map.getValue());
+
+                    }
+                    if (!executionResultIds.contains(tcDescriptor.getTestCaseDescriptorId()))
+                        testCases.put(tcDescriptor.getTestCaseDescriptorId(), updatedScript);
+                }
+            }
+
+        }
         // TODO: Update infrastructureParams on the script
 /*        if(jenkinsService != null) {
             //TODO create robot files
