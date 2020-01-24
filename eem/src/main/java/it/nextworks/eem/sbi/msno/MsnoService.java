@@ -36,15 +36,12 @@ public class MsnoService {
     @PostConstruct
     private void initMsnoClient() {
         log.debug("Initializing MSNO REST client");
-        /*
         ApiClient ac = new ApiClient();
         String url = "http://" + msnoHost + "/nslcm/v1";
-        ac.setBasePath(url);
-         */
+        restClient = new DefaultApi(ac.setBasePath(url));
     }
 
     public NsInstance queryNs(GeneralizedQueryRequest request) throws FailedOperationException, MalformattedElementException {
-        /*
         if (request == null)
             throw new MalformattedElementException("Query NS request is null");
         request.isValid();
@@ -59,7 +56,8 @@ public class MsnoService {
         } catch (Exception e) {
             throw new FailedOperationException("Failure when interacting with NFVO : " + e.getMessage());
         }
-        */
+        /*
         return null;
+        */
     }
 }
