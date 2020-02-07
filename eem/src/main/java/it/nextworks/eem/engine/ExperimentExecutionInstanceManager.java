@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.nextworks.eem.model.ExecutionResult;
 import it.nextworks.eem.model.TestCaseExecutionConfiguration;
+import it.nextworks.eem.model.enumerate.ExperimentExecutionResultCode;
 import it.nextworks.eem.model.enumerate.ExperimentRunType;
 import it.nextworks.eem.model.enumerate.InfrastructureParameterType;
 import it.nextworks.eem.rabbitMessage.*;
@@ -279,7 +280,14 @@ public class ExperimentExecutionInstanceManager {
         }
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         ExecutionResult executionResult = new ExecutionResult();
-        executionResult.result(msg.getResult());
+        for(TestCaseDescriptor tcDescriptor : tcDescriptors)
+            if(tcDescriptor.getTestCaseDescriptorId().equalsIgnoreCase(testCaseId))
+                executionResult.setTestCaseName(tcDescriptor.getName());
+        if(msg.isFailed())
+            executionResult.setResultCode(ExperimentExecutionResultCode.FAILED);
+        else
+            executionResult.setResultCode(ExperimentExecutionResultCode.SUCCESSFUL);
+        executionResult.setResult(msg.getResult());
         experimentExecution.addTestCaseResult(testCaseId, executionResult);
         experimentExecutionRepository.saveAndFlush(experimentExecution);
         log.info("Experiment Execution Test Case with Id {} completed", testCaseId);

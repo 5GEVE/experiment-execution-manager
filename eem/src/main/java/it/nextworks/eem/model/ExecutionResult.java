@@ -5,6 +5,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
+import it.nextworks.eem.model.enumerate.ExperimentExecutionResultCode;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import org.springframework.validation.annotation.Validated;
 
@@ -31,11 +32,12 @@ public class ExecutionResult   {
   @ManyToOne
   private ExperimentExecution execution;
 
+  @JsonProperty("testCaseName")
+  private String testCaseName;
+  @JsonProperty("resultCode")
+  private ExperimentExecutionResultCode resultCode;
   @JsonProperty("result")
   private String result = null;
-
-  //TODO add boolean failed?
-  private String resultUrl;
 
   public Long getId() {
     return id;
@@ -43,6 +45,46 @@ public class ExecutionResult   {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public ExecutionResult testCaseName(String testCaseName) {
+    this.testCaseName = testCaseName;
+    return this;
+  }
+
+  /**
+   * Get testCaseName
+   * @return testCaseName
+   **/
+  @ApiModelProperty(required = true, value = "")
+  @NotNull
+
+  public String getTestCaseName() {
+    return testCaseName;
+  }
+
+  public void setTestCaseName(String testCaseName) {
+    this.testCaseName = testCaseName;
+  }
+
+  public ExecutionResult resultCode(ExperimentExecutionResultCode resultCode) {
+    this.resultCode = resultCode;
+    return this;
+  }
+
+  /**
+   * Get resultCode
+   * @return resultCode
+   **/
+  @ApiModelProperty(required = true, value = "")
+  @NotNull
+
+  public ExperimentExecutionResultCode getResultCode() {
+    return resultCode;
+  }
+
+  public void setResultCode(ExperimentExecutionResultCode resultCode) {
+    this.resultCode = resultCode;
   }
 
   public ExecutionResult result(String result) {
@@ -83,12 +125,14 @@ public class ExecutionResult   {
     }
     ExecutionResult executionResult = (ExecutionResult) o;
     return Objects.equals(this.id, executionResult.id) &&
-            Objects.equals(this.result, executionResult.result);
+            Objects.equals(this.result, executionResult.result) &&
+            Objects.equals(this.testCaseName, executionResult.testCaseName) &&
+            Objects.equals(this.resultCode, executionResult.resultCode);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, result);
+    return Objects.hash(id, result, resultCode, testCaseName);
   }
 
   @Override
@@ -97,6 +141,8 @@ public class ExecutionResult   {
     sb.append("class ExecutionResult {\n");
 
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
+    sb.append("    testCaseName: ").append(toIndentedString(testCaseName)).append("\n");
+    sb.append("    resultCode: ").append(toIndentedString(resultCode)).append("\n");
     sb.append("    result: ").append(toIndentedString(result)).append("\n");
     sb.append("}");
     return sb.toString();

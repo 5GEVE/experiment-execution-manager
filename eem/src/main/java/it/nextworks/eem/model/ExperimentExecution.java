@@ -34,6 +34,10 @@ public class ExperimentExecution {
   @JsonProperty("executionId")
   private String executionId = null;
 
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @JsonProperty("executionName")
+  private String executionName;
+
   @JsonProperty("state")
   private ExperimentState state = null;
 
@@ -99,6 +103,26 @@ public class ExperimentExecution {
 
   public void setExecutionId(String executionId) {
     this.executionId = executionId;
+  }
+
+  public ExperimentExecution executionName(String executionName) {
+    this.executionName = executionName;
+    return this;
+  }
+
+  /**
+   * Name of the executed experiment
+   * @return executionName
+   **/
+  @ApiModelProperty(required = true, value = "Name of the executed experiment")
+  @NotNull
+
+  public String getExecutionName() {
+    return executionName;
+  }
+
+  public void setExecutionName(String executionName) {
+    this.executionName = executionName;
   }
 
   public ExperimentExecution state(ExperimentState state) {
@@ -275,27 +299,28 @@ public class ExperimentExecution {
     }
     ExperimentExecution experimentExecutionResponse = (ExperimentExecution) o;
     return Objects.equals(this.id, experimentExecutionResponse.id) &&
-        Objects.equals(this.executionId, experimentExecutionResponse.executionId) &&
-        Objects.equals(this.state, experimentExecutionResponse.state) &&
-        Objects.equals(this.testCaseDescriptorConfiguration, experimentExecutionResponse.testCaseDescriptorConfiguration) &&
-        Objects.equals(this.testCaseResult, experimentExecutionResponse.testCaseResult) &&
-        Objects.equals(this.runType, experimentExecutionResponse.runType) &&
-        Objects.equals(this.errorMessage, experimentExecutionResponse.errorMessage) &&
-        Objects.equals(this.reportUrl, experimentExecutionResponse.reportUrl);
+            Objects.equals(this.executionName, experimentExecutionResponse.executionName) &&
+            Objects.equals(this.executionId, experimentExecutionResponse.executionId) &&
+            Objects.equals(this.state, experimentExecutionResponse.state) &&
+            Objects.equals(this.testCaseDescriptorConfiguration, experimentExecutionResponse.testCaseDescriptorConfiguration) &&
+            Objects.equals(this.testCaseResult, experimentExecutionResponse.testCaseResult) &&
+            Objects.equals(this.runType, experimentExecutionResponse.runType) &&
+            Objects.equals(this.errorMessage, experimentExecutionResponse.errorMessage) &&
+            Objects.equals(this.reportUrl, experimentExecutionResponse.reportUrl);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, executionId, state, testCaseDescriptorConfiguration, testCaseResult, reportUrl, runType, errorMessage);
+    return Objects.hash(id, executionId, executionName, state, testCaseDescriptorConfiguration, testCaseResult, reportUrl, runType, errorMessage);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ExperimentExecutionResponse {\n");
-
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    executionId: ").append(toIndentedString(executionId)).append("\n");
+    sb.append("    executionName: ").append(toIndentedString(executionName)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    runType: ").append(toIndentedString(runType)).append("\n");
     sb.append("    testCaseResult: ").append(toIndentedString(testCaseResult)).append("\n");
