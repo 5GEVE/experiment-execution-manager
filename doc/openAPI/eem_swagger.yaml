@@ -3,25 +3,25 @@ info:
   description: 5G EVE Experiment Execution Management ReST API
   version: 1.0.1
   title: Experiment Execution Management API
-  termsOfService: 'https://www.5g-eve.eu/'
+  termsOfService: https://www.5g-eve.eu/
   contact: {}
   license:
     name: Apache2
-    url: 'http://unlicense.org'
-host: 'localhost:8080'
-basePath: /
+    url: http://unlicense.org
+host: localhost:8080
+basePath: "/"
 tags:
-  - name: eem-api-controller
-    description: the eem API
+- name: eem-api-controller
+  description: the eem API
 paths:
-  /eem/:
+  "/eem/":
     get:
       tags:
-        - EEM Application
+      - EEM Application
       summary: List API versions
       operationId: listVersionsv1
       produces:
-        - application/json
+      - application/json
       responses:
         '200':
           description: 200 response
@@ -38,20 +38,21 @@ paths:
       deprecated: false
     options:
       tags:
-        - EEM Application
+      - EEM Application
       summary: eemOptions
       operationId: eemOptions
       consumes:
-        - application/json
+      - application/json
       produces:
-        - '*/*'
+      - "*/*"
       responses:
         '200':
           description: OK
           schema:
             type: object
         '204':
-          description: The Option operation is needed for compatibility reasons with JS applications
+          description: The Option operation is needed for compatibility reasons with
+            JS applications
           schema:
             type: object
         '401':
@@ -59,68 +60,68 @@ paths:
         '403':
           description: Forbidden
       deprecated: false
-  /eem/experiment_executions:
+  "/eem/experiment_executions":
     get:
       tags:
-        - EEM Operations
+      - EEM Operations
       summary: List all experiments available
       operationId: eemExperimentExecutionsGet
       produces:
-        - application/json
+      - application/json
       parameters:
-        - name: state
-          in: query
-          description: Execution state of the experiment
-          required: false
-          type: string
-          allowEmptyValue: false
-          enum:
-            - INIT
-            - CONFIGURING
-            - RUNNING
-            - RUNNING_STEP
-            - PAUSED
-            - VALIDATING
-            - COMPLETED
-            - ABORTING
-            - ABORTED
-            - FAILED
+      - name: state
+        in: query
+        description: Execution state of the experiment
+        required: false
+        type: string
+        allowEmptyValue: false
+        enum:
+        - INIT
+        - CONFIGURING
+        - RUNNING
+        - RUNNING_STEP
+        - PAUSED
+        - VALIDATING
+        - COMPLETED
+        - ABORTING
+        - ABORTED
+        - FAILED
       responses:
         '200':
           description: List of all experiments
           schema:
             type: array
             items:
-              $ref: '#/definitions/ExperimentExecution'
+              "$ref": "#/definitions/ExperimentExecution"
         '401':
           description: Operation not authorised
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '403':
           description: Operation forbidden
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '404':
           description: Not Found
         '412':
           description: Precondition Failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '500':
           description: Operation failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
       deprecated: false
     post:
       tags:
-        - EEM Operations
+      - EEM Operations
       summary: Requests a new experiment execution
       operationId: eemExperimentExecutionsPost
       consumes:
-        - application/json
+      - application/json
       produces:
-        - application/json
-        - text/plain
+      - application/json
+      - text/plain
       responses:
         '200':
           description: OK
@@ -133,38 +134,39 @@ paths:
         '401':
           description: Operation not authorised
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '403':
           description: Operation forbidden
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '404':
           description: Not Found
         '412':
           description: Precondition Failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '500':
           description: Operation failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
       deprecated: false
     options:
       tags:
-        - EEM Operations
+      - EEM Operations
       summary: eemExperimentExecutionsOptions
       operationId: eemExperimentExecutionsOptions
       consumes:
-        - application/json
+      - application/json
       produces:
-        - '*/*'
+      - "*/*"
       responses:
         '200':
           description: OK
           schema:
             type: object
         '204':
-          description: The Option operation is needed for compatibility reasons with JS     applications
+          description: The Option operation is needed for compatibility reasons with
+            JS     applications
           schema:
             type: object
         '401':
@@ -172,60 +174,60 @@ paths:
         '403':
           description: Forbidden
       deprecated: false
-  '/eem/experiment_executions/{id}':
+  "/eem/experiment_executions/{id}":
     get:
       tags:
-        - EEM Operations
+      - EEM Operations
       summary: eemExperimentExecutionsIdGet
       description: API to get experiment execution details
       operationId: eemExperimentExecutionsIdGet
       produces:
-        - application/json
+      - application/json
       parameters:
-        - name: id
-          in: path
-          description: id
-          required: true
-          type: string
+      - name: id
+        in: path
+        description: id
+        required: true
+        type: string
       responses:
         '200':
           description: Return experiment execution details
           schema:
-            $ref: '#/definitions/ExperimentExecution'
+            "$ref": "#/definitions/ExperimentExecution"
         '401':
           description: Operation not authorised
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '403':
           description: Operation forbidden
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '404':
           description: Identifier of the experiment execution not found
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '412':
           description: Precondition Failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '500':
           description: Operation failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
       deprecated: false
     delete:
       tags:
-        - EEM Operations
+      - EEM Operations
       summary: eemExperimentExecutionsIdDelete
       operationId: eemExperimentExecutionsIdDelete
       produces:
-        - application/json
+      - application/json
       parameters:
-        - name: id
-          in: path
-          description: id
-          required: true
-          type: string
+      - name: id
+        in: path
+        description: id
+        required: true
+        type: string
       responses:
         '200':
           description: OK
@@ -238,35 +240,35 @@ paths:
         '401':
           description: Operation not authorised
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '403':
           description: Operation forbidden
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '404':
           description: Identifier of the Experiment execution not found
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '500':
           description: Operation failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
       deprecated: false
     options:
       tags:
-        - EEM Operations
+      - EEM Operations
       summary: eemExperimentExecutionsIdOptions
       operationId: eemExperimentExecutionsIdOptions
       consumes:
-        - application/json
+      - application/json
       produces:
-        - '*/*'
+      - "*/*"
       parameters:
-        - name: id
-          in: path
-          description: id
-          required: true
-          type: string
+      - name: id
+        in: path
+        description: id
+        required: true
+        type: string
       responses:
         '200':
           description: Return 200 OK upon action completion
@@ -279,22 +281,22 @@ paths:
         '403':
           description: Forbidden
       deprecated: false
-  '/eem/experiment_executions/{id}/abort':
+  "/eem/experiment_executions/{id}/abort":
     post:
       tags:
-        - EEM Operations
+      - EEM Operations
       summary: eemExperimentExecutionsIdAbortPost
       operationId: eemExperimentExecutionsIdAbortPost
       consumes:
-        - application/json
+      - application/json
       produces:
-        - application/json
+      - application/json
       parameters:
-        - name: id
-          in: path
-          description: id
-          required: true
-          type: string
+      - name: id
+        in: path
+        description: id
+        required: true
+        type: string
       responses:
         '200':
           description: Return 200 OK upon action completion
@@ -305,36 +307,36 @@ paths:
         '401':
           description: Operation not authorised
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '403':
           description: Operation forbidden
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '404':
           description: Identifier of the experiment execution not found
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '500':
           description: Operation failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
       deprecated: false
-  '/eem/experiment_executions/{id}/pause':
+  "/eem/experiment_executions/{id}/pause":
     post:
       tags:
-        - EEM Operations
+      - EEM Operations
       summary: eemExperimentExecutionsIdPausePost
       operationId: eemExperimentExecutionsIdPausePost
       consumes:
-        - application/json
+      - application/json
       produces:
-        - application/json
+      - application/json
       parameters:
-        - name: id
-          in: path
-          description: id
-          required: true
-          type: string
+      - name: id
+        in: path
+        description: id
+        required: true
+        type: string
       responses:
         '200':
           description: Return 200 OK upon action completion
@@ -345,36 +347,36 @@ paths:
         '401':
           description: Operation not authorised
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '403':
           description: Operation forbidden
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '404':
           description: Identifier of the experiment execution not found
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '500':
           description: Operation failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
       deprecated: false
-  '/eem/experiment_executions/{id}/resume':
+  "/eem/experiment_executions/{id}/resume":
     post:
       tags:
-        - EEM Operations
+      - EEM Operations
       summary: eemExperimentExecutionsIdResumePost
       operationId: eemExperimentExecutionsIdResumePost
       consumes:
-        - application/json
+      - application/json
       produces:
-        - application/json
+      - application/json
       parameters:
-        - name: id
-          in: path
-          description: id
-          required: true
-          type: string
+      - name: id
+        in: path
+        description: id
+        required: true
+        type: string
       responses:
         '200':
           description: Return 200 OK upon action completion
@@ -385,51 +387,52 @@ paths:
         '401':
           description: Operation not authorised
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '403':
           description: Operation forbidden
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '404':
           description: Identifier of the experiment execution not found
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '500':
           description: Operation failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
       deprecated: false
-  '/eem/experiment_executions/{id}/run':
+  "/eem/experiment_executions/{id}/run":
     post:
       tags:
-        - EEM Operations
+      - EEM Operations
       summary: eemExperimentExecutionsIdRunPost
       operationId: eemExperimentExecutionsIdRunPost
       consumes:
-        - application/json
+      - application/json
       produces:
-        - application/json
+      - application/json
       parameters:
-        - in: body
-          name: body
-          description: body
-          required: true
-          schema:
-            $ref: '#/definitions/ExperimentExecutionRequest'
-        - name: id
-          in: path
-          description: id
-          required: true
-          type: string
-        - name: runType
-          in: query
-          description: 'Determine the type of run. If not present, the default value is RUN_ALL'
-          required: false
-          type: string
-          allowEmptyValue: false
-          enum:
-            - RUN_IN_STEPS
-            - RUN_ALL
+      - in: body
+        name: body
+        description: body
+        required: true
+        schema:
+          "$ref": "#/definitions/ExperimentExecutionRequest"
+      - name: id
+        in: path
+        description: id
+        required: true
+        type: string
+      - name: runType
+        in: query
+        description: Determine the type of run. If not present, the default value
+          is RUN_ALL
+        required: false
+        type: string
+        allowEmptyValue: false
+        enum:
+        - RUN_IN_STEPS
+        - RUN_ALL
       responses:
         '200':
           description: Return 200 OK upon action completion
@@ -440,40 +443,40 @@ paths:
         '400':
           description: Malformatted request
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '401':
           description: Operation not authorised
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '403':
           description: Operation forbidden
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '404':
           description: Identifier of the experiment execution not found
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '500':
           description: Operation failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
       deprecated: false
-  '/eem/experiment_executions/{id}/step':
+  "/eem/experiment_executions/{id}/step":
     post:
       tags:
-        - EEM Operations
+      - EEM Operations
       summary: eemExperimentExecutionsIdStepPost
       operationId: eemExperimentExecutionsIdStepPost
       consumes:
-        - application/json
+      - application/json
       produces:
-        - application/json
+      - application/json
       parameters:
-        - name: id
-          in: path
-          description: id
-          required: true
-          type: string
+      - name: id
+        in: path
+        description: id
+        required: true
+        type: string
       responses:
         '200':
           description: Return 200 OK upon action completion
@@ -484,35 +487,36 @@ paths:
         '401':
           description: Operation not authorised
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '403':
           description: Operation forbidden
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '404':
           description: Identifier of the experiment execution not found
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '500':
           description: Operation failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
       deprecated: false
-  /eem/experiment_notifications:
+  "/eem/experiment_notifications":
     get:
       tags:
-        - EEM Notifications
+      - EEM Notifications
       summary: eemExperimentNotificationsGet
       operationId: eemExperimentNotificationsGet
       produces:
-        - '*/*'
+      - "*/*"
       responses:
         '200':
           description: OK
           schema:
             type: object
         '204':
-          description: Default returned value in case the subscribers checks the notification endpoint
+          description: Default returned value in case the subscribers checks the notification
+            endpoint
           schema:
             type: object
         '401':
@@ -524,20 +528,20 @@ paths:
       deprecated: false
     post:
       tags:
-        - EEM Notifications
+      - EEM Notifications
       summary: eemExperimentNotificationsPost
       operationId: eemExperimentNotificationsPost
       consumes:
-        - application/json
+      - application/json
       produces:
-        - '*/*'
+      - "*/*"
       parameters:
-        - in: body
-          name: body
-          description: body
-          required: true
-          schema:
-            $ref: '#/definitions/ConfigurationChangeNotification'
+      - in: body
+        name: body
+        description: body
+        required: true
+        schema:
+          "$ref": "#/definitions/ConfigurationChangeNotification"
       responses:
         '200':
           description: OK
@@ -558,13 +562,13 @@ paths:
       deprecated: false
     options:
       tags:
-        - EEM Notifications
+      - EEM Notifications
       summary: eemExperimentNotificationsOptions
       operationId: eemExperimentNotificationsOptions
       consumes:
-        - application/json
+      - application/json
       produces:
-        - '*/*'
+      - "*/*"
       responses:
         '200':
           description: OK
@@ -579,57 +583,57 @@ paths:
         '403':
           description: Forbidden
       deprecated: false
-  /eem/experiment_subscriptions:
+  "/eem/experiment_subscriptions":
     get:
       tags:
-        - EEM Subscriptions
+      - EEM Subscriptions
       summary: eemExperimentSubscriptionsGet
       operationId: eemExperimentSubscriptionsGet
       produces:
-        - application/json
+      - application/json
       responses:
         '200':
           description: Return list of subscriptions to the Experiment Execution Manager
           schema:
             type: array
             items:
-              $ref: '#/definitions/ExperimentExecutionSubscription'
+              "$ref": "#/definitions/ExperimentExecutionSubscription"
         '401':
           description: Operation not authorised
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '403':
           description: Operation forbidden
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '404':
           description: Not Found
         '412':
           description: Precondition Failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '500':
           description: Operation failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
       deprecated: false
     post:
       tags:
-        - EEM Subscriptions
+      - EEM Subscriptions
       summary: eemExperimentSubscriptionsPost
       operationId: eemExperimentSubscriptionsPost
       consumes:
-        - application/json
+      - application/json
       produces:
-        - application/json
-        - text/plain
+      - application/json
+      - text/plain
       parameters:
-        - in: body
-          name: body
-          description: body
-          required: true
-          schema:
-            $ref: '#/definitions/ExperimentExecutionSubscriptionRequest'
+      - in: body
+        name: body
+        description: body
+        required: true
+        schema:
+          "$ref": "#/definitions/ExperimentExecutionSubscriptionRequest"
       responses:
         '200':
           description: OK
@@ -642,39 +646,39 @@ paths:
         '303':
           description: Subscription already exists
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '400':
           description: Malformatted request
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '401':
           description: Operation not authorised
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '403':
           description: Operation forbidden
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '404':
           description: Not Found
         '412':
           description: Precondition Failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '500':
           description: Operation failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
       deprecated: false
     options:
       tags:
-        - EEM Subscriptions
+      - EEM Subscriptions
       summary: eemExperimentSubscriptionsOptions
       operationId: eemExperimentSubscriptionsOptions
       consumes:
-        - application/json
+      - application/json
       produces:
-        - application/json
+      - application/json
       responses:
         '200':
           description: OK
@@ -687,77 +691,78 @@ paths:
         '401':
           description: Operation not authorised
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '403':
           description: Operation forbidden
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '404':
           description: Return error details
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '500':
           description: Operation failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '501':
           description: Operation not implemented
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
       deprecated: false
-  '/eem/experiment_subscriptions/{subscriptionId}':
+  "/eem/experiment_subscriptions/{subscriptionId}":
     get:
       tags:
-        - EEM Subscriptions
+      - EEM Subscriptions
       summary: eemExperimentSubscriptionsSubscriptionIdGet
       operationId: eemExperimentSubscriptionsSubscriptionIdGet
       produces:
-        - application/json
+      - application/json
       parameters:
-        - name: subscriptionId
-          in: path
-          description: subscriptionId
-          required: true
-          type: string
+      - name: subscriptionId
+        in: path
+        description: subscriptionId
+        required: true
+        type: string
       responses:
         '200':
-          description: Returns experiment execution subscription for the id provided on the path
+          description: Returns experiment execution subscription for the id provided
+            on the path
           schema:
-            $ref: '#/definitions/ExperimentExecutionSubscription'
+            "$ref": "#/definitions/ExperimentExecutionSubscription"
         '401':
           description: Operation not authorised
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '403':
           description: Operation forbidden
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '404':
           description: Identifier of the experiment execution subscription not found
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '412':
           description: Precondition Failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '500':
           description: Operation failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
       deprecated: false
     delete:
       tags:
-        - EEM Subscriptions
+      - EEM Subscriptions
       summary: eemExperimentSubscriptionsSubscriptionIdDelete
       operationId: eemExperimentSubscriptionsSubscriptionIdDelete
       produces:
-        - application/json
+      - application/json
       parameters:
-        - name: subscriptionId
-          in: path
-          description: subscriptionId
-          required: true
-          type: string
+      - name: subscriptionId
+        in: path
+        description: subscriptionId
+        required: true
+        type: string
       responses:
         '200':
           description: OK
@@ -770,35 +775,35 @@ paths:
         '401':
           description: Operation not authorised
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '403':
           description: Operation forbidden
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '404':
           description: Return error details
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
         '500':
           description: Operation failed
           schema:
-            $ref: '#/definitions/ErrorInfo'
+            "$ref": "#/definitions/ErrorInfo"
       deprecated: false
     options:
       tags:
-        - EEM Subscriptions
+      - EEM Subscriptions
       summary: eemExperimentSubscriptionsSubscriptionIdOptions
       operationId: eemExperimentSubscriptionsSubscriptionIdOptions
       consumes:
-        - application/json
+      - application/json
       produces:
-        - '*/*'
+      - "*/*"
       parameters:
-        - name: subscriptionId
-          in: path
-          description: subscriptionId
-          required: true
-          type: string
+      - name: subscriptionId
+        in: path
+        description: subscriptionId
+        required: true
+        type: string
       responses:
         '200':
           description: OK
@@ -817,61 +822,76 @@ definitions:
   ConfigurationChangeNotification:
     type: object
     required:
-      - configurationChangeState
-      - executionId
-      - notificationInfo
+    - configurationChangeState
+    - executionId
+    - notificationInfo
     properties:
       configurationChangeState:
         type: string
         enum:
-          - CONFIGURING
-          - CONFIGURED
-          - CONFIGURATION_FAILED
-          - VALIDATING
-          - VALIDATED
-          - VALIDATION_FAILED
-          - RUNNING
-          - RUNNING_DONE
-          - RUNNING_FAILED
-          - ABORTING
-          - ABORTED
-          - ABORTING_FAILED
+        - CONFIGURING
+        - CONFIGURED
+        - CONFIGURATION_FAILED
+        - VALIDATING
+        - VALIDATED
+        - VALIDATION_FAILED
+        - RUNNING
+        - RUNNING_DONE
+        - RUNNING_FAILED
+        - ABORTING
+        - ABORTED
+        - ABORTING_FAILED
       executionId:
         type: string
       notificationError:
-        $ref: '#/definitions/ErrorInfo'
+        "$ref": "#/definitions/ErrorInfo"
       notificationInfo:
         type: string
-        description: It can be URL containing the report from RAV for the execution or additional info from Runtime Configurator
+        description: It can be URL containing the report from RAV for the execution
+          or additional info from Runtime Configurator
     title: ConfigurationChangeNotification
   ErrorInfo:
     type: object
     required:
-      - detail
-      - status
+    - detail
+    - status
     properties:
       detail:
         type: string
-        description: 'A human-readable explanation specific to this occurrence of the problem. '
+        description: 'A human-readable explanation specific to this occurrence of
+          the problem. '
       status:
         type: integer
         format: int32
-        description: 'The HTTP status code for this occurrence of the problem. The HTTP status code ([RFC7231], Section 6) generated by the origin server for this occurrence of the problem. '
+        description: 'The HTTP status code for this occurrence of the problem. The
+          HTTP status code ([RFC7231], Section 6) generated by the origin server for
+          this occurrence of the problem. '
     title: ErrorInfo
-    description: 'The definition of the general "ProblemDetails" data structure from IETF RFC 7807 [19] is reproduced in this structure.  '
+    description: 'The definition of the general "ProblemDetails" data structure from
+      IETF RFC 7807 [19] is reproduced in this structure.  '
   ExecutionResult:
     type: object
     required:
-      - result
+    - result
+    - resultCode
+    - testCaseName
     properties:
       result:
+        type: string
+      resultCode:
+        type: string
+        enum:
+        - SUCCESSFUL
+        - FAILED
+      testCaseName:
         type: string
     title: ExecutionResult
   ExperimentExecution:
     type: object
     required:
-      - executionId
-      - state
+    - executionId
+    - executionName
+    - state
     properties:
       errorMessage:
         type: string
@@ -879,6 +899,9 @@ definitions:
       executionId:
         type: string
         description: Identifier of the executed experiment
+      executionName:
+        type: string
+        description: Name of the executed experiment
       experimentDescriptorId:
         type: string
       nsInstanceId:
@@ -889,31 +912,31 @@ definitions:
       state:
         type: string
         enum:
-          - INIT
-          - CONFIGURING
-          - RUNNING
-          - RUNNING_STEP
-          - PAUSED
-          - VALIDATING
-          - COMPLETED
-          - ABORTING
-          - ABORTED
-          - FAILED
+        - INIT
+        - CONFIGURING
+        - RUNNING
+        - RUNNING_STEP
+        - PAUSED
+        - VALIDATING
+        - COMPLETED
+        - ABORTING
+        - ABORTED
+        - FAILED
       testCaseDescriptorConfiguration:
         type: array
         description: Test cases for the requested execution
         items:
-          $ref: '#/definitions/TestCaseExecutionConfiguration'
+          "$ref": "#/definitions/TestCaseExecutionConfiguration"
       testCaseResult:
         type: object
         additionalProperties:
-          $ref: '#/definitions/ExecutionResult'
+          "$ref": "#/definitions/ExecutionResult"
     title: ExperimentExecution
   ExperimentExecutionRequest:
     type: object
     required:
-      - experimentDescriptorId
-      - nsInstanceId
+    - experimentDescriptorId
+    - nsInstanceId
     properties:
       experimentDescriptorId:
         type: string
@@ -929,10 +952,10 @@ definitions:
   ExperimentExecutionSubscription:
     type: object
     required:
-      - callbackURI
-      - executionId
-      - subscriptionId
-      - subscriptionType
+    - callbackURI
+    - executionId
+    - subscriptionId
+    - subscriptionType
     properties:
       callbackURI:
         type: string
@@ -944,15 +967,15 @@ definitions:
       subscriptionType:
         type: string
         enum:
-          - EXPERIMENT_EXECUTION_CHANGE_STATE
+        - EXPERIMENT_EXECUTION_CHANGE_STATE
     title: ExperimentExecutionSubscription
     description: Subsription response
   ExperimentExecutionSubscriptionRequest:
     type: object
     required:
-      - callbackURI
-      - executionId
-      - subscriptionType
+    - callbackURI
+    - executionId
+    - subscriptionType
     properties:
       callbackURI:
         type: string
@@ -961,7 +984,7 @@ definitions:
       subscriptionType:
         type: string
         enum:
-          - EXPERIMENT_EXECUTION_CHANGE_STATE
+        - EXPERIMENT_EXECUTION_CHANGE_STATE
     title: ExperimentExecutionSubscriptionRequest
     description: Subsription reuqest to an execution experiment
   TestCaseDescrConfig:
@@ -979,3 +1002,4 @@ definitions:
       tcDescriptorId:
         type: string
     title: TestCaseExecutionConfiguration
+
