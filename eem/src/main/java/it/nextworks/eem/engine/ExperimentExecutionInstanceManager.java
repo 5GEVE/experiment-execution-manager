@@ -197,16 +197,17 @@ public class ExperimentExecutionInstanceManager {
                     break;
             }
         } catch (JsonParseException e) {
-            log.debug(null, e);
+            log.debug("Error while parsing message", e);
             manageExperimentExecutionError("Error while parsing message: " + e.getMessage());
         } catch (JsonMappingException e) {
-            log.debug(null, e);
+            log.debug("Error in Json mapping", e);
             manageExperimentExecutionError("Error in Json mapping: " + e.getMessage());
         } catch (IOException e) {
-            log.debug(null, e);
+            log.debug("IO error when receiving json message", e);
             manageExperimentExecutionError("IO error when receiving json message: " + e.getMessage());
         } catch (Exception e){
             log.debug("Unhandled Exception", e);
+            manageExperimentExecutionError("Generic internal error: " + e.getMessage());
         }
     }
 
@@ -509,7 +510,7 @@ public class ExperimentExecutionInstanceManager {
                         infrastructureParameterValue = readParameter(InfrastructureParameterType.SAP_IP_ADDRESS, ids);
                     } catch (FailedOperationException e) {
                         log.error("Unable to get SAP ip address. Skipping");
-                        log.debug(null, e);
+                        log.debug("Unable to get SAP ip address", e);
                     }
                 } else
                     log.error("Unacceptable Infrastructure parameter format: {}. Skipping", infrastructureParameter);
@@ -525,7 +526,7 @@ public class ExperimentExecutionInstanceManager {
                         infrastructureParameterValue = readParameter(InfrastructureParameterType.VNF_CP_IP_ADDRESS, ids);
                     } catch (FailedOperationException e) {
                         log.error("Unable to get VNF ExtCp ip address. Skipping");
-                        log.debug(null, e);
+                        log.debug("Unable to get VNF ExtCp ip address", e);
                     }
                 } else
                     log.error("Unacceptable Infrastructure parameter format: {}. Skipping ", infrastructureParameter);
@@ -538,7 +539,7 @@ public class ExperimentExecutionInstanceManager {
                         infrastructureParameterValue = readParameter(InfrastructureParameterType.VDU_CP_IP_ADDRESS, ids);
                     } catch (FailedOperationException e) {
                         log.error("Unable to get CP Address. Skipping");
-                        log.debug(null, e);
+                        log.debug("Unable to get CP Address", e);
                     }
                 } else
                     log.error("Unacceptable Infrastructure parameter format: {}. Skipping ", infrastructureParameter);
@@ -553,7 +554,7 @@ public class ExperimentExecutionInstanceManager {
                         infrastructureParameterValue = readParameter(InfrastructureParameterType.PNF_CP_IP_ADDRESS, ids);
                     } catch (FailedOperationException e) {
                         log.error("Unable to get Hostname. Skipping");
-                        log.debug(null, e);
+                        log.debug("Unable to get Hostname", e);
                     }
                 }else
                     log.error("Unacceptable Infrastructure parameter format: {}. Skipping", infrastructureParameter);

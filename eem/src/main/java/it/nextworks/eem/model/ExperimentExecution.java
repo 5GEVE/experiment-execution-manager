@@ -114,8 +114,7 @@ public class ExperimentExecution {
    * Name of the executed experiment
    * @return executionName
    **/
-  @ApiModelProperty(required = true, value = "Name of the executed experiment")
-  @NotNull
+  @ApiModelProperty(required = false, value = "Name of the executed experiment")
 
   public String getExecutionName() {
     return executionName;
