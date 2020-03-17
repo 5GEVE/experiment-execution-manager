@@ -16,6 +16,7 @@ import it.nextworks.eem.sbi.jenkins.JenkinsService;
 import it.nextworks.eem.sbi.msno.MsnoService;
 import it.nextworks.eem.sbi.runtimeConfigurator.RunTimeConfiguratorService;
 import it.nextworks.eem.sbi.validationComponent.ValidationService;
+import it.nextworks.eem.sbi.validationComponent.ValidationStatus;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
@@ -87,7 +88,7 @@ public class EemService{
     private ExperimentExecutionRepository experimentExecutionRepository;
 
     @Value("${eem.jenkins.validation.url}")
-    private String validationBaseUrl;
+    private String jenkinsValidationBaseUrl;
 
     @PostConstruct
     private void initStoredExperimentExecution() throws FailedOperationException{
@@ -283,7 +284,7 @@ public class EemService{
         log.info("Initializing new Experiment Execution Instance Manager with Id {}", experimentExecutionId);
         ExperimentExecutionInstanceManager eeim;
         try {
-            eeim = new ExperimentExecutionInstanceManager(experimentExecutionId, experimentExecutionRepository, subscriptionService, jenkinsService, validationService, runTimeConfiguratorService, catalogueService, msnoService, validationBaseUrl);
+            eeim = new ExperimentExecutionInstanceManager(experimentExecutionId, experimentExecutionRepository, subscriptionService, jenkinsService, validationService, runTimeConfiguratorService, catalogueService, msnoService, jenkinsValidationBaseUrl);
         }catch (NotExistingEntityException e) {
             throw new FailedOperationException(String.format("Initialization of Experiment Execution Instance Manager with Id %s failed : %s", experimentExecutionId, e.getMessage()));
         }

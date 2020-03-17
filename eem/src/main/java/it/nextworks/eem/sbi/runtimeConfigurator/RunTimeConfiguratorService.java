@@ -20,9 +20,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Service
-@ConditionalOnProperty(
-        value="eem.sbi.service.jenkins",
-        havingValue = "false")
 public class RunTimeConfiguratorService {
     private static final Logger log = LoggerFactory.getLogger(RunTimeConfiguratorService.class);
 

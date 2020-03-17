@@ -17,6 +17,7 @@ package it.nextworks.eem.rabbitMessage;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import it.nextworks.eem.sbi.validationComponent.ValidationStatus;
 
 public class ValidationResultInternalMessage extends InternalMessage {
 
@@ -26,11 +27,15 @@ public class ValidationResultInternalMessage extends InternalMessage {
 	@JsonProperty("result")
 	private String result;
 
+	@JsonProperty("validationStatus")
+	private ValidationStatus validationStatus;
+
 	@JsonCreator
-	public ValidationResultInternalMessage(@JsonProperty("result") String result, @JsonProperty("failed") boolean failed) {
+	public ValidationResultInternalMessage(@JsonProperty("validationStatus") ValidationStatus validationStatus, @JsonProperty("result") String result, @JsonProperty("failed") boolean failed) {
 		this.type = InternalMessageType.VALIDATION_RESULT;
 		this.result = result;
 		this.failed = failed;
+		this.validationStatus = validationStatus;
 	}
 
 	/**
@@ -44,4 +49,11 @@ public class ValidationResultInternalMessage extends InternalMessage {
 	 * @return failed
 	 */
 	public boolean isFailed() { return failed; }
+
+	/**
+	 * @return validationStatus
+	 */
+	public ValidationStatus getValidationStatus() {
+		return validationStatus;
+	}
 }
