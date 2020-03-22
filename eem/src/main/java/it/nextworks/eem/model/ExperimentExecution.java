@@ -75,6 +75,10 @@ public class ExperimentExecution {
   @JsonProperty("errorMessage")
   private String errorMessage;
 
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @JsonProperty("tenantId")
+  private String tenantId = "";
+
   @JsonIgnore
   private ExperimentRunType runType;
 
@@ -90,6 +94,7 @@ public class ExperimentExecution {
     this.executionId = executionId;
     return this;
   }
+
 
   /**
    * Identifier of the executed experiment
@@ -127,6 +132,19 @@ public class ExperimentExecution {
 
   public ExperimentExecution state(ExperimentState state) {
     this.state = state;
+    return this;
+  }
+
+  public String getTenantId() {
+    return tenantId;
+  }
+
+  public void setTenantId(String tenantId){
+    this.tenantId = tenantId;
+  }
+
+  public ExperimentExecution tenantId(String tenantId){
+    this.tenantId = tenantId;
     return this;
   }
 

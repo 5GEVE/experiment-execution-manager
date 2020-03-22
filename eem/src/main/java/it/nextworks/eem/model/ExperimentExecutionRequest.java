@@ -25,8 +25,16 @@ public class ExperimentExecutionRequest   {
   @JsonProperty("testCaseDescriptorConfiguration")
   private TestCaseDescrConfigMap testCaseDescriptorConfiguration = null;
 
+  @JsonProperty("tenantId")
+  private String tenantId = "";
+
   public ExperimentExecutionRequest nsInstanceId(String nsInstanceId) {
     this.nsInstanceId = nsInstanceId;
+    return this;
+  }
+
+  public ExperimentExecutionRequest tenantId(String tenantId){
+    this.tenantId = tenantId;
     return this;
   }
 
@@ -85,6 +93,13 @@ public class ExperimentExecutionRequest   {
     this.testCaseDescriptorConfiguration = testCaseDescriptorConfiguration;
   }
 
+  public String getTenantId(){
+    return this.tenantId;
+  }
+
+  public void setTenantId(String tenantId){
+    this.tenantId = tenantId;
+  }
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -102,7 +117,7 @@ public class ExperimentExecutionRequest   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(nsInstanceId, experimentDescriptorId, testCaseDescriptorConfiguration);
+    return Objects.hash(nsInstanceId, experimentDescriptorId, testCaseDescriptorConfiguration, tenantId);
   }
 
   @Override
@@ -112,6 +127,7 @@ public class ExperimentExecutionRequest   {
     
     sb.append("    nsInstanceId: ").append(toIndentedString(nsInstanceId)).append("\n");
     sb.append("    experimentDescriptorId: ").append(toIndentedString(experimentDescriptorId)).append("\n");
+    sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
     sb.append("    testCaseDescriptorConfiguration: ").append(toIndentedString(testCaseDescriptorConfiguration)).append("\n");
     sb.append("}");
     return sb.toString();

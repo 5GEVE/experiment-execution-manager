@@ -160,6 +160,7 @@ public class EemService{
         request.getTestCaseDescriptorConfiguration().forEach((x, y) -> testCaseExecutionConfigurations.add(new TestCaseExecutionConfiguration(x, y)));
         experimentExecution.experimentDescriptorId(request.getExperimentDescriptorId())
                 .nsInstanceId(request.getNsInstanceId())
+                .tenantId(request.getTenantId())
                 .testCaseDescriptorConfiguration(testCaseExecutionConfigurations)
                 .runType(runType);
         experimentExecutionRepository.saveAndFlush(experimentExecution);
