@@ -172,8 +172,6 @@ public class ValidationService {
             manageValidationError("Error while translating internal scheduling message in Json format", executionId);
         }
 
-        do {
-
             try {
                 Thread.sleep(5000);
                 statusResponse = ravApi.showTestcaseValidationStatus(executionId, tcDescriptorId);
@@ -182,7 +180,6 @@ public class ValidationService {
                 manageValidationError("Error trying to validate execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
             }
 
-        } while (statusResponse.getStatus().equalsIgnoreCase("VALIDATED"));
         //TODO insert some delay in performing queries..Every time EEM receives a VALIDATING message, it sends immediately a new queryValidationResult
 
         //TODO remove, handled via Notification Endpoint
@@ -190,7 +187,7 @@ public class ValidationService {
         String reportUrl = null;
         String topic = "lifecycle.validation." + executionId;
         //if VALIDATING
-        if(false)
+        if(! statusResponse.getStatus().equalsIgnoreCase("VALIDATED"))
             validationStatus = ValidationStatus.VALIDATING;
         else{
             validationStatus = ValidationStatus.VALIDATED;
@@ -203,8 +200,7 @@ public class ValidationService {
             log.error("Error while translating internal scheduling message in Json format");
             manageValidationError("Error while translating internal scheduling message in Json format", executionId);
         }
-        //cannot query validation stuff
-        //manageValidationError();
+
     }
 
     private void configurationStuff(String executionId){//TODO modify name
@@ -281,7 +277,8 @@ public class ValidationService {
         }
         VsBlueprint vsBlueprint = vsBlueprintResponse.getVsBlueprintInfo().get(0).getVsBlueprint();
         // TODO: Change once the siteName is provided
-        String siteName = "ITALY_TURIN".toLowerCase();
+
+        String siteName = expExecution.getSiteNames().get(0).toLowerCase();
         // TODO: Topic cannot be related to TCs. Will be sent all of them for each TC (should be changed interface on RAV)
         List<Topic> topics = new ArrayList<>();
         List<Publishtopic> publishTopics = new ArrayList<>();
@@ -293,8 +290,8 @@ public class ValidationService {
                 Topic topic = new Topic();
                 topic.brokerAddr(monitoringAddress+":"+monitoringPort);
                 topic.setMetric(amd.getName().toLowerCase());
-                topic.setTopic(executionId+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getName());
-                log.debug("topic created for RAV: {}", executionId+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getName());
+                topic.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getName());
+                log.debug("topic name created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getName());
                 topics.add(topic);
             }
         }
@@ -304,8 +301,8 @@ public class ValidationService {
             Topic topic = new Topic();
             topic.brokerAddr(monitoringAddress+":"+monitoringPort);
             topic.setMetric(amd.getName().toLowerCase());
-            topic.setTopic(executionId+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString()+"."+amd.getName());
-            log.debug("topic created for RAV: {}", executionId+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getName());
+            topic.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString()+"."+amd.getName());
+            log.debug("topic created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getName());
             topics.add(topic);
         }
 
@@ -315,8 +312,8 @@ public class ValidationService {
             Topic topic = new Topic();
             topic.brokerAddr(monitoringAddress+":"+monitoringPort);
             topic.setMetric(im.getName().toLowerCase());
-            topic.setTopic(executionId+"."+siteName+"."+MetricDataType.INFRASTRUCTURE_METRIC.toString()+"."+im.getName());
-            log.debug("topic created for RAV: {}", executionId+"."+siteName+"."+ MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getName());
+            topic.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.INFRASTRUCTURE_METRIC.toString()+"."+im.getName());
+            log.debug("topic created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getName());
             topics.add(topic);
         }
 
@@ -326,8 +323,8 @@ public class ValidationService {
             Publishtopic pt = new Publishtopic();
             pt.setBrokerAddr(monitoringAddress+":"+monitoringPort);
             pt.setKpi(kpi.getName());
-            pt.setTopic(executionId+"."+siteName+"."+MetricDataType.KPI.toString()+"."+kpi.getName());
-            log.debug("KPI topics created for RAV: {}", executionId+"."+siteName+"."+ MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getName());
+            pt.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.KPI.toString()+"."+kpi.getName());
+            log.debug("KPI topics created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getName());
             publishTopics.add(pt);
         }
 
@@ -366,26 +363,7 @@ public class ValidationService {
             log.error("Configuration action failed");
             manageValidationError("Configuration action failed", executionId);
         }
-//        try {//TODO remove
-//            log.debug("Configuring the experiment validation");
-//            Thread.sleep(5000);
-//        } catch (InterruptedException e) {
-//            log.debug("Sleep error");
-//        }
-//
-//        //TODO remove, handled via Notification Endpoint
-//        //configuration ok
-//        String configuration = "OK";
-//        String topic = "lifecycle.validation." + executionId;
-//        InternalMessage internalMessage = new ValidationResultInternalMessage(ValidationStatus.CONFIGURED, "Validation ok", false);
-//        try {
-//            sendMessageToQueue(internalMessage, topic);
-//        } catch (JsonProcessingException e) {
-//            log.error("Error while translating internal scheduling message in Json format");
-//            manageValidationError("Error while translating internal scheduling message in Json format", executionId);
-//        }
-        //configuration ko
-        //manageValidationError();
+
     }
 
     private void terminationStuff(String executionId){

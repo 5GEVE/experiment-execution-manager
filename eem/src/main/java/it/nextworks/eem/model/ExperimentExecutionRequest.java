@@ -1,5 +1,6 @@
 package it.nextworks.eem.model;
 
+import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -26,7 +27,13 @@ public class ExperimentExecutionRequest   {
   private TestCaseDescrConfigMap testCaseDescriptorConfiguration = null;
 
   @JsonProperty("tenantId")
-  private String tenantId = "";
+  private String tenantId;
+
+  @JsonProperty("siteNames")
+  private List<String> siteNames;
+
+  @JsonProperty("experimentId")
+  private String experimentId;
 
   public ExperimentExecutionRequest nsInstanceId(String nsInstanceId) {
     this.nsInstanceId = nsInstanceId;
@@ -58,6 +65,19 @@ public class ExperimentExecutionRequest   {
     return this;
   }
 
+  public ExperimentExecutionRequest siteNames(List<String> siteNames) {
+    if (this.siteNames != null){
+      for (String site: siteNames)
+        this.siteNames.add(site);
+    }
+    return this;
+  }
+
+
+  public ExperimentExecutionRequest experimentId(String experimentId){
+    this.experimentId = experimentId;
+    return this;
+  }
   /**
    * Get experimentDescriptorId
    * @return experimentDescriptorId
@@ -99,6 +119,25 @@ public class ExperimentExecutionRequest   {
 
   public void setTenantId(String tenantId){
     this.tenantId = tenantId;
+  }
+
+  public List<String> getSiteNames() {
+    return siteNames;
+  }
+
+  public void setSiteNames(List<String> siteNames) {
+    if (siteNames != null) {
+      for (String site : siteNames)
+        this.siteNames.add(site);
+    }
+  }
+
+  public String getExperimentId() {
+    return experimentId;
+  }
+
+  public void setExperimentId(String experimentId) {
+    this.experimentId = experimentId;
   }
 
   @Override

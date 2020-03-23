@@ -75,9 +75,19 @@ public class ExperimentExecution {
   @JsonProperty("errorMessage")
   private String errorMessage;
 
-  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @JsonIgnore
   @JsonProperty("tenantId")
   private String tenantId = "";
+
+  @JsonIgnore
+  @JsonProperty("siteNames")
+  private List<String> siteNames;
+
+  @JsonIgnore
+  @JsonProperty("experimentId")
+  private String experimentId;
+
+
 
   @JsonIgnore
   private ExperimentRunType runType;
@@ -305,6 +315,31 @@ public class ExperimentExecution {
 
   public void setRunType(ExperimentRunType runType) {
     this.runType = runType;
+  }
+
+  public List<String> getSiteNames() {
+    return siteNames;
+  }
+
+  public void setSiteNames(List<String> siteNames) {
+    this.siteNames = siteNames;
+  }
+
+  public ExperimentExecution siteNames(List<String> siteNames){
+    this.siteNames = siteNames;
+    return this;
+  }
+  public String getExperimentId() {
+    return experimentId;
+  }
+
+  public void setExperimentId(String experimentId) {
+    this.experimentId = experimentId;
+  }
+
+  public ExperimentExecution experimentId(String experimentId){
+    this.executionId = experimentId;
+    return this;
   }
 
   @Override
