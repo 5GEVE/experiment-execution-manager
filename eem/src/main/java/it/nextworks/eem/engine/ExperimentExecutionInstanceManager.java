@@ -326,7 +326,7 @@ public class ExperimentExecutionInstanceManager {
                     //Validation is done by Jenkins during test case execution
                     processValidationResult(new ValidationResultInternalMessage(ValidationStatus.VALIDATED,"Validation done by Jenkins", false));
                 }
-            }else if(currentState.equals(ExperimentState.RUNNING_STEP) || (currentState.equals(ExperimentState.RUNNING) && interruptRunning)) {
+            } else if(currentState.equals(ExperimentState.RUNNING_STEP) || (currentState.equals(ExperimentState.RUNNING) && interruptRunning)) {
                 //Pause experiment execution if the run type is RUN_IN_STEPS or if requested
                 if(updateAndNotifyExperimentExecutionState(ExperimentState.PAUSED)) {
                     interruptRunning = false;

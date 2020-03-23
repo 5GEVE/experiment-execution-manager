@@ -1,5 +1,6 @@
 package it.nextworks.eem.model;
 
+import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -25,8 +26,22 @@ public class ExperimentExecutionRequest   {
   @JsonProperty("testCaseDescriptorConfiguration")
   private TestCaseDescrConfigMap testCaseDescriptorConfiguration = null;
 
+  @JsonProperty("tenantId")
+  private String tenantId;
+
+  @JsonProperty("siteNames")
+  private List<String> siteNames;
+
+  @JsonProperty("experimentId")
+  private String experimentId;
+
   public ExperimentExecutionRequest nsInstanceId(String nsInstanceId) {
     this.nsInstanceId = nsInstanceId;
+    return this;
+  }
+
+  public ExperimentExecutionRequest tenantId(String tenantId){
+    this.tenantId = tenantId;
     return this;
   }
 
@@ -50,6 +65,19 @@ public class ExperimentExecutionRequest   {
     return this;
   }
 
+  public ExperimentExecutionRequest siteNames(List<String> siteNames) {
+    if (this.siteNames != null){
+      for (String site: siteNames)
+        this.siteNames.add(site);
+    }
+    return this;
+  }
+
+
+  public ExperimentExecutionRequest experimentId(String experimentId){
+    this.experimentId = experimentId;
+    return this;
+  }
   /**
    * Get experimentDescriptorId
    * @return experimentDescriptorId
@@ -85,6 +113,32 @@ public class ExperimentExecutionRequest   {
     this.testCaseDescriptorConfiguration = testCaseDescriptorConfiguration;
   }
 
+  public String getTenantId(){
+    return this.tenantId;
+  }
+
+  public void setTenantId(String tenantId){
+    this.tenantId = tenantId;
+  }
+
+  public List<String> getSiteNames() {
+    return siteNames;
+  }
+
+  public void setSiteNames(List<String> siteNames) {
+    if (siteNames != null) {
+      for (String site : siteNames)
+        this.siteNames.add(site);
+    }
+  }
+
+  public String getExperimentId() {
+    return experimentId;
+  }
+
+  public void setExperimentId(String experimentId) {
+    this.experimentId = experimentId;
+  }
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -102,7 +156,7 @@ public class ExperimentExecutionRequest   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(nsInstanceId, experimentDescriptorId, testCaseDescriptorConfiguration);
+    return Objects.hash(nsInstanceId, experimentDescriptorId, testCaseDescriptorConfiguration, tenantId);
   }
 
   @Override
@@ -112,6 +166,7 @@ public class ExperimentExecutionRequest   {
     
     sb.append("    nsInstanceId: ").append(toIndentedString(nsInstanceId)).append("\n");
     sb.append("    experimentDescriptorId: ").append(toIndentedString(experimentDescriptorId)).append("\n");
+    sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
     sb.append("    testCaseDescriptorConfiguration: ").append(toIndentedString(testCaseDescriptorConfiguration)).append("\n");
     sb.append("}");
     return sb.toString();

@@ -76,6 +76,20 @@ public class ExperimentExecution {
   private String errorMessage;
 
   @JsonIgnore
+  @JsonProperty("tenantId")
+  private String tenantId = "";
+
+  @JsonIgnore
+  @JsonProperty("siteNames")
+  private List<String> siteNames;
+
+  @JsonIgnore
+  @JsonProperty("experimentId")
+  private String experimentId;
+
+
+
+  @JsonIgnore
   private ExperimentRunType runType;
 
   public Long getId() {
@@ -90,6 +104,7 @@ public class ExperimentExecution {
     this.executionId = executionId;
     return this;
   }
+
 
   /**
    * Identifier of the executed experiment
@@ -127,6 +142,19 @@ public class ExperimentExecution {
 
   public ExperimentExecution state(ExperimentState state) {
     this.state = state;
+    return this;
+  }
+
+  public String getTenantId() {
+    return tenantId;
+  }
+
+  public void setTenantId(String tenantId){
+    this.tenantId = tenantId;
+  }
+
+  public ExperimentExecution tenantId(String tenantId){
+    this.tenantId = tenantId;
     return this;
   }
 
@@ -287,6 +315,31 @@ public class ExperimentExecution {
 
   public void setRunType(ExperimentRunType runType) {
     this.runType = runType;
+  }
+
+  public List<String> getSiteNames() {
+    return siteNames;
+  }
+
+  public void setSiteNames(List<String> siteNames) {
+    this.siteNames = siteNames;
+  }
+
+  public ExperimentExecution siteNames(List<String> siteNames){
+    this.siteNames = siteNames;
+    return this;
+  }
+  public String getExperimentId() {
+    return experimentId;
+  }
+
+  public void setExperimentId(String experimentId) {
+    this.experimentId = experimentId;
+  }
+
+  public ExperimentExecution experimentId(String experimentId){
+    this.executionId = experimentId;
+    return this;
   }
 
   @Override
