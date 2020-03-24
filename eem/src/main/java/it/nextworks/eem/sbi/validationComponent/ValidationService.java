@@ -303,7 +303,7 @@ public class ValidationService {
             Topic topic = new Topic();
             topic.brokerAddr(monitoringAddress+":"+monitoringPort);
             topic.setMetric(amd.getMetricId().toLowerCase());
-            topic.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString()+"."+amd.getMetricId());
+            topic.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
             log.debug("topic created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
             topics.add(topic);
         }
@@ -314,7 +314,7 @@ public class ValidationService {
             Topic topic = new Topic();
             topic.brokerAddr(monitoringAddress+":"+monitoringPort);
             topic.setMetric(im.getMetricId().toLowerCase());
-            topic.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.INFRASTRUCTURE_METRIC.toString()+"."+im.getMetricId());
+            topic.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getMetricId());
             log.debug("topic created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getMetricId());
             topics.add(topic);
         }
@@ -325,7 +325,7 @@ public class ValidationService {
             Publishtopic pt = new Publishtopic();
             pt.setBrokerAddr(monitoringAddress+":"+monitoringPort);
             pt.setKpi(kpi.getKpiId());
-            pt.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.KPI.toString()+"."+kpi.getKpiId());
+            pt.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
             log.debug("KPI topics created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
             publishTopics.add(pt);
         }
