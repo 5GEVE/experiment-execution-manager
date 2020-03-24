@@ -289,9 +289,9 @@ public class ValidationService {
             for (ApplicationMetric amd : ctxB.getApplicationMetrics()) {
                 Topic topic = new Topic();
                 topic.brokerAddr(monitoringAddress+":"+monitoringPort);
-                topic.setMetric(amd.getName().toLowerCase());
-                topic.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getName());
-                log.debug("topic name created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getName());
+                topic.setMetric(amd.getMetricId().toLowerCase());
+                topic.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
+                log.debug("topic name created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
                 topics.add(topic);
             }
         }
@@ -300,9 +300,9 @@ public class ValidationService {
         for (ApplicationMetric amd : vsBlueprint.getApplicationMetrics()){
             Topic topic = new Topic();
             topic.brokerAddr(monitoringAddress+":"+monitoringPort);
-            topic.setMetric(amd.getName().toLowerCase());
-            topic.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString()+"."+amd.getName());
-            log.debug("topic created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getName());
+            topic.setMetric(amd.getMetricId().toLowerCase());
+            topic.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString()+"."+amd.getMetricId());
+            log.debug("topic created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
             topics.add(topic);
         }
 
@@ -311,9 +311,9 @@ public class ValidationService {
         for (InfrastructureMetric im : expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint().getMetrics()){
             Topic topic = new Topic();
             topic.brokerAddr(monitoringAddress+":"+monitoringPort);
-            topic.setMetric(im.getName().toLowerCase());
-            topic.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.INFRASTRUCTURE_METRIC.toString()+"."+im.getName());
-            log.debug("topic created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getName());
+            topic.setMetric(im.getMetricId().toLowerCase());
+            topic.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.INFRASTRUCTURE_METRIC.toString()+"."+im.getMetricId());
+            log.debug("topic created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getMetricId());
             topics.add(topic);
         }
 
@@ -322,9 +322,9 @@ public class ValidationService {
         for (KeyPerformanceIndicator kpi : expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint().getKpis()){
             Publishtopic pt = new Publishtopic();
             pt.setBrokerAddr(monitoringAddress+":"+monitoringPort);
-            pt.setKpi(kpi.getName());
-            pt.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.KPI.toString()+"."+kpi.getName());
-            log.debug("KPI topics created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getName());
+            pt.setKpi(kpi.getKpiId());
+            pt.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.KPI.toString()+"."+kpi.getKpiId());
+            log.debug("KPI topics created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
             publishTopics.add(pt);
         }
 
