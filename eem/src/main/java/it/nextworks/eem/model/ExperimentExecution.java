@@ -80,6 +80,7 @@ public class ExperimentExecution {
   private String tenantId = "";
 
   @JsonIgnore
+  @ElementCollection(targetClass=String.class)
   @JsonProperty("siteNames")
   private List<String> siteNames;
 
