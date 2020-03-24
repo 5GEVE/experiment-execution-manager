@@ -252,7 +252,7 @@ public class ValidationService {
         List<CtxBlueprint> ctxBlueprintList = new ArrayList<>();
 
         for (String ctxBId : expBlueprint.getCtxBlueprintIds()){
-            parameters.put("CtxB_ID", ctxBId);
+            parameters.put("CTXB_ID", ctxBId);
             try {
                 contextBlueprints = catalogueService.queryCtxBlueprint(request);
                 if(contextBlueprints.getCtxBlueprintInfos().size() != 1 ){
@@ -265,7 +265,7 @@ public class ValidationService {
                 log.error("Unable to retrieve context blueprint identified with {} from the catalogue", ctxBId);
                 manageValidationError("Unable to retrieve context blueprint from the catalogue", executionId);
             }
-            parameters.remove("CtxB_ID");
+            parameters.remove("CTXB_ID");
         }
         log.debug("Retrieving VSBlueprint");
         parameters.put("VSB_ID", expBlueprint.getVsBlueprintId());//todo
@@ -341,8 +341,9 @@ public class ValidationService {
             model.setPublish(publishTopics);
             model.setTopics(topics);
             confDictTC.setConfiguration(model);
+            testCasesListConfig.add(confDictTC);
         }
-
+        confDict.setTestcases(testCasesListConfig);
 
         try {
             Call call = ravApi.setConfigurationExpCall(confDict, executionId, null, null);
