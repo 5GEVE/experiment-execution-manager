@@ -245,11 +245,13 @@ public class ValidationService {
             log.error("Unable to retrieve Experiment blueprint identified with {} from the catalogue", expDescriptor.getExpBlueprintId());
             manageValidationError("Unable to retrieve Experiment blueprint from the catalogue", executionId);
         }
+        ExpBlueprint expBlueprint = expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint();
         parameters.remove("ExpB_ID");
         log.debug("Going to retrieve Context Blueprint");
         QueryCtxBlueprintResponse contextBlueprints = null;
         List<CtxBlueprint> ctxBlueprintList = new ArrayList<>();
-        for (String ctxBId : expDescriptor.getTestCaseDescriptorIds()){
+
+        for (String ctxBId : expBlueprint.getCtxBlueprintIds()){
             parameters.put("CtxB_ID", ctxBId);
             try {
                 contextBlueprints = catalogueService.queryCtxBlueprint(request);
@@ -265,16 +267,14 @@ public class ValidationService {
             }
             parameters.remove("CtxB_ID");
         }
-        parameters.remove("CtxB_ID");
-
         log.debug("Retrieving VSBlueprint");
-        parameters.put("VSB_ID", expDescriptor.getVsDescriptorId());
+        parameters.put("VSB_ID", expBlueprint.getVsBlueprintId());//todo
         QueryVsBlueprintResponse vsBlueprintResponse = null;
         try{
             vsBlueprintResponse = catalogueService.queryVsBlueprint(request);
 
         } catch( Exception e4){
-            log.error("Unable to retrieve Virtual Service Blueprint identified with {} from the catalogue", expDescriptor.getVsDescriptorId());
+            log.error("Unable to retrieve Virtual Service Blueprint identified with {} from the catalogue", expBlueprint.getVsBlueprintId());
             manageValidationError("Unable to retrieve Virtual Service Blueprint from the catalogue", executionId);
         }
         VsBlueprint vsBlueprint = vsBlueprintResponse.getVsBlueprintInfo().get(0).getVsBlueprint();
