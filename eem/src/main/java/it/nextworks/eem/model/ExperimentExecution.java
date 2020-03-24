@@ -80,7 +80,9 @@ public class ExperimentExecution {
   private String tenantId = "";
 
   @JsonIgnore
-  @ElementCollection(targetClass=String.class)
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SELECT)
+  @Cascade(org.hibernate.annotations.CascadeType.ALL)
   @JsonProperty("siteNames")
   private List<String> siteNames = new ArrayList<>();
 
@@ -319,7 +321,7 @@ public class ExperimentExecution {
   }
 
   public List<String> getSiteNames() {
-    return siteNames;
+    return this.siteNames;
   }
 
   public void setSiteNames(List<String> siteNames) {
@@ -339,7 +341,7 @@ public class ExperimentExecution {
   }
 
   public ExperimentExecution experimentId(String experimentId){
-    this.executionId = experimentId;
+    this.experimentId = experimentId;
     return this;
   }
 

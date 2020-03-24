@@ -39,8 +39,10 @@ import java.util.*;
         havingValue = "false")
 public class ValidationService {
 
+    @Autowired
     private ExperimentExecutionRepository experimentExecutionRepository;
 
+    @Autowired
     private ExperimentCatalogueService catalogueService;
 
     private static final Logger log = LoggerFactory.getLogger(ValidationService.class);
