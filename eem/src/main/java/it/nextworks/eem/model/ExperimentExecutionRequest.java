@@ -1,5 +1,6 @@
 package it.nextworks.eem.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,7 +31,7 @@ public class ExperimentExecutionRequest   {
   private String tenantId;
 
   @JsonProperty("siteNames")
-  private List<String> siteNames;
+  private List<String> siteNames = new ArrayList<>();
 
   @JsonProperty("experimentId")
   private String experimentId;

@@ -82,7 +82,7 @@ public class ExperimentExecution {
   @JsonIgnore
   @ElementCollection(targetClass=String.class)
   @JsonProperty("siteNames")
-  private List<String> siteNames;
+  private List<String> siteNames = new ArrayList<>();
 
   @JsonIgnore
   @JsonProperty("experimentId")
