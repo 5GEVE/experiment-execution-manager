@@ -163,19 +163,19 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
     }
 
     private void queryValidationResultStuff(String executionId, String tcDescriptorId){//TODO modify name
-        StatusResponse statusResponse = null;
-        try {
-            Call call = ravApi.startTestcaseValidationCall(executionId, tcDescriptorId, null, null);
-            Response response = call.execute();
-            if (response.code() != 200){
-                log.error("Failed to start validation of execution {} and tcDiD {}: Response code  received {}", executionId, tcDescriptorId, response.code());
-                manageValidationError("Failed to start validation of execution " + executionId + " and tcDiD " + tcDescriptorId + ": Response code received " + response.code() , executionId);
-            }
-        } catch(Exception e1){
-            log.error("Failed to start validation of execution {} and tcDiD {}", executionId, tcDescriptorId);
-            e1.getMessage();
-            manageValidationError("Error while translating internal scheduling message in Json format", executionId);
-        }
+          StatusResponse statusResponse = null;
+//        try {
+//            Call call = ravApi.startTestcaseValidationCall(executionId, tcDescriptorId, null, null);
+//            Response response = call.execute();
+//            if (response.code() != 200){
+//                log.error("Failed to start validation of execution {} and tcDiD {}: Response code  received {}", executionId, tcDescriptorId, response.code());
+//                manageValidationError("Failed to start validation of execution " + executionId + " and tcDiD " + tcDescriptorId + ": Response code received " + response.code() , executionId);
+//            }
+//        } catch(Exception e1){
+//            log.error("Failed to start validation of execution {} and tcDiD {}", executionId, tcDescriptorId);
+//            e1.getMessage();
+//            manageValidationError("Error while translating internal scheduling message in Json format", executionId);
+//        }
 
             try {
                 Thread.sleep(5000);
