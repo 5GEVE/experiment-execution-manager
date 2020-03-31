@@ -17,7 +17,7 @@ package it.nextworks.eem.rabbitMessage;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import it.nextworks.eem.sbi.validationComponent.ValidationStatus;
+import it.nextworks.eem.sbi.rav.ValidationStatus;
 
 public class ValidationResultInternalMessage extends InternalMessage {
 

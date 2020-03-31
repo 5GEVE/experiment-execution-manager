@@ -1,13 +1,12 @@
 package it.nextworks.eem.engine;
 
 import com.offbytwo.jenkins.JenkinsServer;
-import com.offbytwo.jenkins.model.FolderJob;
 import it.nextworks.eem.model.*;
 import it.nextworks.eem.model.enumerate.ExperimentState;
 import it.nextworks.eem.model.enumerate.SubscriptionType;
 import it.nextworks.eem.repo.ExperimentExecutionRepository;
 import it.nextworks.eem.repo.ExperimentExecutionSubscriptionRepository;
-import it.nextworks.eem.sbi.jenkins.JenkinsService;
+import it.nextworks.eem.sbi.jenkins.JenkinsDriver;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +35,7 @@ public class EEMServiceTests {
     EemService eemService;
 
     @Autowired
-    JenkinsService jenkinsService;
+    JenkinsDriver jenkinsDriver;
 
     @Autowired
     ExperimentExecutionRepository experimentExecutionRepository;

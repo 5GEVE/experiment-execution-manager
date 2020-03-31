@@ -16,12 +16,15 @@ import it.nextworks.eem.model.ExperimentExecution;
 import it.nextworks.eem.model.ExperimentExecutionStateChangeNotification;
 import it.nextworks.eem.model.enumerate.ExperimentState;
 import it.nextworks.eem.repo.ExperimentExecutionRepository;
+import it.nextworks.eem.sbi.ConfiguratorService;
+import it.nextworks.eem.sbi.ExecutorService;
+import it.nextworks.eem.sbi.ValidatorService;
 import it.nextworks.eem.sbi.expcatalogue.ExperimentCatalogueService;
-import it.nextworks.eem.sbi.jenkins.JenkinsService;
+import it.nextworks.eem.sbi.jenkins.JenkinsDriver;
 import it.nextworks.eem.sbi.msno.MsnoService;
-import it.nextworks.eem.sbi.runtimeConfigurator.RunTimeConfiguratorService;
-import it.nextworks.eem.sbi.validationComponent.ValidationService;
-import it.nextworks.eem.sbi.validationComponent.ValidationStatus;
+import it.nextworks.eem.sbi.runtimeConfigurator.RCDriver;
+import it.nextworks.eem.sbi.rav.RAVDriver;
+import it.nextworks.eem.sbi.rav.ValidationStatus;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.*;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.*;
 import it.nextworks.nfvmano.libs.ifa.common.elements.Filter;
@@ -46,10 +49,11 @@ public class ExperimentExecutionInstanceManager {
     private ExperimentState currentState;
     private ExperimentRunType runType;
 
-    private JenkinsService jenkinsService;
-    private ValidationService validationService;
+    private ConfiguratorService configuratorService;
+    private ExecutorService executorService;
+    private ValidatorService validatorService;
+
     private EemSubscriptionService subscriptionService;
-    private RunTimeConfiguratorService runTimeConfiguratorService;
     private ExperimentCatalogueService catalogueService;
     private MsnoService msnoService;
     private ExperimentExecutionRepository experimentExecutionRepository;
@@ -70,9 +74,7 @@ public class ExperimentExecutionInstanceManager {
     private Iterator<Map.Entry<String, String>> testCasesIterator;
     private Map.Entry<String, String> runningTestCase;
 
-    private String jenkinsValidationBaseUrl;
-
-    public ExperimentExecutionInstanceManager(String executionId, ExperimentExecutionRepository experimentExecutionRepository, EemSubscriptionService subscriptionService, JenkinsService jenkinsService, ValidationService validationService, RunTimeConfiguratorService runTimeConfiguratorService, ExperimentCatalogueService catalogueService, MsnoService msnoService, String jenkinsValidationBaseUrl) throws NotExistingEntityException
+    public ExperimentExecutionInstanceManager(String executionId, ExperimentExecutionRepository experimentExecutionRepository, EemSubscriptionService subscriptionService, ConfiguratorService configuratorService, ExecutorService executorService, ValidatorService validatorService, ExperimentCatalogueService catalogueService, MsnoService msnoService) throws NotExistingEntityException
     {
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         if(!experimentExecutionOptional.isPresent())
@@ -85,12 +87,11 @@ public class ExperimentExecutionInstanceManager {
         this.interruptRunning = false;
         this.isExperimentConfigured = false;
         this.isValidationConfigured = false;
-        this.jenkinsService = jenkinsService;
-        this.validationService = validationService;
-        this.runTimeConfiguratorService = runTimeConfiguratorService;
+        this.configuratorService = configuratorService;
+        this.executorService = executorService;
+        this.validatorService = validatorService;
         this.catalogueService = catalogueService;
         this.msnoService = msnoService;
-        this.jenkinsValidationBaseUrl = jenkinsValidationBaseUrl;
         //Retrieve again all information for stored experiment executions
         if(!this.currentState.equals(ExperimentState.INIT)) {
             try {
@@ -103,24 +104,17 @@ public class ExperimentExecutionInstanceManager {
         //Restart experiment executions based on the current state
         switch(currentState){
             case CONFIGURING:
-                runTimeConfiguratorService.configureExperiment(executionId);
-                if(jenkinsService != null)//Validation is done by Jenkins during test case execution
-                    processValidationResult(new ValidationResultInternalMessage(ValidationStatus.CONFIGURED, "Validation done by Jenkins", false));
-                else
-                    validationService.configureExperiment(executionId);
+                configuratorService.configureExperiment(executionId);
+                validatorService.configureExperiment(executionId);
                 break;
             case RUNNING: case RUNNING_STEP:
                 runExperimentExecutionTestCase();
                 break;
             case VALIDATING:
-                if(jenkinsService != null)//Validation is done by Jenkins during test case execution
-                    processValidationResult(new ValidationResultInternalMessage(ValidationStatus.VALIDATED, "Validation done by Jenkins", false));
-                else{
-                    //Consider stopTcValidation already sent
-                    if(testCasesIterator.hasNext()) {
-                        runningTestCase = testCasesIterator.next();
-                        validationService.stopTcValidation(executionId, runningTestCase.getKey());
-                    }
+                //Consider startTcValidation already sent
+                if(testCasesIterator.hasNext()) {
+                    runningTestCase = testCasesIterator.next();
+                    validatorService.stopTcValidation(executionId, runningTestCase.getKey());
                 }
                 break;
             case ABORTING:
@@ -231,11 +225,8 @@ public class ExperimentExecutionInstanceManager {
                 manageExperimentExecutionError(e.getMessage());
                 return;
             }
-            runTimeConfiguratorService.configureExperiment(executionId);
-            if(jenkinsService != null)//Validation is done by Jenkins during test case execution
-                processValidationResult(new ValidationResultInternalMessage(ValidationStatus.CONFIGURED,"Validation done by Jenkins", false));
-            else
-                validationService.configureExperiment(executionId);
+            configuratorService.configureExperiment(executionId);
+            validatorService.configureExperiment(executionId);
         }
     }
 
@@ -268,10 +259,8 @@ public class ExperimentExecutionInstanceManager {
                 if (updateAndNotifyExperimentExecutionState(ExperimentState.ABORTED))
                     log.info("Experiment Execution with Id {} aborted", executionId);
             }
-            else if(jenkinsService != null)
-                jenkinsService.abortTestCase(executionId, runningTestCase.getKey());
             else
-                runTimeConfiguratorService.abortTestCase(executionId, runningTestCase.getKey());
+                executorService.abortTestCase(executionId, runningTestCase.getKey());
         }
     }
 
@@ -308,36 +297,9 @@ public class ExperimentExecutionInstanceManager {
             log.info("Experiment Execution with Id {} aborted", executionId);
             return;
         }
-        if(jenkinsService == null) {
-            if(updateAndNotifyExperimentExecutionState(ExperimentState.VALIDATING))
-                log.info("Validating TC with Id {} of Experiment Execution with Id {}", testCaseId, executionId);
-            validationService.stopTcValidation(executionId, testCaseId);
-        }
-        else{
-            //Remove completed test case from the list
-            testCasesIterator.remove();
-            if(testCases.size() == 0){
-                experimentExecution.reportUrl(this.jenkinsValidationBaseUrl + executionId + "/index.html");
-                experimentExecutionRepository.saveAndFlush(experimentExecution);
-                // TODO: jenkinsIP/EXEC_ID/index.html
-                //Validate experiment execution if test cases are no longer present
-                if(updateAndNotifyExperimentExecutionState(ExperimentState.VALIDATING)) {
-                    log.info("Validating Experiment Execution with Id {}", executionId);
-                    //Validation is done by Jenkins during test case execution
-                    processValidationResult(new ValidationResultInternalMessage(ValidationStatus.VALIDATED,"Validation done by Jenkins", false));
-                }
-            } else if(currentState.equals(ExperimentState.RUNNING_STEP) || (currentState.equals(ExperimentState.RUNNING) && interruptRunning)) {
-                //Pause experiment execution if the run type is RUN_IN_STEPS or if requested
-                if(updateAndNotifyExperimentExecutionState(ExperimentState.PAUSED)) {
-                    interruptRunning = false;
-                    log.info("Experiment Execution with Id {} paused", executionId);
-                }
-            }else if(currentState.equals(ExperimentState.RUNNING)){
-                //Run another test case if run type is RUN_ALL
-                runExperimentExecutionTestCase();
-            }else {
-                log.debug("State of the Execution Experiment is not correct");
-            }
+        if(updateAndNotifyExperimentExecutionState(ExperimentState.VALIDATING)) {
+            log.info("Validating TC with Id {} of Experiment Execution with Id {}", testCaseId, executionId);
+            validatorService.stopTcValidation(executionId, testCaseId);
         }
     }
 
@@ -353,47 +315,41 @@ public class ExperimentExecutionInstanceManager {
                     processConfigurationResult(new ConfigurationResultInternalMessage("Validation configured", false));
                 break;
             case ACQUIRING:
-                runTimeConfiguratorService.runTestCase(executionId, runningTestCase.getKey(), runningTestCase.getValue());
+                executorService.runTestCase(executionId, runningTestCase.getKey(), runningTestCase.getValue());
                 break;
             case VALIDATING:
-                validationService.queryValidationResult(executionId, runningTestCase.getKey());
+                validatorService.queryValidationResult(executionId, runningTestCase.getKey());
                 break;
             case VALIDATED:
-                if(jenkinsService != null){
-                    if(updateAndNotifyExperimentExecutionState(ExperimentState.COMPLETED)) {
-                        log.info("Experiment Execution with Id {} validated", executionId);
-                        log.info("Experiment Execution with Id {} completed", executionId);
-                    }
-                }else{
-                    Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
-                    if(!experimentExecutionOptional.isPresent()){
-                        log.error("Experiment Execution with Id {} not found", executionId);
-                        return;
-                    }
-                    ExperimentExecution experimentExecution = experimentExecutionOptional.get();
-                    testCasesIterator.remove();
-                    if(testCases.size() == 0){
-                        experimentExecution.setReportUrl(msg.getResult());
-                        experimentExecutionRepository.saveAndFlush(experimentExecution);
-                        //Complete experiment execution if test cases are no longer present
-                        if(updateAndNotifyExperimentExecutionState(ExperimentState.COMPLETED)) {
-                            log.info("Experiment Execution with Id {} completed", executionId);
-                            validationService.terminateExperiment(executionId);
-                        }
-                    }else if(runType.equals(ExperimentRunType.RUN_IN_STEPS) || (runType.equals(ExperimentRunType.RUN_ALL) && interruptRunning)) {
-                        //Pause experiment execution if the run type is RUN_IN_STEPS or if requested
-                        if(updateAndNotifyExperimentExecutionState(ExperimentState.PAUSED)) {
-                            interruptRunning = false;
-                            log.info("Experiment Execution with Id {} paused", executionId);
-                        }
-                    }else if(runType.equals(ExperimentRunType.RUN_ALL)){
-                        //Run another test case if run type is RUN_ALL
-                        if(updateAndNotifyExperimentExecutionState(ExperimentState.RUNNING))
-                            runExperimentExecutionTestCase();
-                    }else {
-                        log.debug("State of the Execution Experiment is not correct");
-                    }
+                Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
+                if(!experimentExecutionOptional.isPresent()){
+                    log.error("Experiment Execution with Id {} not found", executionId);
+                    return;
                 }
+                ExperimentExecution experimentExecution = experimentExecutionOptional.get();
+                testCasesIterator.remove();
+                if(testCases.size() == 0){
+                    experimentExecution.setReportUrl(msg.getResult());
+                    experimentExecutionRepository.saveAndFlush(experimentExecution);
+                    //Complete experiment execution if test cases are no longer present
+                    if(updateAndNotifyExperimentExecutionState(ExperimentState.COMPLETED)) {
+                        log.info("Experiment Execution with Id {} completed", executionId);
+                        validatorService.terminateExperiment(executionId);
+                    }
+                }else if(runType.equals(ExperimentRunType.RUN_IN_STEPS) || (runType.equals(ExperimentRunType.RUN_ALL) && interruptRunning)) {
+                    //Pause experiment execution if the run type is RUN_IN_STEPS or if requested
+                    if(updateAndNotifyExperimentExecutionState(ExperimentState.PAUSED)) {
+                        interruptRunning = false;
+                        log.info("Experiment Execution with Id {} paused", executionId);
+                    }
+                }else if(runType.equals(ExperimentRunType.RUN_ALL)){
+                    //Run another test case if run type is RUN_ALL
+                    if(updateAndNotifyExperimentExecutionState(ExperimentState.RUNNING))
+                        runExperimentExecutionTestCase();
+                }else {
+                    log.debug("State of the Execution Experiment is not correct");
+                }
+
         }
     }
 
@@ -434,11 +390,7 @@ public class ExperimentExecutionInstanceManager {
             runningTestCase = testCasesIterator.next();
             String tcDescriptorId = runningTestCase.getKey();
             log.info("Running Experiment Execution Test Case with Id {}", tcDescriptorId);
-            if(jenkinsService != null)
-                jenkinsService.runTestCase(executionId, tcDescriptorId, runningTestCase.getValue());
-            else
-                validationService.startTcValidation(executionId, tcDescriptorId);
-                //runTimeConfiguratorService.runTestCase(executionId, tcDescriptorId, runningTestCase.getValue());
+            validatorService.startTcValidation(executionId, tcDescriptorId);
         }else
             log.debug("No more Test Cases to run");
     }

@@ -11,12 +11,14 @@ import it.nextworks.eem.rabbitMessage.*;
 import it.nextworks.eem.model.*;
 import it.nextworks.eem.model.enumerate.ExperimentState;
 import it.nextworks.eem.repo.ExperimentExecutionRepository;
+import it.nextworks.eem.sbi.ConfiguratorService;
+import it.nextworks.eem.sbi.ExecutorService;
+import it.nextworks.eem.sbi.ValidatorService;
 import it.nextworks.eem.sbi.expcatalogue.ExperimentCatalogueService;
-import it.nextworks.eem.sbi.jenkins.JenkinsService;
+import it.nextworks.eem.sbi.jenkins.JenkinsDriver;
 import it.nextworks.eem.sbi.msno.MsnoService;
-import it.nextworks.eem.sbi.runtimeConfigurator.RunTimeConfiguratorService;
-import it.nextworks.eem.sbi.validationComponent.ValidationService;
-import it.nextworks.eem.sbi.validationComponent.ValidationStatus;
+import it.nextworks.eem.sbi.runtimeConfigurator.RCDriver;
+import it.nextworks.eem.sbi.rav.RAVDriver;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
@@ -69,14 +71,14 @@ public class EemService{
     @Autowired
     private EemSubscriptionService subscriptionService;
 
-    @Autowired(required=false)
-    private JenkinsService jenkinsService;
+    @Autowired
+    private ConfiguratorService configuratorService;
 
-    @Autowired(required=false)
-    private ValidationService validationService;
+    @Autowired
+    private ExecutorService executorService;
 
-    @Autowired(required=false)
-    private RunTimeConfiguratorService runTimeConfiguratorService;
+    @Autowired
+    private ValidatorService validatorService;
 
     @Autowired
     private ExperimentCatalogueService catalogueService;
@@ -86,9 +88,6 @@ public class EemService{
 
     @Autowired
     private ExperimentExecutionRepository experimentExecutionRepository;
-
-    @Value("${eem.jenkins.validation.url}")
-    private String jenkinsValidationBaseUrl;
 
     @PostConstruct
     private void initStoredExperimentExecution() throws FailedOperationException{
@@ -287,7 +286,7 @@ public class EemService{
         log.info("Initializing new Experiment Execution Instance Manager with Id {}", experimentExecutionId);
         ExperimentExecutionInstanceManager eeim;
         try {
-            eeim = new ExperimentExecutionInstanceManager(experimentExecutionId, experimentExecutionRepository, subscriptionService, jenkinsService, validationService, runTimeConfiguratorService, catalogueService, msnoService, jenkinsValidationBaseUrl);
+            eeim = new ExperimentExecutionInstanceManager(experimentExecutionId, experimentExecutionRepository, subscriptionService, configuratorService, executorService, validatorService, catalogueService, msnoService);
         }catch (NotExistingEntityException e) {
             throw new FailedOperationException(String.format("Initialization of Experiment Execution Instance Manager with Id %s failed : %s", experimentExecutionId, e.getMessage()));
         }

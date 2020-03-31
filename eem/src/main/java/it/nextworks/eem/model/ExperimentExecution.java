@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import it.nextworks.eem.model.enumerate.ExperimentRunType;
 import it.nextworks.eem.model.enumerate.ExperimentState;
-import it.nextworks.eem.sbi.validationComponent.ValidationStatus;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import org.hibernate.annotations.*;
 import org.springframework.validation.annotation.Validated;
