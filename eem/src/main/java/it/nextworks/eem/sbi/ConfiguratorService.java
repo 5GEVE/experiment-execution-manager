@@ -1,6 +1,7 @@
 package it.nextworks.eem.sbi;
 
 import it.nextworks.eem.configuration.ConfigurationParameters;
+import it.nextworks.eem.sbi.dummyDrivers.DummyConfiguratorDriver;
 import it.nextworks.eem.sbi.enums.ConfiguratorType;
 import it.nextworks.eem.sbi.interfaces.ConfiguratorServiceProviderInterface;
 import it.nextworks.eem.sbi.runtimeConfigurator.RCDriver;
@@ -37,6 +38,8 @@ public class ConfiguratorService implements ConfiguratorServiceProviderInterface
         log.debug("Initializing Configurator driver");
         if (configuratorType.equals(ConfiguratorType.RC))
             this.driver = RCDriver.getInstance(rabbitTemplate, messageExchange);
+        else if (configuratorType.equals((ConfiguratorType.DUMMY)))
+            this.driver = new DummyConfiguratorDriver();
         else
             log.error("Wrong configuration for Configurator service.");
     }

@@ -2,6 +2,7 @@ package it.nextworks.eem.sbi;
 
 import it.nextworks.eem.configuration.ConfigurationParameters;
 import it.nextworks.eem.repo.ExperimentExecutionRepository;
+import it.nextworks.eem.sbi.dummyDrivers.DummyValidatorDriver;
 import it.nextworks.eem.sbi.enums.ValidatorType;
 import it.nextworks.eem.sbi.expcatalogue.ExperimentCatalogueService;
 import it.nextworks.eem.sbi.interfaces.ValidatorServiceProviderInterface;
@@ -70,6 +71,8 @@ public class ValidatorService implements ValidatorServiceProviderInterface {
             this.driver = RAVDriver.getInstance(ravURI, monitoringAddress, monitoringPort, catalogueService, experimentExecutionRepository, rabbitTemplate, messageExchange);
         else if (validatorType.equals(ValidatorType.JENKINS))
             this.driver = JenkinsDriver.getInstance(jenkinsURI, jenkinsUsername, jenkinsPassword, jenkinsValidationBaseUrl, rabbitTemplate, messageExchange);
+        else if (validatorType.equals(ValidatorType.DUMMY))
+            this.driver = new DummyValidatorDriver();
         else
             log.error("Wrong configuration for Executor service.");
     }

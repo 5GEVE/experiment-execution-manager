@@ -1,6 +1,7 @@
 package it.nextworks.eem.sbi;
 
 import it.nextworks.eem.configuration.ConfigurationParameters;
+import it.nextworks.eem.sbi.dummyDrivers.DummyExecutorDriver;
 import it.nextworks.eem.sbi.enums.ExecutorType;
 import it.nextworks.eem.sbi.interfaces.ExecutorServiceProviderInterface;
 import it.nextworks.eem.sbi.jenkins.JenkinsDriver;
@@ -53,6 +54,8 @@ public class ExecutorService implements ExecutorServiceProviderInterface {
             this.driver = RCDriver.getInstance(rabbitTemplate, messageExchange);
         else if (executorType.equals(ExecutorType.JENKINS))
             this.driver = JenkinsDriver.getInstance(jenkinsURI, jenkinsUsername, jenkinsPassword, jenkinsValidationBaseUrl, rabbitTemplate, messageExchange);
+        else if (executorType.equals(ExecutorType.DUMMY))
+            this.driver = new DummyExecutorDriver();
         else
             log.error("Wrong configuration for Executor service.");
     }

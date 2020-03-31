@@ -15,14 +15,16 @@ spring.jackson.serialization.WRITE_DATES_AS_TIMESTAMPS=false
 ##BINDING TOMCAT ON MANAGEMENT IP ADDRESS
 server.contextPath=/
 server.port=8080
+##COMPONENTS TYPE
+configurator.type=RC
+executor.type=JENKINS
+validator.type=RAV
 ##RABBITMQ
 spring.rabbitmq.host=localhost
 ##PORTAL CATALOGUE
 portal.catalogue.host=_CATALOGUE_
 ##MSNO
 msno.host=_MSNO_
-##USE JENKINS
-eem.sbi.service.jenkins=true
 ## Jenkins Data
 eem.jenkins.uri=http://10.0.8.30:8080
 eem.jenkins.username=admin
