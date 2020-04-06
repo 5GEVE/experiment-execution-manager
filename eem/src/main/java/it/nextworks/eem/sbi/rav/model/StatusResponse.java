@@ -13,14 +13,12 @@
 package it.nextworks.eem.sbi.rav.model;
 
 import java.util.Objects;
-
 import com.google.gson.annotations.SerializedName;
-
 /**
  * StatusResponse
  */
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2020-03-18T10:36:45.404Z[GMT]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2020-04-06T19:10:49.373Z[GMT]")
 public class StatusResponse {
   @SerializedName("status")
   private String status = null;

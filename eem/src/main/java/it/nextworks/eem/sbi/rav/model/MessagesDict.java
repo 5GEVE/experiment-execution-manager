@@ -15,49 +15,29 @@ package it.nextworks.eem.sbi.rav.model;
 import java.util.Objects;
 import com.google.gson.annotations.SerializedName;
 /**
- * ControlResponse
+ * MessagesDict
  */
 
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2020-04-06T19:10:49.373Z[GMT]")
-public class ControlResponse {
-  @SerializedName("expID")
-  private String expID = null;
+public class MessagesDict {
+  @SerializedName("exampleExpId1")
+  private String exampleExpId1 = null;
 
-  @SerializedName("status")
-  private String status = null;
-
-  public ControlResponse expID(String expID) {
-    this.expID = expID;
+  public MessagesDict exampleExpId1(String exampleExpId1) {
+    this.exampleExpId1 = exampleExpId1;
     return this;
   }
 
    /**
-   * Get expID
-   * @return expID
+   * Get exampleExpId1
+   * @return exampleExpId1
   **/
-  public String getExpID() {
-    return expID;
+  public String getExampleExpId1() {
+    return exampleExpId1;
   }
 
-  public void setExpID(String expID) {
-    this.expID = expID;
-  }
-
-  public ControlResponse status(String status) {
-    this.status = status;
-    return this;
-  }
-
-   /**
-   * Get status
-   * @return status
-  **/
-  public String getStatus() {
-    return status;
-  }
-
-  public void setStatus(String status) {
-    this.status = status;
+  public void setExampleExpId1(String exampleExpId1) {
+    this.exampleExpId1 = exampleExpId1;
   }
 
 
@@ -69,24 +49,22 @@ public class ControlResponse {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ControlResponse controlResponse = (ControlResponse) o;
-    return Objects.equals(this.expID, controlResponse.expID) &&
-        Objects.equals(this.status, controlResponse.status);
+    MessagesDict messagesDict = (MessagesDict) o;
+    return Objects.equals(this.exampleExpId1, messagesDict.exampleExpId1);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(expID, status);
+    return Objects.hash(exampleExpId1);
   }
 
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ControlResponse {\n");
+    sb.append("class MessagesDict {\n");
     
-    sb.append("    expID: ").append(toIndentedString(expID)).append("\n");
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("    exampleExpId1: ").append(toIndentedString(exampleExpId1)).append("\n");
     sb.append("}");
     return sb.toString();
   }

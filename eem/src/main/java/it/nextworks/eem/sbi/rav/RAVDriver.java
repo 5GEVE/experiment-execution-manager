@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Response;
-import it.nextworks.eem.configuration.ConfigurationParameters;
 import it.nextworks.eem.model.ExperimentExecution;
 import it.nextworks.eem.rabbitMessage.InternalMessage;
 import it.nextworks.eem.rabbitMessage.ValidationResultInternalMessage;
@@ -25,11 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import javax.annotation.PostConstruct;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 public class RAVDriver implements ValidatorServiceProviderInterface {
@@ -208,7 +204,7 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
 
     }
 
-    private void configurationStuff(String executionId){//TODO modify name
+    private void configurationStuff(String executionId){
         //TODO configure experiment validation
         // Get experimentDescriptorId from experiment execution id
         Optional<ExperimentExecution> expExecutionInstance = experimentExecutionRepository.findByExecutionId(executionId);
@@ -281,7 +277,6 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
             manageValidationError("Unable to retrieve Virtual Service Blueprint from the catalogue", executionId);
         }
         VsBlueprint vsBlueprint = vsBlueprintResponse.getVsBlueprintInfo().get(0).getVsBlueprint();
-        // TODO: Change once the siteName is provided
 
         String siteName = expExecution.getSiteNames().get(0).toLowerCase();
         // TODO: Topic cannot be related to TCs. Will be sent all of them for each TC (should be changed interface on RAV)
@@ -328,6 +323,16 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
             Publishtopic pt = new Publishtopic();
             pt.setBrokerAddr(monitoringAddress+":"+monitoringPort);
             pt.setKpi(kpi.getKpiId());
+            pt.setFormula(kpi.getFormula());
+            pt.setInterval(new BigDecimal(kpi.getInterval().replaceAll("[^0-9]+", ""))); //TODO check if converts it in a proper way
+            List<String> metricsIds = new ArrayList<>();
+            pt.setUnit(kpi.getUnit());
+            for (String metric : kpi.getMetricIds()){
+                metricsIds.add(metric);
+            }
+            //TODO : Fix this on expDesciptor. Need to have both lowerBound and UpperBound for the KPI
+            pt.setUpperBound(expDescriptor.getKpiThresholds().get(kpi.getKpiId()));
+            pt.setInput(metricsIds);
             pt.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
             log.debug("KPI topics created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
             publishTopics.add(pt);

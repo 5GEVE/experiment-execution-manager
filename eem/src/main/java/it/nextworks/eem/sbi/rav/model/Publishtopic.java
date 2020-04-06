@@ -13,14 +13,15 @@
 package it.nextworks.eem.sbi.rav.model;
 
 import java.util.Objects;
-
 import com.google.gson.annotations.SerializedName;
-
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 /**
  * Publishtopic
  */
 
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2020-03-18T10:36:45.404Z[GMT]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2020-04-06T19:10:49.373Z[GMT]")
 public class Publishtopic {
   @SerializedName("brokerAddr")
   private String brokerAddr = null;
@@ -30,6 +31,24 @@ public class Publishtopic {
 
   @SerializedName("kpi")
   private String kpi = null;
+
+  @SerializedName("unit")
+  private String unit = null;
+
+  @SerializedName("input")
+  private List<String> input = new ArrayList<String>();
+
+  @SerializedName("formula")
+  private String formula = null;
+
+  @SerializedName("interval")
+  private BigDecimal interval = null;
+
+  @SerializedName("lowerBound")
+  private String lowerBound = null;
+
+  @SerializedName("upperBound")
+  private String upperBound = null;
 
   public Publishtopic brokerAddr(String brokerAddr) {
     this.brokerAddr = brokerAddr;
@@ -82,6 +101,113 @@ public class Publishtopic {
     this.kpi = kpi;
   }
 
+  public Publishtopic unit(String unit) {
+    this.unit = unit;
+    return this;
+  }
+
+   /**
+   * Get unit
+   * @return unit
+  **/
+  public String getUnit() {
+    return unit;
+  }
+
+  public void setUnit(String unit) {
+    this.unit = unit;
+  }
+
+  public Publishtopic input(List<String> input) {
+    this.input = input;
+    return this;
+  }
+
+  public Publishtopic addInputItem(String inputItem) {
+    this.input.add(inputItem);
+    return this;
+  }
+
+   /**
+   * Get input
+   * @return input
+  **/
+  public List<String> getInput() {
+    return input;
+  }
+
+  public void setInput(List<String> input) {
+    this.input = input;
+  }
+
+  public Publishtopic formula(String formula) {
+    this.formula = formula;
+    return this;
+  }
+
+   /**
+   * Get formula
+   * @return formula
+  **/
+  public String getFormula() {
+    return formula;
+  }
+
+  public void setFormula(String formula) {
+    this.formula = formula;
+  }
+
+  public Publishtopic interval(BigDecimal interval) {
+    this.interval = interval;
+    return this;
+  }
+
+   /**
+   * Get interval
+   * @return interval
+  **/
+  public BigDecimal getInterval() {
+    return interval;
+  }
+
+  public void setInterval(BigDecimal interval) {
+    this.interval = interval;
+  }
+
+  public Publishtopic lowerBound(String lowerBound) {
+    this.lowerBound = lowerBound;
+    return this;
+  }
+
+   /**
+   * Get lowerBound
+   * @return lowerBound
+  **/
+  public String getLowerBound() {
+    return lowerBound;
+  }
+
+  public void setLowerBound(String lowerBound) {
+    this.lowerBound = lowerBound;
+  }
+
+  public Publishtopic upperBound(String upperBound) {
+    this.upperBound = upperBound;
+    return this;
+  }
+
+   /**
+   * Get upperBound
+   * @return upperBound
+  **/
+  public String getUpperBound() {
+    return upperBound;
+  }
+
+  public void setUpperBound(String upperBound) {
+    this.upperBound = upperBound;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -94,12 +220,18 @@ public class Publishtopic {
     Publishtopic publishtopic = (Publishtopic) o;
     return Objects.equals(this.brokerAddr, publishtopic.brokerAddr) &&
         Objects.equals(this.topic, publishtopic.topic) &&
-        Objects.equals(this.kpi, publishtopic.kpi);
+        Objects.equals(this.kpi, publishtopic.kpi) &&
+        Objects.equals(this.unit, publishtopic.unit) &&
+        Objects.equals(this.input, publishtopic.input) &&
+        Objects.equals(this.formula, publishtopic.formula) &&
+        Objects.equals(this.interval, publishtopic.interval) &&
+        Objects.equals(this.lowerBound, publishtopic.lowerBound) &&
+        Objects.equals(this.upperBound, publishtopic.upperBound);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(brokerAddr, topic, kpi);
+    return Objects.hash(brokerAddr, topic, kpi, unit, input, formula, interval, lowerBound, upperBound);
   }
 
 
@@ -111,6 +243,12 @@ public class Publishtopic {
     sb.append("    brokerAddr: ").append(toIndentedString(brokerAddr)).append("\n");
     sb.append("    topic: ").append(toIndentedString(topic)).append("\n");
     sb.append("    kpi: ").append(toIndentedString(kpi)).append("\n");
+    sb.append("    unit: ").append(toIndentedString(unit)).append("\n");
+    sb.append("    input: ").append(toIndentedString(input)).append("\n");
+    sb.append("    formula: ").append(toIndentedString(formula)).append("\n");
+    sb.append("    interval: ").append(toIndentedString(interval)).append("\n");
+    sb.append("    lowerBound: ").append(toIndentedString(lowerBound)).append("\n");
+    sb.append("    upperBound: ").append(toIndentedString(upperBound)).append("\n");
     sb.append("}");
     return sb.toString();
   }
