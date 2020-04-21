@@ -192,104 +192,120 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 	@Override
     public String onBoardVsBlueprint(OnBoardVsBlueprintRequest request)
             throws MethodNotImplementedException, MalformattedElementException, AlreadyExistingEntityException, FailedOperationException {
-		throw new MethodNotImplementedException("The onboarding of a new vertical service blueprint is not allowed through the ELM");
+		throw new MethodNotImplementedException("The onboarding of a new vertical service blueprint is not allowed through the EEM");
 	}
 
 	@Override
     public void deleteVsBlueprint(String vsBlueprintId)
             throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException, FailedOperationException {
-		throw new MethodNotImplementedException("The deletion of a vertical service blueprint is not allowed through the ELM");
+		throw new MethodNotImplementedException("The deletion of a vertical service blueprint is not allowed through the EEM");
 	}
 	
 	@Override
 	public String onBoardVsDescriptor(OnboardVsDescriptorRequest request)
 			throws MethodNotImplementedException, MalformattedElementException, AlreadyExistingEntityException, FailedOperationException {
-		throw new MethodNotImplementedException("The onboarding of a new vertical service descriptor is not allowed through the ELM");
+		throw new MethodNotImplementedException("The onboarding of a new vertical service descriptor is not allowed through the EEM");
 	}
 	
 	@Override
 	public void deleteVsDescriptor(String vsDescriptorId, String tenantId)
 			throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException, FailedOperationException {
-		throw new MethodNotImplementedException("The deletion of a vertical service descriptor is not allowed through the ELM");
+		throw new MethodNotImplementedException("The deletion of a vertical service descriptor is not allowed through the EEM");
 	}
 
 	@Override
 	public String onboardCtxBlueprint(OnboardCtxBlueprintRequest request)
 			throws MethodNotImplementedException, MalformattedElementException, AlreadyExistingEntityException, FailedOperationException {
-		throw new MethodNotImplementedException("The onboarding of a new context blueprint is not allowed through the ELM");
+		throw new MethodNotImplementedException("The onboarding of a new context blueprint is not allowed through the EEM");
 	}
 	
 	@Override
 	public void deleteCtxBlueprint(String ctxBlueprintId)
 			throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException, FailedOperationException {
-		throw new MethodNotImplementedException("The deletion of a context blueprint is not allowed through the ELM");
+		throw new MethodNotImplementedException("The deletion of a context blueprint is not allowed through the EEM");
 	}
 
 	@Override
 	public String onboardCtxDescriptor(OnboardCtxDescriptorRequest request)
 			throws MethodNotImplementedException, MalformattedElementException, AlreadyExistingEntityException, FailedOperationException {
-		throw new MethodNotImplementedException("The onboarding of a new context descriptor is not allowed through the ELM");
+		throw new MethodNotImplementedException("The onboarding of a new context descriptor is not allowed through the EEM");
 	}
 	
 	@Override
 	public void deleteCtxDescriptor(String ctxDescriptorId, String tenantId)
 			throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException, FailedOperationException {
-		throw new MethodNotImplementedException("The deletion of a context descriptor is not allowed through the ELM");
+		throw new MethodNotImplementedException("The deletion of a context descriptor is not allowed through the EEM");
 	}
 
 	@Override
 	public String onboardTestCaseBlueprint(OnboardTestCaseBlueprintRequest request)
 			throws MethodNotImplementedException, MalformattedElementException, AlreadyExistingEntityException, FailedOperationException {
-		throw new MethodNotImplementedException("The onboarding of a new test case blueprint is not allowed through the ELM");
+		throw new MethodNotImplementedException("The onboarding of a new test case blueprint is not allowed through the EEM");
 	}
 	
 	@Override
 	public void deleteTestCaseBlueprint(String testCaseBlueprintId)
 			throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException, FailedOperationException {
-		throw new MethodNotImplementedException("The deletion of a test case blueprint is not allowed through the ELM");
+		throw new MethodNotImplementedException("The deletion of a test case blueprint is not allowed through the EEM");
 	}
 
 	@Override
 	public String onboardTestCaseDescriptor(OnboardTestCaseDescriptorRequest request)
 			throws MethodNotImplementedException, MalformattedElementException, AlreadyExistingEntityException, FailedOperationException {
-		throw new MethodNotImplementedException("The onboarding of a new test case descriptor is not allowed through the ELM");
+		throw new MethodNotImplementedException("The onboarding of a new test case descriptor is not allowed through the EEM");
 	}
 	
 	@Override
 	public void deleteTestCaseDescriptor(String testcaseDescriptorId, String tenantId)
 			throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException, FailedOperationException {
-		throw new MethodNotImplementedException("The deletion of a test case descriptor is not allowed through the ELM");
+		throw new MethodNotImplementedException("The deletion of a test case descriptor is not allowed through the EEM");
 	}
 	
 	@Override
 	public String onboardExpBlueprint(OnboardExpBlueprintRequest request)
 			throws MethodNotImplementedException, MalformattedElementException, AlreadyExistingEntityException,
 			FailedOperationException, NotExistingEntityException {
-		throw new MethodNotImplementedException("The onboarding of a new experiment blueprint is not allowed through the ELM");
+		throw new MethodNotImplementedException("The onboarding of a new experiment blueprint is not allowed through the EEM");
 	}
 
 	@Override
 	public void deleteExpBlueprint(String expBlueprintId) throws MethodNotImplementedException,
 			MalformattedElementException, NotExistingEntityException, FailedOperationException {
-		throw new MethodNotImplementedException("The deletion of an experiment blueprint is not allowed through the ELM");
+		throw new MethodNotImplementedException("The deletion of an experiment blueprint is not allowed through the EEM");
 	}
 	
 	@Override
 	public String onboardExpDescriptor(OnboardExpDescriptorRequest request)
 			throws MethodNotImplementedException, MalformattedElementException, AlreadyExistingEntityException, FailedOperationException, NotExistingEntityException {
-		throw new MethodNotImplementedException("The onboarding of a new experiment descriptor is not allowed through the ELM");
+		throw new MethodNotImplementedException("The onboarding of a new experiment descriptor is not allowed through the EEM");
 	}
 	
 	@Override
 	public void deleteExpDescriptor(String expDescriptorId, String tenantId)
 			throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException, FailedOperationException {
-		throw new MethodNotImplementedException("The deletion of an experiment descriptor is not allowed through the ELM");
+		throw new MethodNotImplementedException("The deletion of an experiment descriptor is not allowed through the EEM");
 	}
-	
+
+	@Override
+	public void useExpDescriptor(String s, String s1) throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException, FailedOperationException {
+		/*
+		TODO: Complete the methods if needed
+		 */
+			throw new MethodNotImplementedException("The use of an experiment descriptor is not allowed through the EEM");
+	}
+
+	@Override
+	public void releaseExpDescriptor(String s, String s1) throws MethodNotImplementedException, MalformattedElementException, NotExistingEntityException, FailedOperationException {
+		/*
+		TODO: Complete the methods if needed
+		 */
+		throw new MethodNotImplementedException("The release of an experiment descriptor is not allowed through the EEM");
+	}
+
 	@Override
 	public Map<String, NfvNsInstantiationInfo> translateVsd(List<String> vsdIds)
 			throws FailedOperationException, NotExistingEntityException, MethodNotImplementedException {
-		throw new MethodNotImplementedException("The deletion of an experiment descriptor is not allowed through the ELM");
+		throw new MethodNotImplementedException("The deletion of an experiment descriptor is not allowed through the EEM");
 	}
 	
 	@PostConstruct
