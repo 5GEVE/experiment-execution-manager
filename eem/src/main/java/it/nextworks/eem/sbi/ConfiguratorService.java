@@ -39,7 +39,7 @@ public class ConfiguratorService implements ConfiguratorServiceProviderInterface
         if (configuratorType.equals(ConfiguratorType.RC))
             this.driver = RCDriver.getInstance(rabbitTemplate, messageExchange);
         else if (configuratorType.equals((ConfiguratorType.DUMMY)))
-            this.driver = new DummyConfiguratorDriver();
+            this.driver = new DummyConfiguratorDriver(rabbitTemplate, messageExchange);
         else
             log.error("Wrong configuration for Configurator service.");
     }

@@ -72,7 +72,7 @@ public class ValidatorService implements ValidatorServiceProviderInterface {
         else if (validatorType.equals(ValidatorType.JENKINS))
             this.driver = JenkinsDriver.getInstance(jenkinsURI, jenkinsUsername, jenkinsPassword, jenkinsValidationBaseUrl, rabbitTemplate, messageExchange);
         else if (validatorType.equals(ValidatorType.DUMMY))
-            this.driver = new DummyValidatorDriver();
+            this.driver = new DummyValidatorDriver(rabbitTemplate, messageExchange);
         else
             log.error("Wrong configuration for Executor service.");
     }

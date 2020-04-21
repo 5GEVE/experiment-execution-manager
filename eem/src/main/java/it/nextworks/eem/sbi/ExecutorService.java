@@ -55,7 +55,7 @@ public class ExecutorService implements ExecutorServiceProviderInterface {
         else if (executorType.equals(ExecutorType.JENKINS))
             this.driver = JenkinsDriver.getInstance(jenkinsURI, jenkinsUsername, jenkinsPassword, jenkinsValidationBaseUrl, rabbitTemplate, messageExchange);
         else if (executorType.equals(ExecutorType.DUMMY))
-            this.driver = new DummyExecutorDriver();
+            this.driver = new DummyExecutorDriver(rabbitTemplate, messageExchange);
         else
             log.error("Wrong configuration for Executor service.");
     }
