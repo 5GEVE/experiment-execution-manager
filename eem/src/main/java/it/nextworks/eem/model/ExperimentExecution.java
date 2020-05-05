@@ -89,6 +89,10 @@ public class ExperimentExecution {
   @JsonProperty("experimentId")
   private String experimentId;
 
+  @JsonIgnore
+  @JsonProperty("useCase")
+  private String useCase = "";
+
 
 
   @JsonIgnore
@@ -107,7 +111,18 @@ public class ExperimentExecution {
     return this;
   }
 
+  public String getUseCase() {
+    return useCase;
+  }
 
+  public void setUseCase(String useCase) {
+    this.useCase = useCase;
+  }
+
+  public ExperimentExecution useCase(String useCase){
+    this.useCase = useCase;
+    return this;
+  }
   /**
    * Identifier of the executed experiment
    * @return executionId

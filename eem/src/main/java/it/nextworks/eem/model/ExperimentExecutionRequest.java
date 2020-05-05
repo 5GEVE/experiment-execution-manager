@@ -36,6 +36,15 @@ public class ExperimentExecutionRequest   {
   @JsonProperty("experimentId")
   private String experimentId;
 
+  @JsonProperty("useCase")
+  private String useCase;
+
+
+  public ExperimentExecutionRequest useCase(String useCase){
+    this.useCase = useCase;
+    return this;
+  }
+
   public ExperimentExecutionRequest nsInstanceId(String nsInstanceId) {
     this.nsInstanceId = nsInstanceId;
     return this;
@@ -131,6 +140,15 @@ public class ExperimentExecutionRequest   {
       for (String site : siteNames)
         this.siteNames.add(site);
     }
+  }
+
+
+  public String getUseCase() {
+    return useCase;
+  }
+
+  public void setUseCase(String useCase) {
+    this.useCase = useCase;
   }
 
   public String getExperimentId() {

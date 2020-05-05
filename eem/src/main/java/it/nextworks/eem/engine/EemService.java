@@ -163,6 +163,7 @@ public class EemService{
                 .experimentId(request.getExperimentId())
                 .siteNames(request.getSiteNames())
                 .testCaseDescriptorConfiguration(testCaseExecutionConfigurations)
+                .useCase(request.getUseCase())
                 .runType(runType);
         experimentExecutionRepository.saveAndFlush(experimentExecution);
         experimentExecutionInstances.get(executionId).setRunType(runType);
