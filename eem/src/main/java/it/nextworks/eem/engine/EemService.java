@@ -13,12 +13,10 @@ import it.nextworks.eem.model.enumerate.ExperimentState;
 import it.nextworks.eem.repo.ExperimentExecutionRepository;
 import it.nextworks.eem.sbi.ConfiguratorService;
 import it.nextworks.eem.sbi.ExecutorService;
+import it.nextworks.eem.sbi.MultiSiteOrchestratorService;
 import it.nextworks.eem.sbi.ValidatorService;
 import it.nextworks.eem.sbi.expcatalogue.ExperimentCatalogueService;
-import it.nextworks.eem.sbi.jenkins.JenkinsDriver;
-import it.nextworks.eem.sbi.msno.MsnoService;
-import it.nextworks.eem.sbi.runtimeConfigurator.RCDriver;
-import it.nextworks.eem.sbi.rav.RAVDriver;
+import it.nextworks.eem.sbi.msno.MsnoDriver;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
@@ -84,7 +82,7 @@ public class EemService{
     private ExperimentCatalogueService catalogueService;
 
     @Autowired
-    private MsnoService msnoService;
+    private MultiSiteOrchestratorService multiSiteOrchestratorService;
 
     @Autowired
     private ExperimentExecutionRepository experimentExecutionRepository;
@@ -287,7 +285,7 @@ public class EemService{
         log.info("Initializing new Experiment Execution Instance Manager with Id {}", experimentExecutionId);
         ExperimentExecutionInstanceManager eeim;
         try {
-            eeim = new ExperimentExecutionInstanceManager(experimentExecutionId, experimentExecutionRepository, subscriptionService, configuratorService, executorService, validatorService, catalogueService, msnoService);
+            eeim = new ExperimentExecutionInstanceManager(experimentExecutionId, experimentExecutionRepository, subscriptionService, configuratorService, executorService, validatorService, catalogueService, multiSiteOrchestratorService);
         }catch (NotExistingEntityException e) {
             throw new FailedOperationException(String.format("Initialization of Experiment Execution Instance Manager with Id %s failed : %s", experimentExecutionId, e.getMessage()));
         }

@@ -18,13 +18,10 @@ import it.nextworks.eem.model.enumerate.ExperimentState;
 import it.nextworks.eem.repo.ExperimentExecutionRepository;
 import it.nextworks.eem.sbi.ConfiguratorService;
 import it.nextworks.eem.sbi.ExecutorService;
+import it.nextworks.eem.sbi.MultiSiteOrchestratorService;
 import it.nextworks.eem.sbi.ValidatorService;
 import it.nextworks.eem.sbi.expcatalogue.ExperimentCatalogueService;
-import it.nextworks.eem.sbi.jenkins.JenkinsDriver;
-import it.nextworks.eem.sbi.msno.MsnoService;
-import it.nextworks.eem.sbi.runtimeConfigurator.RCDriver;
-import it.nextworks.eem.sbi.rav.RAVDriver;
-import it.nextworks.eem.sbi.rav.ValidationStatus;
+import it.nextworks.eem.sbi.msno.MsnoDriver;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.*;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.*;
 import it.nextworks.nfvmano.libs.ifa.common.elements.Filter;
@@ -55,7 +52,7 @@ public class ExperimentExecutionInstanceManager {
 
     private EemSubscriptionService subscriptionService;
     private ExperimentCatalogueService catalogueService;
-    private MsnoService msnoService;
+    private MultiSiteOrchestratorService multiSiteOrchestratorService;
     private ExperimentExecutionRepository experimentExecutionRepository;
 
     private boolean interruptRunning;
@@ -74,7 +71,7 @@ public class ExperimentExecutionInstanceManager {
     private Iterator<Map.Entry<String, String>> testCasesIterator;
     private Map.Entry<String, String> runningTestCase;
 
-    public ExperimentExecutionInstanceManager(String executionId, ExperimentExecutionRepository experimentExecutionRepository, EemSubscriptionService subscriptionService, ConfiguratorService configuratorService, ExecutorService executorService, ValidatorService validatorService, ExperimentCatalogueService catalogueService, MsnoService msnoService) throws NotExistingEntityException
+    public ExperimentExecutionInstanceManager(String executionId, ExperimentExecutionRepository experimentExecutionRepository, EemSubscriptionService subscriptionService, ConfiguratorService configuratorService, ExecutorService executorService, ValidatorService validatorService, ExperimentCatalogueService catalogueService, MultiSiteOrchestratorService multiSiteOrchestratorService) throws NotExistingEntityException
     {
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         if(!experimentExecutionOptional.isPresent())
@@ -91,7 +88,7 @@ public class ExperimentExecutionInstanceManager {
         this.executorService = executorService;
         this.validatorService = validatorService;
         this.catalogueService = catalogueService;
-        this.msnoService = msnoService;
+        this.multiSiteOrchestratorService = multiSiteOrchestratorService;
         //Retrieve again all information for stored experiment executions
         if(!this.currentState.equals(ExperimentState.INIT)) {
             try {
@@ -463,7 +460,7 @@ public class ExperimentExecutionInstanceManager {
             //Retrieve NsInstance
             log.debug("Going to retrieve NsInstance with Id {}", nsInstanceId);
             parameters.put("NS_ID", nsInstanceId);
-            nsInstance = msnoService.queryNs(request);
+            nsInstance = multiSiteOrchestratorService.queryNs(request);
             parameters.remove("NS_ID");
             translateTestCases();
         }catch (MalformattedElementException e){

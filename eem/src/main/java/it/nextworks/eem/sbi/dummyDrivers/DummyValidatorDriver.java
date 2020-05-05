@@ -8,7 +8,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.nextworks.eem.rabbitMessage.InternalMessage;
 import it.nextworks.eem.rabbitMessage.ValidationResultInternalMessage;
 import it.nextworks.eem.sbi.interfaces.ValidatorServiceProviderInterface;
-import it.nextworks.eem.sbi.jenkins.JenkinsDriver;
 import it.nextworks.eem.sbi.rav.ValidationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,7 @@ public class DummyValidatorDriver implements ValidatorServiceProviderInterface {
     private TopicExchange messageExchange;
 
     public DummyValidatorDriver(RabbitTemplate rabbitTemplate, TopicExchange messageExchange) {
-        log.debug("Initializing Dummy Driver");
+        log.debug("Initializing Dummy Validator Driver");
         this.rabbitTemplate = rabbitTemplate;
         this.messageExchange = messageExchange;
 

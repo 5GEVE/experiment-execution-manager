@@ -20,7 +20,7 @@ public class DummyConfiguratorDriver implements ConfiguratorServiceProviderInter
     private TopicExchange messageExchange;
 
     public DummyConfiguratorDriver(RabbitTemplate rabbitTemplate, TopicExchange messageExchange) {
-        log.debug("Initializing Dummy Driver");
+        log.debug("Initializing Dummy Configurator Driver");
         this.rabbitTemplate = rabbitTemplate;
         this.messageExchange = messageExchange;
     }

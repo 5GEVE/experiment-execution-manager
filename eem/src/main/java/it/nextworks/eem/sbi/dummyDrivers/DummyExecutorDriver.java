@@ -23,7 +23,7 @@ public class DummyExecutorDriver implements ExecutorServiceProviderInterface {
     private RabbitTemplate rabbitTemplate;
     private TopicExchange messageExchange;
     public DummyExecutorDriver(RabbitTemplate rabbitTemplate, TopicExchange messageExchange) {
-        log.debug("Initializing Dummy Driver");
+        log.debug("Initializing Dummy Executor Driver");
         this.rabbitTemplate = rabbitTemplate;
         this.messageExchange = messageExchange;
     }

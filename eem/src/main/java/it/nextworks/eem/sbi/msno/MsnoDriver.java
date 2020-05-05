@@ -1,8 +1,8 @@
 package it.nextworks.eem.sbi.msno;
 
+import it.nextworks.eem.sbi.interfaces.MultiSiteOrchestratorProviderInterface;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
-import it.nextworks.nfvmano.libs.ifa.common.exceptions.MethodNotImplementedException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.common.messages.GeneralizedQueryRequest;
 import it.nextworks.openapi.ApiClient;
@@ -10,37 +10,39 @@ import it.nextworks.openapi.msno.DefaultApi;
 import it.nextworks.openapi.msno.model.NsInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
+public class MsnoDriver implements MultiSiteOrchestratorProviderInterface {
 
-@Service
-public class MsnoService {
+    // static variable single_instance of type JenkinsDriver
+    private static MsnoDriver single_instance = null;
 
-    private static final Logger log = LoggerFactory.getLogger(MsnoService.class);
+    private static final Logger log = LoggerFactory.getLogger(MsnoDriver.class);
 
     private DefaultApi restClient;
-
-    @Value("${msno.host}")
-    private String msnoHost;
 
     private String version = "v1";
     private String accept = "application/json";
     private String contentType = "application/json";
     private String authorization = null;		//TODO: this is to be fixed - it should be the token
 
-    public MsnoService() {}
-
-    //TODO uncomment and test
-    @PostConstruct
-    private void initMsnoClient() {
-        log.debug("Initializing MSNO REST client");
+    // private constructor restricted to this class itself
+    private MsnoDriver(String msnoHost){
+        log.debug("Initializing Msno Driver: uri {}", msnoHost);
         ApiClient ac = new ApiClient();
         String url = "http://" + msnoHost + "/nslcm/v1";
         restClient = new DefaultApi(ac.setBasePath(url));
     }
 
+    // static method to create instance of MsnoDriver class
+    public static MsnoDriver getInstance(String msnoHost){
+        if (single_instance == null)
+            single_instance = new MsnoDriver(msnoHost);
+        else
+            log.debug("Msno Driver already instantiated: uri {}", msnoHost);
+        return single_instance;
+    }
+
+    @Override
     public NsInstance queryNs(GeneralizedQueryRequest request) throws FailedOperationException, MalformattedElementException {
         if (request == null)
             throw new MalformattedElementException("Query NS request is null");
