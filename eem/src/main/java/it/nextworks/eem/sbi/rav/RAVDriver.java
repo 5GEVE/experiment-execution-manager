@@ -290,8 +290,8 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
                 Topic topic = new Topic();
                 topic.brokerAddr(monitoringAddress+":"+monitoringPort);
                 topic.setMetric(amd.getMetricId().toLowerCase());
-                topic.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
-                log.debug("topic name created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
+                topic.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
+                log.debug("topic name created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
                 topics.add(topic);
             }
         }
@@ -301,8 +301,8 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
             Topic topic = new Topic();
             topic.brokerAddr(monitoringAddress+":"+monitoringPort);
             topic.setMetric(amd.getMetricId().toLowerCase());
-            topic.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
-            log.debug("topic created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
+            topic.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
+            log.debug("topic created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
             topics.add(topic);
         }
 
@@ -312,8 +312,8 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
             Topic topic = new Topic();
             topic.brokerAddr(monitoringAddress+":"+monitoringPort);
             topic.setMetric(im.getMetricId().toLowerCase());
-            topic.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getMetricId());
-            log.debug("topic created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getMetricId());
+            topic.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getMetricId());
+            log.debug("topic created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getMetricId());
             topics.add(topic);
         }
 
@@ -333,8 +333,8 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
             //TODO : Fix this on expDesciptor. Need to have both lowerBound and UpperBound for the KPI
             pt.setUpperBound(expDescriptor.getKpiThresholds().get(kpi.getKpiId()));
             pt.setInput(metricsIds);
-            pt.setTopic(expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
-            log.debug("KPI topics created for RAV: {}", expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
+            pt.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
+            log.debug("KPI topics created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
             publishTopics.add(pt);
         }
 
