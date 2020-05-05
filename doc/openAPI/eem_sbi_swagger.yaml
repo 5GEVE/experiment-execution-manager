@@ -1,0 +1,708 @@
+swagger: '2.0'
+info:
+  description: 5G EVE Experiment Execution Management southbound REST API
+  version: 1.0.1
+  title: Experiment Execution Management southbound API
+  termsOfService: https://www.5g-eve.eu/
+  contact: {}
+  license:
+    name: Apache2
+    url: http://unlicense.org
+host: localhost:8080
+basePath: "/"
+tags:
+- name: eem-sb-api-controller
+  description: The EEM SBI API
+paths:
+  "/eem/SBI":
+    get:
+      tags:
+      - EEM SBI Controller
+      summary: List SBI API version
+      operationId: listSbiVersion
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '401':
+          description: Unauthorised
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '403':
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '404':
+          description: Not Found
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '500':
+          description: Operation Failed
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+      deprecated: false
+  "/eem/SBI/exp_config":
+    post:
+      tags:
+      - EEM SBI Day-2 Configuration Ops
+      summary: Request a new experiment configuration job
+      operationId: eemSbiExpConfigPost
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      - text/plain
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+        '201':
+          description: Experiment Configuration Identifier
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '401':
+          description: Unauthorised
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '403':
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '404':
+          description: Not Found
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '500':
+          description: Operation Failed
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+      deprecated: false
+  "/eem/SBI/exp_exec":
+    post:
+      tags:
+      - EEM SBI Execution Ops
+      summary: Request a new experiment execution job
+      operationId: eemSbiExpExecPost
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      - text/plain
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+        '201':
+          description: Experiment Execution Identifier
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '401':
+          description: Unauthorised
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '403':
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '404':
+          description: Not Found
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '500':
+          description: Operation Failed
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+      deprecated: false
+  "/eem/SBI/exp_config/{id}":
+    get:
+      tags:
+      - EEM SBI Day-2 Configuration Ops
+      summary: Request status of an experiment configuration job
+      operationId: eemSbiExpConfigIdGet
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: Config Id
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            "$ref": "#/definitions/Exp_config"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '401':
+          description: Unauthorised
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '403':
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '404':
+          description: Not Found
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '500':
+          description: Operation Failed
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+      deprecated: false
+  "/eem/SBI/exp_exec/{id}":
+    get:
+      tags:
+      - EEM SBI Execution Ops
+      summary: Request status of an experiment execution job
+      operationId: eemSbiExpExecIdGet
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: Exec Id
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            "$ref": "#/definitions/Exp_exec"
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '401':
+          description: Unauthorised
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '403':
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '404':
+          description: Not Found
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '500':
+          description: Operation Failed
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+      deprecated: false
+  "/eem/SBI/exp_config/{id}/abort":
+    post:
+      tags:
+      - EEM SBI Day-2 Configuration Ops
+      summary: Abort a configuration job
+      operationId: eemSbiExpConfigIdAbortPost
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: Config Id
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '401':
+          description: Unauthorised
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '403':
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '404':
+          description: Not Found
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '500':
+          description: Operation Failed
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+      deprecated: false
+  "/eem/SBI/exp_config/{id}/pause":
+    post:
+      tags:
+      - EEM SBI Day-2 Configuration Ops
+      summary: Pause a configuration job
+      operationId: eemSbiExpConfigIdPausePost
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: Config Id
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '401':
+          description: Unauthorised
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '403':
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '404':
+          description: Not Found
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '500':
+          description: Operation Failed
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+      deprecated: false
+  "/eem/SBI/exp_config/{id}/resume":
+    post:
+      tags:
+      - EEM SBI Day-2 Configuration Ops
+      summary: Resume a configuration job
+      operationId: eemSbiExpConfigIdResumePost
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: Config Id
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '401':
+          description: Unauthorised
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '403':
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '404':
+          description: Not Found
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '500':
+          description: Operation Failed
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+      deprecated: false
+  "/eem/SBI/exp_config/{id}/run":
+    post:
+      tags:
+      - EEM SBI Day-2 Configuration Ops
+      summary: Run a configuration job
+      operationId: eemSbiExpConfigIdRunPost
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: Config Id
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body
+        required: true
+        schema:
+          "$ref": "#/definitions/Exp_config_script"
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '401':
+          description: Unauthorised
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '403':
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '404':
+          description: Not Found
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '500':
+          description: Operation Failed
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+      deprecated: false
+  "/eem/SBI/exp_exec/{id}/abort":
+    post:
+      tags:
+      - EEM SBI Execution Ops
+      summary: Abort an execution job
+      operationId: eemSbiExpExecIdAbortPost
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: Exec Id
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '401':
+          description: Unauthorised
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '403':
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '404':
+          description: Not Found
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '500':
+          description: Operation Failed
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+      deprecated: false
+  "/eem/SBI/exp_exec/{id}/pause":
+    post:
+      tags:
+      - EEM SBI Execution Ops
+      summary: Pause an execution job
+      operationId: eemSbiExpExecIdPausePost
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: Exec Id
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '401':
+          description: Unauthorised
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '403':
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '404':
+          description: Not Found
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '500':
+          description: Operation Failed
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+      deprecated: false
+  "/eem/SBI/exp_exec/{id}/resume":
+    post:
+      tags:
+      - EEM SBI Execution Ops
+      summary: Resume an execution job
+      operationId: eemSbiExpExecIdResumePost
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: Exec Id
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '401':
+          description: Unauthorised
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '403':
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '404':
+          description: Not Found
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '500':
+          description: Operation Failed
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+      deprecated: false
+  "/eem/SBI/exp_exec/{id}/run":
+    post:
+      tags:
+      - EEM SBI Execution Ops
+      summary: Run an execution job (all test cases)
+      operationId: eemSbiExpExecIdRunPost
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: Exec Id
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body
+        required: true
+        schema:
+          "$ref": "#/definitions/Exp_exec_script"
+      - name: runType
+        in: query
+        description: Determine the type of run. If not present, the default value is RUN_ALL
+        required: false
+        type: string
+        allowEmptyValue: false
+        enum:
+        - RUN_IN_STEPS
+        - RUN_ALL
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '401':
+          description: Unauthorised
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '403':
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '404':
+          description: Not Found
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '500':
+          description: Operation Failed
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+      deprecated: false
+  "/eem/SBI/exp_exec/{id}/step":
+    post:
+      tags:
+      - EEM SBI Execution Ops
+      summary: Run a step in an execution job (one test case)
+      operationId: eemSbiExpExecIdStepPost
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: Exec Id
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body
+        required: true
+        schema:
+          "$ref": "#/definitions/Exp_exec_script_step"
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+        '400':
+          description: Bad Request
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '401':
+          description: Unauthorised
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '403':
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '404':
+          description: Not Found
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+        '500':
+          description: Operation Failed
+          schema:
+            "$ref": "#/definitions/ErrorInfo"
+      deprecated: false
+definitions:
+  ErrorInfo:
+    type: object
+    required:
+    - detail
+    - code
+    properties:
+      detail:
+        type: string
+        description: 'A human-readable explanation specific to this occurrence of the problem.'
+      code:
+        type: integer
+        format: int32
+        description: 'The HTTP status code ([RFC7231], Section 6) generated by the origin of this occurrence '
+    title: Error Info
+  Exp_config:
+    type: object
+    required:
+    - configId
+    - state
+    properties:
+      configId:
+        type: string
+        description: Identifier of the configuration job
+      state:
+        type: string
+        enum:
+        - INIT
+        - CONFIGURING
+        - PAUSED
+        - VALIDATING
+        - COMPLETED
+        - ABORTING
+        - ABORTED
+        - FAILED
+    title: Experiment Configuration Status
+  Exp_exec:
+    type: object
+    required:
+    - execId
+    - state
+    properties:
+      execId:
+        type: string
+        description: Identifier of the execution job
+      state:
+        type: string
+        enum:
+        - INIT
+        - CONFIGURING
+        - RUNNING
+        - RUNNING_STEP
+        - PAUSED
+        - VALIDATING
+        - COMPLETED
+        - ABORTING
+        - ABORTED
+        - FAILED
+    title: Experiment Execution Status
+  Exp_config_script:
+    type: object
+    required:
+    - config_id
+    properties:
+      config_id:
+        type: string
+      testCaseConfigScript:
+        type: object
+    title: Experiment Configuration Script
+  Exp_exec_script:
+    type: object
+    required:
+    - exec_id
+    properties:
+      exec_id:
+        type: string
+      testCaseExecScript:
+        type: object
+    title: Experiment Execution Script
+  Exp_exec_script_step:
+    type: object
+    required:
+    - exec_id
+    properties:
+      exec_id:
+        type: string
+      testCaseExecScript:
+        type: object
+        additionalProperties:
+          type: string
+    title: Experiment Execution Script (step)
