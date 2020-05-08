@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.nextworks.eem.configuration.ConfigurationParameters;
+import it.nextworks.eem.model.ConfigurationStatus;
+import it.nextworks.eem.model.MetricInfo;
 import it.nextworks.eem.rabbitMessage.AbortingResultInternalMessage;
 import it.nextworks.eem.rabbitMessage.ConfigurationResultInternalMessage;
 import it.nextworks.eem.rabbitMessage.InternalMessage;
@@ -19,6 +21,9 @@ import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorServiceProviderInterface {
 
@@ -47,58 +52,133 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
     }
 
     @Override
-    public void configureExperiment(String executionId){
+    public void applyConfiguration(String executionId, String tcDescriptorId, String configScript){
         new Thread(() -> {
-            configurationStuff(executionId);
+            applyConfigurationImplementation(executionId, tcDescriptorId, configScript);
+        }).start();
+    }
+
+    @Override
+    public void abortConfiguration(String executionId, String tcDescriptorId){
+        new Thread(() -> {
+            abortConfigurationImplementation(executionId, tcDescriptorId);
+        }).start();
+    }
+
+    @Override
+    public void configureInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<MetricInfo> metrics){
+        new Thread(() -> {
+            configureInfrastructureMetricCollectionImplementation(executionId, tcDescriptorId, metrics);
+        }).start();
+    }
+
+    @Override
+    public void resetConfiguration(String executionId, String tcDescriptorId, String resetScript){
+        new Thread(() -> {
+            resetConfigurationImplementation(executionId, tcDescriptorId, resetScript);
+        }).start();
+    }
+
+    @Override
+    public void removeInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<String> metricConfigIds){
+        new Thread(() -> {
+            removeInfrastructureMetricCollectionImplementation(executionId, tcDescriptorId, metricConfigIds);
         }).start();
     }
 
     @Override
     public void runTestCase(String executionId, String tcDescriptorId, String testCaseFile){
         new Thread(() -> {
-            runningStuff(executionId, tcDescriptorId, testCaseFile);
+            runTestCaseImplementation(executionId, tcDescriptorId, testCaseFile);
         }).start();
     }
 
     @Override
     public void abortTestCase(String executionId, String tcDescriptorId){
         new Thread(() -> {
-            abortStuff(executionId, tcDescriptorId);
+            abortTestCaseImplementation(executionId, tcDescriptorId);
         }).start();
     }
 
-    private void configurationStuff(String executionId){//TODO modify name
-        //TODO configure the experiment
-        try {//TODO remove
+    private void applyConfigurationImplementation(String executionId, String tcDescriptorId, String configScript){
+        //TODO remove
+        try {
             log.debug("Configuring the experiment");
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             log.debug("Sleep error");
         }
-        //TODO remove, handled via Notification Endpoint
+
+        //TODO configure experiment
         //configuration ok
         String result = "OK";
         String topic = "lifecycle.configurationResult." + executionId;
-        InternalMessage internalMessage = new ConfigurationResultInternalMessage(result, false);
+        InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.CONFIGURED, result, null,false);
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
             log.error("Error while translating internal scheduling message in Json format");
             manageConfigurationError("Error while translating internal scheduling message in Json format", executionId);
         }
+
+        //TODO handle configuration error
         //configuration ko
         //manageConfigurationError();
     }
 
-    private void runningStuff(String executionId, String tcDescriptorId, String testCaseFile){//TODO modify name
-        //TODO run test case and get result
-        try {//TODO remove
+    private void abortConfigurationImplementation(String executionId, String tcDescriptorId){
+        //TODO abort configuration
+        //no response message needed
+    }
+
+    private void configureInfrastructureMetricCollectionImplementation(String executionId, String tcDescriptorId, List<MetricInfo> metricst){
+        //TODO remove
+        try {
+            log.debug("Configuring infrastructure metrics");
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            log.debug("Sleep error");
+        }
+
+        //TODO configure infrastructure metrics
+        //metric configuration ok
+        String result = "OK";
+        List<String> metricConfigIds = new ArrayList<>();
+        metricConfigIds.add("metric1_id");//TODO use IDs returned by RC
+        String topic = "lifecycle.configurationResult." + executionId;
+        InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_CONFIGURED, result, metricConfigIds,false);
+        try {
+            sendMessageToQueue(internalMessage, topic);
+        } catch (JsonProcessingException e) {
+            log.error("Error while translating internal scheduling message in Json format");
+            manageConfigurationError("Error while translating internal scheduling message in Json format", executionId);
+        }
+
+        //TODO handle metric configuration error
+        //metric configuration ko
+        //manageConfigurationError();
+    }
+
+    private void resetConfigurationImplementation(String executionId, String tcDescriptorId, String resetScript){
+        //TODO reset configuration
+        //no response message needed
+    }
+
+    private void removeInfrastructureMetricCollectionImplementation(String executionId, String tcDescriptorId, List<String> metricConfigIds){
+        //TODO remove infrastructure metrics
+        //no response message needed
+    }
+
+    private void runTestCaseImplementation(String executionId, String tcDescriptorId, String testCaseFile){
+        //TODO remove
+        try {
             log.debug("Running the experiment");
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             log.debug("Sleep error");
         }
-        //TODO remove, handled via Notification Endpoint
+
+        //TODO run test case and get result
         //test ok
         String result = "OK";
         String topic = "lifecycle.testCaseResult." + executionId;
@@ -109,19 +189,22 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
             log.error("Error while translating internal scheduling message in Json format");
             manageTestCaseError("Error while translating internal scheduling message in Json format", executionId, tcDescriptorId);
         }
+
+        //TODO handle run test case error
         //test ko
         //manageTestCaseError();
     }
 
-    private void abortStuff(String executionId, String tcDescriptorId){
-        //TODO abort test case
-        try {//TODO remove
+    private void abortTestCaseImplementation(String executionId, String tcDescriptorId){
+        //TODO remove
+        try {
             log.debug("Aborting the experiment");
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             log.debug("Sleep error");
         }
-        //TODO remove, handled via Notification Endpoint
+
+        //TODO abort test case
         //aborting ok
         String result = "OK";
         String topic = "lifecycle.abortingResult." + executionId;
@@ -132,6 +215,8 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
             log.error("Error while translating internal scheduling message in Json format");
             manageAbortingError("Error while translating internal scheduling message in Json format", executionId);
         }
+
+        //TODO handle aborting error
         //aborting ko
         //manageAbortingError();
     }
@@ -140,7 +225,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
         log.error("Configuration of Experiment Execution with Id {} failed : {}", executionId, errorMessage);
         errorMessage = String.format("Configuration of Experiment Execution with Id %s failed : %s", executionId, errorMessage);
         String topic = "lifecycle.configurationResult." + executionId;
-        InternalMessage internalMessage = new ConfigurationResultInternalMessage(errorMessage, true);
+        InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.FAILED, errorMessage, null, true);
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {

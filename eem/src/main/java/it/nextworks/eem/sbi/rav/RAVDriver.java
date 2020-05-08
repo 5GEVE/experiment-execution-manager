@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Response;
 import it.nextworks.eem.model.ExperimentExecution;
+import it.nextworks.eem.model.ValidationStatus;
 import it.nextworks.eem.rabbitMessage.InternalMessage;
 import it.nextworks.eem.rabbitMessage.ValidationResultInternalMessage;
 import it.nextworks.eem.repo.ExperimentExecutionRepository;

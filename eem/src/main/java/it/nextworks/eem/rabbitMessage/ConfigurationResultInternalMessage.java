@@ -17,6 +17,10 @@ package it.nextworks.eem.rabbitMessage;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import it.nextworks.eem.model.ConfigurationStatus;
+import it.nextworks.eem.model.ValidationStatus;
+
+import java.util.List;
 
 public class ConfigurationResultInternalMessage extends InternalMessage {
 
@@ -26,11 +30,19 @@ public class ConfigurationResultInternalMessage extends InternalMessage {
 	@JsonProperty("result")
 	private String result;
 
+	@JsonProperty("metricConfigIds")
+	private List<String> metricConfigIds;
+
+	@JsonProperty("configurationStatus")
+	private ConfigurationStatus configurationStatus;
+
 	@JsonCreator
-	public ConfigurationResultInternalMessage(@JsonProperty("result") String result, @JsonProperty("failed") boolean failed) {
+	public ConfigurationResultInternalMessage(@JsonProperty("configurationStatus") ConfigurationStatus configurationStatus, @JsonProperty("result") String result, @JsonProperty("metricConfigIds") List<String> metricConfigIds, @JsonProperty("failed") boolean failed) {
 		this.type = InternalMessageType.CONFIGURATION_RESULT;
 		this.result = result;
 		this.failed = failed;
+		this.configurationStatus = configurationStatus;
+		this.metricConfigIds = metricConfigIds;
 	}
 
 	/**
@@ -45,4 +57,17 @@ public class ConfigurationResultInternalMessage extends InternalMessage {
 	 */
 	public boolean isFailed() { return failed; }
 
+	/**
+	 * @return configurationStatus
+	 */
+	public ConfigurationStatus getConfigurationStatus() {
+		return configurationStatus;
+	}
+
+	/**
+	 * @return metricConfigIds
+	 */
+	public List<String> getMetricConfigIds() {
+		return metricConfigIds;
+	}
 }

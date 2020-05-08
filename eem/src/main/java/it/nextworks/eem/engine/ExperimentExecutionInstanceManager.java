@@ -21,7 +21,6 @@ import it.nextworks.eem.sbi.ExecutorService;
 import it.nextworks.eem.sbi.MultiSiteOrchestratorService;
 import it.nextworks.eem.sbi.ValidatorService;
 import it.nextworks.eem.sbi.expcatalogue.ExperimentCatalogueService;
-import it.nextworks.eem.sbi.msno.MsnoDriver;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.*;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.*;
 import it.nextworks.nfvmano.libs.ifa.common.elements.Filter;
@@ -101,7 +100,7 @@ public class ExperimentExecutionInstanceManager {
         //Restart experiment executions based on the current state
         switch(currentState){
             case CONFIGURING:
-                configuratorService.configureExperiment(executionId);
+                //configuratorService.configureExperiment(executionId);//TODO workflow to be changed
                 validatorService.configureExperiment(executionId);
                 break;
             case RUNNING: case RUNNING_STEP:
@@ -222,7 +221,7 @@ public class ExperimentExecutionInstanceManager {
                 manageExperimentExecutionError(e.getMessage());
                 return;
             }
-            configuratorService.configureExperiment(executionId);
+            //configuratorService.configureExperiment(executionId);//TODO workflow to be changed
             validatorService.configureExperiment(executionId);
         }
     }
@@ -309,7 +308,7 @@ public class ExperimentExecutionInstanceManager {
             case CONFIGURED:
                 isValidationConfigured = true;
                 if(isExperimentConfigured)
-                    processConfigurationResult(new ConfigurationResultInternalMessage("Validation configured", false));
+                    //processConfigurationResult(new ConfigurationResultInternalMessage("Validation configured", false));//TODO workflow to be changed
                 break;
             case ACQUIRING:
                 executorService.runTestCase(executionId, runningTestCase.getKey(), runningTestCase.getValue());

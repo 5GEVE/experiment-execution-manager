@@ -8,7 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.nextworks.eem.rabbitMessage.InternalMessage;
 import it.nextworks.eem.rabbitMessage.ValidationResultInternalMessage;
 import it.nextworks.eem.sbi.interfaces.ValidatorServiceProviderInterface;
-import it.nextworks.eem.sbi.rav.ValidationStatus;
+import it.nextworks.eem.model.ValidationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.TopicExchange;

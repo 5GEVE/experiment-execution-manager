@@ -26,5 +26,4 @@ public enum InternalMessageType {
 	VALIDATION_RESULT,
 	CONFIGURATION_RESULT,
 	ABORTING_RESULT
-
 }

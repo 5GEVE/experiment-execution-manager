@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import it.nextworks.eem.model.ConfigurationStatus;
+import it.nextworks.eem.model.MetricInfo;
 import it.nextworks.eem.rabbitMessage.ConfigurationResultInternalMessage;
 import it.nextworks.eem.rabbitMessage.InternalMessage;
 import it.nextworks.eem.sbi.interfaces.ConfiguratorServiceProviderInterface;
@@ -12,6 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DummyConfiguratorDriver implements ConfiguratorServiceProviderInterface {
 
@@ -27,16 +32,46 @@ public class DummyConfiguratorDriver implements ConfiguratorServiceProviderInter
 
 
     @Override
-    public void configureExperiment(String executionId){
+    public void applyConfiguration(String executionId, String tcDescriptorId, String configScript){
         String result = "OK";
         String topic = "lifecycle.configurationResult." + executionId;
-        InternalMessage internalMessage = new ConfigurationResultInternalMessage(result, false);
+        InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.CONFIGURED, result, null,false);
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
             log.error("Error while translating internal scheduling message in Json format");
             manageConfigurationError("Error while translating internal scheduling message in Json format", executionId);
         }
+    }
+
+    @Override
+    public void abortConfiguration(String executionId, String tcDescriptorId){
+        //No response message
+    }
+
+    @Override
+    public void configureInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<MetricInfo> metrics){
+        String result = "OK";
+        List<String> metricConfigIds = new ArrayList<>();
+        metricConfigIds.add("metric1_id");
+        String topic = "lifecycle.configurationResult." + executionId;
+        InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_CONFIGURED, result, metricConfigIds,false);
+        try {
+            sendMessageToQueue(internalMessage, topic);
+        } catch (JsonProcessingException e) {
+            log.error("Error while translating internal scheduling message in Json format");
+            manageConfigurationError("Error while translating internal scheduling message in Json format", executionId);
+        }
+    }
+
+    @Override
+    public void resetConfiguration(String executionId, String tcDescriptorId, String resetScript){
+        //No response message
+    }
+
+    @Override
+    public void removeInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<String> metricConfigIds){
+        //No response message
     }
 
     private void sendMessageToQueue(InternalMessage msg, String topic) throws JsonProcessingException {
@@ -57,7 +92,7 @@ public class DummyConfiguratorDriver implements ConfiguratorServiceProviderInter
         log.error("Configuration of Experiment Execution with Id {} failed : {}", executionId, errorMessage);
         errorMessage = String.format("Configuration of Experiment Execution with Id %s failed : %s", executionId, errorMessage);
         String topic = "lifecycle.configurationResult." + executionId;
-        InternalMessage internalMessage = new ConfigurationResultInternalMessage(errorMessage, true);
+        InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.FAILED, errorMessage, null, true);
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {

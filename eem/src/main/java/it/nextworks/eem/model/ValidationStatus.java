@@ -1,4 +1,4 @@
-package it.nextworks.eem.sbi.rav;
+package it.nextworks.eem.model;
 
 public enum ValidationStatus {
     CONFIGURED,

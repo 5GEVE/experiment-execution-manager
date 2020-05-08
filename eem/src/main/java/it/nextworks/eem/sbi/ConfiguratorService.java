@@ -1,6 +1,7 @@
 package it.nextworks.eem.sbi;
 
 import it.nextworks.eem.configuration.ConfigurationParameters;
+import it.nextworks.eem.model.MetricInfo;
 import it.nextworks.eem.sbi.dummyDrivers.DummyConfiguratorDriver;
 import it.nextworks.eem.sbi.enums.ConfiguratorType;
 import it.nextworks.eem.sbi.interfaces.ConfiguratorServiceProviderInterface;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 
 @Service
 public class ConfiguratorService implements ConfiguratorServiceProviderInterface {
@@ -45,7 +47,27 @@ public class ConfiguratorService implements ConfiguratorServiceProviderInterface
     }
 
     @Override
-    public void configureExperiment(String executionId){
-        driver.configureExperiment(executionId);
+    public void applyConfiguration(String executionId, String tcDescriptorId, String configScript){
+        driver.applyConfiguration(executionId, tcDescriptorId, configScript);
+    }
+
+    @Override
+    public void abortConfiguration(String executionId, String tcDescriptorId){
+        driver.abortConfiguration(executionId, tcDescriptorId);
+    }
+
+    @Override
+    public void configureInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<MetricInfo> metrics){
+        driver.configureInfrastructureMetricCollection(executionId, tcDescriptorId, metrics);
+    }
+
+    @Override
+    public void resetConfiguration(String executionId, String tcDescriptorId, String resetScript){
+        driver.resetConfiguration(executionId, tcDescriptorId, resetScript);
+    }
+
+    @Override
+    public void removeInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<String> metricConfigIds){
+        driver.removeInfrastructureMetricCollection(executionId, tcDescriptorId, metricConfigIds);
     }
 }
