@@ -27,7 +27,7 @@ public class DummyExecutorDriver implements ExecutorServiceProviderInterface {
     }
 
     @Override
-    public void runTestCase(String executionId, String tcDescriptorId, String testCaseFile){
+    public void runTestCase(String executionId, String tcDescriptorId, String executionScript){
         manageTestCaseOK("OK", executionId, tcDescriptorId);
     }
 

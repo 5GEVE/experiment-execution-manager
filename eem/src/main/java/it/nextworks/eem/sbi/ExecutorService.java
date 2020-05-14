@@ -61,8 +61,8 @@ public class ExecutorService implements ExecutorServiceProviderInterface {
     }
 
     @Override
-    public void runTestCase(String executionId, String tcDescriptorId, String testCaseFile){
-        driver.runTestCase(executionId, tcDescriptorId, testCaseFile);
+    public void runTestCase(String executionId, String tcDescriptorId, String executionScript){
+        driver.runTestCase(executionId, tcDescriptorId, executionScript);
     }
 
     @Override

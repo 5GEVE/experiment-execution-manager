@@ -116,9 +116,9 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
 
     //execution
     @Override
-    public void runTestCase(String executionId, String tcDescriptorId, String robotFile){//TODO change type of robotFile
+    public void runTestCase(String executionId, String tcDescriptorId, String executionScript){
         new Thread(() -> {
-            runningJenkinsJob(executionId, tcDescriptorId, robotFile);
+            runningJenkinsJob(executionId, tcDescriptorId, executionScript);
         }).start();
     }
 

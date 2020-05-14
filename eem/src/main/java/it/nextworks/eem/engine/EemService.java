@@ -182,7 +182,7 @@ public class EemService{
         if(!experimentExecutionOptional.isPresent())
             throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", experimentExecutionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
-        if(!experimentExecution.getState().equals(ExperimentState.RUNNING) && !experimentExecution.getState().equals(ExperimentState.RUNNING_STEP) && !experimentExecution.getState().equals(ExperimentState.PAUSED))
+        if(!experimentExecution.getState().equals(ExperimentState.RUNNING) && !experimentExecution.getState().equals(ExperimentState.RUNNING_STEP) && !experimentExecution.getState().equals(ExperimentState.PAUSED) && !experimentExecution.getState().equals(ExperimentState.CONFIGURING))
             throw new FailedOperationException(String.format("Experiment Execution with Id %s is neither in RUNNING or RUNNING_STEP or PAUSED state", experimentExecutionId));
 
         String topic = "lifecycle.abort." + experimentExecutionId;
@@ -201,6 +201,8 @@ public class EemService{
         if(!experimentExecutionOptional.isPresent())
             throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", experimentExecutionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
+        if(!experimentExecution.getRunType().equals(ExperimentRunType.RUN_ALL))
+            throw new FailedOperationException(String.format("Experiment Execution with Id %s is not a RUN_ALL execution", experimentExecutionId));
         if(!experimentExecution.getState().equals(ExperimentState.PAUSED))
             throw new FailedOperationException(String.format("Experiment Execution with Id %s is not in PAUSED state", experimentExecutionId));
 

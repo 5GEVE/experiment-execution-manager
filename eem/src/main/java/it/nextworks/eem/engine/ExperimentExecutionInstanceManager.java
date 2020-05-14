@@ -6,14 +6,11 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import it.nextworks.eem.model.ExecutionResult;
-import it.nextworks.eem.model.TestCaseExecutionConfiguration;
+import it.nextworks.eem.model.*;
 import it.nextworks.eem.model.enumerate.ExperimentExecutionResultCode;
 import it.nextworks.eem.model.enumerate.ExperimentRunType;
 import it.nextworks.eem.model.enumerate.InfrastructureParameterType;
 import it.nextworks.eem.rabbitMessage.*;
-import it.nextworks.eem.model.ExperimentExecution;
-import it.nextworks.eem.model.ExperimentExecutionStateChangeNotification;
 import it.nextworks.eem.model.enumerate.ExperimentState;
 import it.nextworks.eem.repo.ExperimentExecutionRepository;
 import it.nextworks.eem.sbi.ConfiguratorService;
@@ -21,6 +18,8 @@ import it.nextworks.eem.sbi.ExecutorService;
 import it.nextworks.eem.sbi.MultiSiteOrchestratorService;
 import it.nextworks.eem.sbi.ValidatorService;
 import it.nextworks.eem.sbi.expcatalogue.ExperimentCatalogueService;
+import it.nextworks.eem.sbi.rav.model.MetricDataType;
+import it.nextworks.eem.sbi.rav.model.Topic;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.*;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.*;
 import it.nextworks.nfvmano.libs.ifa.common.elements.Filter;
@@ -56,19 +55,23 @@ public class ExperimentExecutionInstanceManager {
 
     private boolean interruptRunning;
     private boolean isValidationConfigured;
-    private boolean isExperimentConfigured;
+    private boolean isTestCaseConfigured;
 
+    private ExpBlueprint expBlueprint;
     private ExpDescriptor expDescriptor;
+    private VsBlueprint vsBlueprint;
     private VsDescriptor vsDescriptor;
     private List<CtxDescriptor> ctxDescriptors = new ArrayList<>();
+    private List<CtxBlueprint> ctxBlueprints = new ArrayList<>();
     private List<TestCaseDescriptor> tcDescriptors = new ArrayList<>();
     private List<TestCaseBlueprint> tcBlueprints = new ArrayList<>();
     private NsInstance nsInstance;
 
-    //Key: tcDescriptorId, Value: robotFile
-    private Map<String, String> testCases = new LinkedHashMap<>();//TODO change value type in RobotFile format, change also inside RUN_TEST_CASE message
-    private Iterator<Map.Entry<String, String>> testCasesIterator;
-    private Map.Entry<String, String> runningTestCase;
+    //Key: tcDescriptorId, Value: Key: execScript|configScript|resetScript, Value: script
+    private Map<String, Map<String, String>> testCases = new LinkedHashMap<>();
+    private Iterator<Map.Entry<String, Map<String, String>>> testCasesIterator;
+    private Map.Entry<String, Map<String, String>> runningTestCase;
+    private List<String> metricConfigIds;
 
     public ExperimentExecutionInstanceManager(String executionId, ExperimentExecutionRepository experimentExecutionRepository, EemSubscriptionService subscriptionService, ConfiguratorService configuratorService, ExecutorService executorService, ValidatorService validatorService, ExperimentCatalogueService catalogueService, MultiSiteOrchestratorService multiSiteOrchestratorService) throws NotExistingEntityException
     {
@@ -81,7 +84,7 @@ public class ExperimentExecutionInstanceManager {
         this.experimentExecutionRepository = experimentExecutionRepository;
         this.subscriptionService = subscriptionService;
         this.interruptRunning = false;
-        this.isExperimentConfigured = false;
+        this.isTestCaseConfigured = false;
         this.isValidationConfigured = false;
         this.configuratorService = configuratorService;
         this.executorService = executorService;
@@ -100,11 +103,20 @@ public class ExperimentExecutionInstanceManager {
         //Restart experiment executions based on the current state
         switch(currentState){
             case CONFIGURING:
-                //configuratorService.configureExperiment(executionId);//TODO workflow to be changed
                 validatorService.configureExperiment(executionId);
+                if(runType.equals(ExperimentRunType.RUN_ALL)){
+                    //Run the first test case if run type is RUN_ALL
+                    configureExperimentExecutionTestCase();
+                } else {
+                    //Pause experiment execution if the run type is RUN_IN_STEPS
+                    if(updateAndNotifyExperimentExecutionState(ExperimentState.PAUSED))
+                        log.info("Experiment Execution with Id {} paused", executionId);
+                }
                 break;
             case RUNNING: case RUNNING_STEP:
-                runExperimentExecutionTestCase();
+                //It is necessary to reconfigure the test case
+                if(updateAndNotifyExperimentExecutionState(ExperimentState.CONFIGURING))
+                    configureExperimentExecutionTestCase();
                 break;
             case VALIDATING:
                 //Consider startTcValidation already sent
@@ -221,8 +233,16 @@ public class ExperimentExecutionInstanceManager {
                 manageExperimentExecutionError(e.getMessage());
                 return;
             }
-            //configuratorService.configureExperiment(executionId);//TODO workflow to be changed
             validatorService.configureExperiment(executionId);
+            if(runType.equals(ExperimentRunType.RUN_ALL)){
+                //Run the first test case if run type is RUN_ALL
+                log.info("Running Experiment Execution with Id {}", executionId);
+                configureExperimentExecutionTestCase();
+            } else {
+                //Pause experiment execution if the run type is RUN_IN_STEPS
+                if(updateAndNotifyExperimentExecutionState(ExperimentState.PAUSED))
+                    log.info("Experiment Execution with Id {} paused", executionId);
+            }
         }
     }
 
@@ -232,28 +252,31 @@ public class ExperimentExecutionInstanceManager {
     }
 
     private void processResumeRequest(){
-        if(updateAndNotifyExperimentExecutionState(ExperimentState.RUNNING)) {
-            log.info("Resuming Experiment Execution with Id {}", executionId);
-            runExperimentExecutionTestCase();
-            log.info("Experiment Execution with Id {} resumed", executionId);
-        }
+        log.info("Resuming Experiment Execution with Id {}", executionId);
+        if(updateAndNotifyExperimentExecutionState(ExperimentState.CONFIGURING))
+            configureExperimentExecutionTestCase();
     }
 
     private void processStepRequest(){
-        if(updateAndNotifyExperimentExecutionState(ExperimentState.RUNNING_STEP)) {
-            log.info("Running a step of Experiment Execution with Id {}", executionId);
-            runExperimentExecutionTestCase();
-        }
+        log.info("Running a step of Experiment Execution with Id {}", executionId);
+        if(updateAndNotifyExperimentExecutionState(ExperimentState.CONFIGURING))
+            configureExperimentExecutionTestCase();
     }
 
     private void processAbortRequest(){
-        boolean abortNow = currentState.equals(ExperimentState.PAUSED);
+        ExperimentState oldState = currentState;
         if(updateAndNotifyExperimentExecutionState(ExperimentState.ABORTING)) {
             log.info("Aborting Experiment Execution with Id {}", executionId);
-            if(abortNow){
+            if(oldState.equals(ExperimentState.PAUSED)){
                 //If PAUSED, there is no need to abort a test case run
                 if (updateAndNotifyExperimentExecutionState(ExperimentState.ABORTED))
                     log.info("Experiment Execution with Id {} aborted", executionId);
+            }else if (oldState.equals(ExperimentState.CONFIGURING)){
+                //If CONFIGURING, abort Test Case configuration
+                if (updateAndNotifyExperimentExecutionState(ExperimentState.ABORTED)) {
+                    configuratorService.abortConfiguration(executionId, runningTestCase.getKey());
+                    log.info("Experiment Execution with Id {} aborted", executionId);
+                }
             }
             else
                 executorService.abortTestCase(executionId, runningTestCase.getKey());
@@ -287,14 +310,16 @@ public class ExperimentExecutionInstanceManager {
         executionResult.setResult(msg.getResult());
         experimentExecution.addTestCaseResult(testCaseId, executionResult);
         experimentExecutionRepository.saveAndFlush(experimentExecution);
-        log.info("Experiment Execution Test Case with Id {} completed", testCaseId);
+        log.info("Test Case with Id {} of Experiment Execution with Id {} completed", testCaseId, executionId);
+        configuratorService.removeInfrastructureMetricCollection(executionId, testCaseId, metricConfigIds);
+        configuratorService.resetConfiguration(executionId, testCaseId, runningTestCase.getValue().get("resetScript"));
         //Abort experiment execution if requested
         if(currentState.equals(ExperimentState.ABORTING) && updateAndNotifyExperimentExecutionState(ExperimentState.ABORTED)) {
             log.info("Experiment Execution with Id {} aborted", executionId);
             return;
         }
         if(updateAndNotifyExperimentExecutionState(ExperimentState.VALIDATING)) {
-            log.info("Validating TC with Id {} of Experiment Execution with Id {}", testCaseId, executionId);
+            log.info("Validating Test Case with Id {} of Experiment Execution with Id {}", testCaseId, executionId);
             validatorService.stopTcValidation(executionId, testCaseId);
         }
     }
@@ -306,12 +331,13 @@ public class ExperimentExecutionInstanceManager {
         }
         switch (msg.getValidationStatus()){
             case CONFIGURED:
+                log.info("Validator configured for Experiment Execution with Id {}", executionId);
                 isValidationConfigured = true;
-                if(isExperimentConfigured)
-                    //processConfigurationResult(new ConfigurationResultInternalMessage("Validation configured", false));//TODO workflow to be changed
+                if(isTestCaseConfigured)
+                    processConfigurationResult(new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_CONFIGURED, "Validation configured", null,false));
                 break;
             case ACQUIRING:
-                executorService.runTestCase(executionId, runningTestCase.getKey(), runningTestCase.getValue());
+                executorService.runTestCase(executionId, runningTestCase.getKey(), runningTestCase.getValue().get("execScript"));
                 break;
             case VALIDATING:
                 validatorService.queryValidationResult(executionId, runningTestCase.getKey());
@@ -340,8 +366,8 @@ public class ExperimentExecutionInstanceManager {
                     }
                 }else if(runType.equals(ExperimentRunType.RUN_ALL)){
                     //Run another test case if run type is RUN_ALL
-                    if(updateAndNotifyExperimentExecutionState(ExperimentState.RUNNING))
-                        runExperimentExecutionTestCase();
+                    if(updateAndNotifyExperimentExecutionState(ExperimentState.CONFIGURING))
+                        configureExperimentExecutionTestCase();
                 }else {
                     log.debug("State of the Execution Experiment is not correct");
                 }
@@ -354,21 +380,31 @@ public class ExperimentExecutionInstanceManager {
             manageExperimentExecutionError(msg.getResult());
             return;
         }
-        isExperimentConfigured = true;
-        if(isValidationConfigured){
-            if(runType.equals(ExperimentRunType.RUN_ALL)){
-                //Run the first test case if run type is RUN_ALL
-                if(updateAndNotifyExperimentExecutionState(ExperimentState.RUNNING)) {
-                    log.info("Running Experiment Execution with Id {}", executionId);
-                    runExperimentExecutionTestCase();
+        switch (msg.getConfigurationStatus()){
+            case CONFIGURED:
+                log.info("Configuration of Test Case with Id {} of Experiment Execution with Id {} completed", runningTestCase.getKey(), executionId);
+                try {
+                    configureInfrastructureMetrics();
+                }catch (FailedOperationException e){
+                    log.error(e.getMessage());
+                    manageExperimentExecutionError(e.getMessage());
                 }
-            }else {
-                //Pause experiment execution if the run type is RUN_IN_STEPS
-                if(updateAndNotifyExperimentExecutionState(ExperimentState.PAUSED))
-                    log.info("Experiment Execution with Id {} paused", executionId);
-            }
+                break;
+            case METRIC_CONFIGURED:
+                log.debug("Configuration of Infrastructure Metrics completed for Test Case with Id {}", runningTestCase.getKey());
+                isTestCaseConfigured = true;
+                if(msg.getMetricConfigIds() != null)
+                    metricConfigIds = msg.getMetricConfigIds();
+                if(isValidationConfigured){
+                    if(runType.equals(ExperimentRunType.RUN_ALL)) {
+                        if (updateAndNotifyExperimentExecutionState(ExperimentState.RUNNING))
+                            runExperimentExecutionTestCase();
+                    }else{
+                        if (updateAndNotifyExperimentExecutionState(ExperimentState.RUNNING_STEP))
+                            runExperimentExecutionTestCase();
+                    }
+                }
         }
-        log.info("Configuration of Experiment Execution with Id {} completed", executionId);
     }
 
     private void processAbortingResult(AbortingResultInternalMessage msg){
@@ -381,14 +417,40 @@ public class ExperimentExecutionInstanceManager {
     }
 
     private void runExperimentExecutionTestCase(){
+        log.info("Running Test Case with Id {} of Experiment Execution with Id {} ", runningTestCase.getKey(), executionId);
+        isTestCaseConfigured = false;
+        validatorService.startTcValidation(executionId, runningTestCase.getKey());
+    }
+
+    private void configureExperimentExecutionTestCase(){
         if(testCasesIterator.hasNext()) {
             //Take the first test case from the list
             runningTestCase = testCasesIterator.next();
             String tcDescriptorId = runningTestCase.getKey();
-            log.info("Running Experiment Execution Test Case with Id {}", tcDescriptorId);
-            validatorService.startTcValidation(executionId, tcDescriptorId);
+            log.info("Configuring Test Case with Id {} of Experiment Execution with Id {}", tcDescriptorId, executionId);
+            configuratorService.applyConfiguration(executionId, tcDescriptorId, runningTestCase.getValue().get("configScript"));
         }else
-            log.debug("No more Test Cases to run");
+            log.debug("No more Test Cases to run for Experiment Execution with Id {}", executionId);
+    }
+
+    private void configureInfrastructureMetrics() throws FailedOperationException{
+        List<MetricInfo> metrics = new ArrayList<>();
+        Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
+        if(!experimentExecutionOptional.isPresent())
+            throw new FailedOperationException(String.format("Experiment Execution with Id %s not found", executionId));
+        ExperimentExecution experimentExecution = experimentExecutionOptional.get();
+        EveSite siteName;//TODO handle multiple sites performing multiple requests or better sending a list of sites
+        try {
+            siteName = EveSite.valueOf(experimentExecution.getSiteNames().get(0).toUpperCase());
+        }catch (IllegalArgumentException e){
+            throw new FailedOperationException(String.format("Incorrect site name in the Experiment Execution with Id {}", executionId));
+        }
+        // Infrastructure metrics from Experiment blueprint
+        for (InfrastructureMetric im : expBlueprint.getMetrics()){
+            String topic = experimentExecution.getUseCase() + "." + experimentExecution.getExperimentId() + "." + experimentExecution.getSiteNames().get(0).toLowerCase() + "." + MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase() + "." + im.getMetricId();
+            MetricInfo metric = new MetricInfo(im, topic, siteName);
+        }
+        configuratorService.configureInfrastructureMetricCollection(executionId, runningTestCase.getKey(), metrics);
     }
 
     private void retrieveAllInformation() throws FailedOperationException {
@@ -411,6 +473,22 @@ public class ExperimentExecutionInstanceManager {
                 throw new FailedOperationException(String.format("Experiment Descriptor with Id %s not found", experimentDescriptorId));
             expDescriptor = expDescriptorResponse.getExpDescriptors().get(0);
             parameters.remove("ExpD_ID");
+            //Retrieve Experiment Blueprint
+            log.debug("Going to retrieve Experiment Blueprint with Id {}", expDescriptor.getExpBlueprintId());
+            parameters.put("ExpB_ID", expDescriptor.getExpBlueprintId());
+            QueryExpBlueprintResponse expBlueprintResponse = catalogueService.queryExpBlueprint(request);
+            if(expBlueprintResponse.getExpBlueprintInfo().isEmpty())
+                throw new FailedOperationException(String.format("Experiment Blueprint with Id %s not found", expDescriptor.getExpBlueprintId()));
+            expBlueprint = expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint();
+            parameters.remove("ExpB_ID");
+            //Retrieve Vertical Service Blueprint
+            log.debug("Going to retrieve Vertical Service Blueprint with Id {}", expBlueprint.getVsBlueprintId());
+            parameters.put("VSB_ID", expBlueprint.getVsBlueprintId());
+            QueryVsBlueprintResponse vsBlueprintResponse = catalogueService.queryVsBlueprint(request);
+            if(vsBlueprintResponse.getVsBlueprintInfo().isEmpty())
+                throw new FailedOperationException(String.format("Vertical Service Blueprint with Id %s not found", expBlueprint.getVsBlueprintId()));
+            vsBlueprint = vsBlueprintResponse.getVsBlueprintInfo().get(0).getVsBlueprint();
+            parameters.remove("VSB_ID");
             //Retrieve Vertical Service Descriptor
             String vsDescriptorId = expDescriptor.getVsDescriptorId();
             log.debug("Going to retrieve Vertical Service Descriptor with Id {}", vsDescriptorId);
@@ -420,6 +498,16 @@ public class ExperimentExecutionInstanceManager {
                 throw new FailedOperationException(String.format("Vertical Service Descriptor with Id %s not found", vsDescriptorId));
             vsDescriptor = vsDescriptorResponse.getVsDescriptors().get(0);
             parameters.remove("VSD_ID");
+            //Retrieve Context Blueprints
+            for (String ctxBId : expBlueprint.getCtxBlueprintIds()){
+                parameters.put("CTXB_ID", ctxBId);
+                QueryCtxBlueprintResponse ctxBlueprintResponse = catalogueService.queryCtxBlueprint(request);
+                if (ctxBlueprintResponse.getCtxBlueprintInfos().isEmpty())
+                    throw new FailedOperationException(String.format("Context Blueprint with Id %s not found", ctxBId));
+                CtxBlueprint ctxBlueprint = ctxBlueprintResponse.getCtxBlueprintInfos().get(0).getCtxBlueprint();
+                ctxBlueprints.add(ctxBlueprint);
+                parameters.remove("CTXB_ID");
+            }
             //Retrieve Context Descriptors
             List<String> ctxDescriptorIds = expDescriptor.getCtxDescriptorIds();
             log.debug("Going to retrieve Context Descriptors with Ids {}", ctxDescriptorIds);
@@ -468,7 +556,6 @@ public class ExperimentExecutionInstanceManager {
     }
 
     private void translateTestCases() throws FailedOperationException{
-        //TODO test
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         if(!experimentExecutionOptional.isPresent())
             throw new FailedOperationException(String.format("Experiment Execution with Id %s not found", executionId));
@@ -485,32 +572,51 @@ public class ExperimentExecutionInstanceManager {
             }
         }
         for(TestCaseBlueprint tcBlueprint: tcBlueprints){
-            String updatedScript = tcBlueprint.getScript();
-            //Override infrastructure parameters inside script field in the test case blueprint
-            for (Map.Entry<String, String> infrastructureParameterEntry : tcBlueprint.getInfrastructureParameters().entrySet()) {
-                updatedScript = updatedScript.replace(tcBlueprint.getInfrastructureParameters().get(infrastructureParameterEntry.getKey()),
-                        findInfrastructureParameterValue(infrastructureParameterEntry.getKey()));
-            }
-            //Override user parameters inside script field in the test case blueprint
+            //Override infrastructure parameters inside script fields in the test case blueprint
+            String executionScript = overrideInfrastuctureParameters(tcBlueprint, tcBlueprint.getExecutionScript());
+            String configurationScript = overrideInfrastuctureParameters(tcBlueprint, tcBlueprint.getConfigurationScript());
+            String resetConfigScript = overrideInfrastuctureParameters(tcBlueprint, tcBlueprint.getResetConfigScript());
             for(TestCaseDescriptor tcDescriptor : tcDescriptors){
                 if(tcBlueprint.getTestcaseBlueprintId().equalsIgnoreCase(tcDescriptor.getTestCaseBlueprintId())){
-                    log.debug("Updating script field for Test Case Blueprint with Id {}", tcBlueprint.getTestcaseBlueprintId());
-                    for(Map.Entry<String, String> userParameterEntry : tcDescriptor.getUserParameters().entrySet())
-                        updatedScript = updatedScript.replace(tcBlueprint.getUserParameters().get(userParameterEntry.getKey()), userParameterEntry.getValue());
-                    if(!executionResultIds.contains(tcDescriptor.getTestCaseDescriptorId()))
-                        testCases.put(tcDescriptor.getTestCaseDescriptorId(), updatedScript);
+                    //Override user parameters inside script fields in the test case blueprint
+                    executionScript = overrideUserParameters(tcBlueprint, tcDescriptor, executionScript);
+                    configurationScript = overrideUserParameters(tcBlueprint, tcDescriptor, configurationScript);
+                    resetConfigScript = overrideUserParameters(tcBlueprint, tcDescriptor, resetConfigScript);
+                    //Add only if test case has not been already executed
+                    if(!executionResultIds.contains(tcDescriptor.getTestCaseDescriptorId())) {
+                        Map<String, String> scripts = new LinkedHashMap<>();
+                        scripts.put("execScript", executionScript);
+                        scripts.put("configScript", configurationScript);
+                        scripts.put("resetScript", resetConfigScript);
+                        testCases.put(tcDescriptor.getTestCaseDescriptorId(), scripts);
+                    }
                 }
             }
         }
         testCasesIterator = testCases.entrySet().iterator();
     }
 
-    private String findInfrastructureParameterValue(String infrastructureParameter) {
+    private String overrideInfrastuctureParameters(TestCaseBlueprint tcBlueprint, String script) throws FailedOperationException{
+        for (Map.Entry<String, String> infrastructureParameterEntry : tcBlueprint.getInfrastructureParameters().entrySet()) {
+            script = script.replace(tcBlueprint.getInfrastructureParameters().get(infrastructureParameterEntry.getKey()),
+                    findInfrastructureParameterValue(infrastructureParameterEntry.getKey()));
+        }
+        return script;
+    }
+
+    private String overrideUserParameters(TestCaseBlueprint tcBlueprint, TestCaseDescriptor tcDescriptor, String script){
+        for(Map.Entry<String, String> userParameterEntry : tcDescriptor.getUserParameters().entrySet())
+            script = script.replace(tcBlueprint.getUserParameters().get(userParameterEntry.getKey()), userParameterEntry.getValue());
+        return script;
+    }
+
+    private String findInfrastructureParameterValue(String infrastructureParameter) throws FailedOperationException{
         //format example:
         //sap.<sap_id>.ipaddress
         //vnf.<vnfd_id>.extcp.<extcp_id>.ipaddress
         //vnf.<vnfd_id>.vdu.<vdu_id>.cp.<cp_id>.ipaddress
         //pnf.<pnfd_id>.cp.<cp_id>.ipaddress
+        //$$topic.metricid
         String infrastructureParameterValue = null;
         String [] splits = infrastructureParameter.split("\\.");
         List<String> ids = new ArrayList<>();
@@ -573,10 +679,33 @@ public class ExperimentExecutionInstanceManager {
                     log.error("Unacceptable Infrastructure parameter format: {}. Skipping", infrastructureParameter);
             } else
                 log.error("Unacceptable Infrastructure parameter format: {}. Skipping", infrastructureParameter);
+        }else if(infrastructureParameter.startsWith("$$topic")){
+            log.debug("Infrastructure parameter related to application metrics");
+            Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
+            if(!experimentExecutionOptional.isPresent())
+                throw new FailedOperationException(String.format("Experiment Execution with Id %s not found", executionId));
+            ExperimentExecution experimentExecution = experimentExecutionOptional.get();
+            String metricId = splits[1];
+            //Check application metrics from Context Blueprints
+            for (CtxBlueprint ctxB : ctxBlueprints) {
+                for (ApplicationMetric amd : ctxB.getApplicationMetrics())
+                    if (amd.getMetricId().equalsIgnoreCase(metricId)) {
+                        infrastructureParameterValue = experimentExecution.getUseCase() + "." + experimentExecution.getExperimentId() + "." + experimentExecution.getSiteNames().get(0).toLowerCase() + "." + MetricDataType.APPLICATION_METRIC.toString().toLowerCase() + "." + amd.getMetricId();
+                        break;
+                    }
+            }
+            //Check application metrics from VS Blueprint
+            if(infrastructureParameterValue == null) {
+                for (ApplicationMetric amd : vsBlueprint.getApplicationMetrics())
+                    if (amd.getMetricId().equalsIgnoreCase(metricId)) {
+                        infrastructureParameterValue = experimentExecution.getUseCase() + "." + experimentExecution.getExperimentId() + "." + experimentExecution.getSiteNames().get(0).toLowerCase() + "." + MetricDataType.APPLICATION_METRIC.toString().toLowerCase() + "." + amd.getMetricId();
+                        break;
+                    }
+            }
         } else
             log.error("Unacceptable Infrastructure parameter format: {}. Skipping", infrastructureParameter);
 
-        return infrastructureParameterValue;
+        return infrastructureParameterValue != null ? infrastructureParameterValue : "NOT_FOUND";
     }
 
     private String readParameter(InfrastructureParameterType parameterType, List<String> ids) throws FailedOperationException{
@@ -691,14 +820,19 @@ public class ExperimentExecutionInstanceManager {
             case ABORTING:
                 return currentState.equals(ExperimentState.RUNNING) ||
                         currentState.equals(ExperimentState.RUNNING_STEP) ||
-                        currentState.equals(ExperimentState.PAUSED);
+                        currentState.equals(ExperimentState.PAUSED) ||
+                        currentState.equals(ExperimentState.CONFIGURING);
             case COMPLETED:
                 return currentState.equals(ExperimentState.VALIDATING);
             case VALIDATING:
                 return currentState.equals(ExperimentState.RUNNING) ||
                         currentState.equals(ExperimentState.RUNNING_STEP);
             case CONFIGURING:
-                return currentState.equals(ExperimentState.INIT);
+                return currentState.equals(ExperimentState.INIT) ||
+                        currentState.equals(ExperimentState.PAUSED) ||
+                        currentState.equals(ExperimentState.VALIDATING) ||
+                        currentState.equals(ExperimentState.RUNNING) ||
+                        currentState.equals(ExperimentState.RUNNING_STEP);
             case RUNNING_STEP:
                 return currentState.equals(ExperimentState.PAUSED);
             default:
