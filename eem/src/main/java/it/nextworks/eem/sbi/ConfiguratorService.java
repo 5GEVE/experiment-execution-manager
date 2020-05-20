@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.net.URISyntaxException;
 import java.util.List;
 
 @Service
@@ -35,11 +36,20 @@ public class ConfiguratorService implements ConfiguratorServiceProviderInterface
     @Value("${configurator.type}")
     private ConfiguratorType configuratorType;
 
+    @Value("${eem.jenkins.uri}")
+    private String jenkinsURI;
+
+    @Value("${eem.jenkins.username}")
+    private String jenkinsUsername;
+
+    @Value("${eem.jenkins.password}")
+    private String jenkinsPassword;
+
     @PostConstruct
-    public void init() {
+    public void init() throws URISyntaxException {
         log.debug("Initializing Configurator driver");
         if (configuratorType.equals(ConfiguratorType.RC))
-            this.driver = RCDriver.getInstance(rabbitTemplate, messageExchange);
+            this.driver = RCDriver.getInstance(jenkinsURI, jenkinsUsername, jenkinsPassword, rabbitTemplate, messageExchange);
         else if (configuratorType.equals((ConfiguratorType.DUMMY)))
             this.driver = new DummyConfiguratorDriver(rabbitTemplate, messageExchange);
         else

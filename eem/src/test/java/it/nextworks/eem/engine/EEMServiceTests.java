@@ -137,7 +137,7 @@ public class EEMServiceTests {
     public void readFileFromFolder() throws URISyntaxException {
         ClassLoader classLoader = getClass().getClassLoader();
         String jobname = "tst";
-        URL resource = classLoader.getResource("job-template.xml");
+        URL resource = classLoader.getResource("job-template-exec.xml");
         if (resource == null) {
             throw new IllegalArgumentException("file is not found!");
         } else {

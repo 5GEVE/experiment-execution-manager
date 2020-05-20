@@ -597,14 +597,18 @@ public class ExperimentExecutionInstanceManager {
     }
 
     private String overrideInfrastuctureParameters(TestCaseBlueprint tcBlueprint, String script) throws FailedOperationException{
+        if(script == null)
+            return null;
         for (Map.Entry<String, String> infrastructureParameterEntry : tcBlueprint.getInfrastructureParameters().entrySet()) {
-            script = script.replace(tcBlueprint.getInfrastructureParameters().get(infrastructureParameterEntry.getKey()),
+            script = script.replace(infrastructureParameterEntry.getKey(),
                     findInfrastructureParameterValue(infrastructureParameterEntry.getKey()));
         }
         return script;
     }
 
     private String overrideUserParameters(TestCaseBlueprint tcBlueprint, TestCaseDescriptor tcDescriptor, String script){
+        if(script == null)
+            return null;
         for(Map.Entry<String, String> userParameterEntry : tcDescriptor.getUserParameters().entrySet())
             script = script.replace(tcBlueprint.getUserParameters().get(userParameterEntry.getKey()), userParameterEntry.getValue());
         return script;
@@ -705,7 +709,10 @@ public class ExperimentExecutionInstanceManager {
         } else
             log.error("Unacceptable Infrastructure parameter format: {}. Skipping", infrastructureParameter);
 
-        return infrastructureParameterValue != null ? infrastructureParameterValue : "NOT_FOUND";
+        if(infrastructureParameterValue == null)
+            throw new FailedOperationException("Cannot find the value for the Infrastructure Parameter " + infrastructureParameter);
+
+        return infrastructureParameterValue;
     }
 
     private String readParameter(InfrastructureParameterType parameterType, List<String> ids) throws FailedOperationException{

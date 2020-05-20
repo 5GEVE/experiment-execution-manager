@@ -134,7 +134,7 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
         String name = "Execution_" + executionId + "__tcb_" + tcDescriptorId;
         log.debug("Running the experiment");
         log.debug("Getting the template file from resources");
-        File configFile = getFileFromResources("job-template.xml");
+        File configFile = getFileFromResources("job-template-exec.xml");
         log.debug("Translating the received template to concrete configXML job file");
         String jenkinsJobDescription = createConfigXMLFileFromTemplate(configFile, executionId, tcDescriptorId, robotFile);
         log.debug("Creating a new jenkins job with executionId: {} and configFile {}", executionId, jenkinsJobDescription);
@@ -284,7 +284,7 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
         return mapper;
     }
 
-    private String createConfigXMLFileFromTemplate(File template, String executionId, String tcDescriptorId,  String robotCode){
+    static public String createConfigXMLFileFromTemplate(File template, String executionId, String tcDescriptorId,  String robotCode){
         String configXML = "";
 
         try (FileReader reader = new FileReader(template);
@@ -310,15 +310,12 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
         String robotFileInConfig = "";
         for (int i = 0; i < lines.length; i++){
             log.debug("echo -e" + lines[i] + " >> ${WORKSPACE}/executionFile.robot");
-            robotFileInConfig = robotFileInConfig.concat("echo \"" + lines[i] + "\" >> ${WORKSPACE}/executionFile.robot").concat("\n");
+            robotFileInConfig = robotFileInConfig.concat("echo '" + lines[i] + "' >> ${WORKSPACE}/executionFile.robot").concat("\n");
         }
 
 
         configXML = configXML.replace("__ROBOT_FILE__", robotFileInConfig);
         configXML = configXML.replace("_JOB__DESCRIPTION__","Job for experiment execution : " + executionId + " test case " + tcDescriptorId );
-        configXML = configXML.replace("__EXECUTION_ID__", executionId);
-        configXML = configXML.replace("__TCD_ID__", tcDescriptorId);
-
 
         log.debug("Generated Jenkins job file after substitution {}", configXML );
         return configXML;
