@@ -65,7 +65,7 @@ public class ExperimentExecutionInstanceManager {
     private List<CtxBlueprint> ctxBlueprints = new ArrayList<>();
     private List<TestCaseDescriptor> tcDescriptors = new ArrayList<>();
     private List<TestCaseBlueprint> tcBlueprints = new ArrayList<>();
-    private NsInstance nsInstance;
+    private NsInstance nsInstance = null;
 
     //Key: tcDescriptorId, Value: Key: execScript|configScript|resetScript, Value: script
     private Map<String, Map<String, String>> testCases = new LinkedHashMap<>();
@@ -545,10 +545,12 @@ public class ExperimentExecutionInstanceManager {
                 parameters.remove("TCB_ID");
             }
             //Retrieve NsInstance
-            log.debug("Going to retrieve NsInstance with Id {}", nsInstanceId);
-            parameters.put("NS_ID", nsInstanceId);
-            nsInstance = multiSiteOrchestratorService.queryNs(request);
-            parameters.remove("NS_ID");
+            if(nsInstanceId != null && !nsInstanceId.equals("")) {
+                log.debug("Going to retrieve NsInstance with Id {}", nsInstanceId);
+                parameters.put("NS_ID", nsInstanceId);
+                nsInstance = multiSiteOrchestratorService.queryNs(request);
+                parameters.remove("NS_ID");
+            }
             translateTestCases();
         }catch (MalformattedElementException e){
             throw new FailedOperationException(e.getMessage());
@@ -717,6 +719,8 @@ public class ExperimentExecutionInstanceManager {
 
     private String readParameter(InfrastructureParameterType parameterType, List<String> ids) throws FailedOperationException{
         //TODO add try/catch block to handle NullPointerException?
+        if(nsInstance == null)
+            throw new FailedOperationException("Cannot obtain infrastructure parameters information: Ns instance is null");
         String parameterValue = null;
         switch (parameterType) {
             case SAP_IP_ADDRESS:
