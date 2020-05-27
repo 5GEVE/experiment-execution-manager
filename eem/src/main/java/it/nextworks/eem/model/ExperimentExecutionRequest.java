@@ -204,8 +204,6 @@ public class ExperimentExecutionRequest   {
 
   @JsonIgnore
   public void isValid() throws MalformattedElementException {
-    if(nsInstanceId == null)
-      throw new MalformattedElementException("nsInstanceId cannot be null");
     if(experimentDescriptorId == null)
       throw new MalformattedElementException("experimentDescriptorId cannot be null");
   }

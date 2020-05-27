@@ -312,7 +312,9 @@ public class ExperimentExecutionInstanceManager {
         experimentExecutionRepository.saveAndFlush(experimentExecution);
         log.info("Test Case with Id {} of Experiment Execution with Id {} completed", testCaseId, executionId);
         configuratorService.removeInfrastructureMetricCollection(executionId, testCaseId, metricConfigIds);
-        configuratorService.resetConfiguration(executionId, testCaseId, runningTestCase.getValue().get("resetScript"));
+        String resetScript = runningTestCase.getValue().get("resetScript");
+        if(resetScript != null)
+            configuratorService.resetConfiguration(executionId, testCaseId, resetScript);
         //Abort experiment execution if requested
         if(currentState.equals(ExperimentState.ABORTING) && updateAndNotifyExperimentExecutionState(ExperimentState.ABORTED)) {
             log.info("Experiment Execution with Id {} aborted", executionId);
@@ -428,7 +430,12 @@ public class ExperimentExecutionInstanceManager {
             runningTestCase = testCasesIterator.next();
             String tcDescriptorId = runningTestCase.getKey();
             log.info("Configuring Test Case with Id {} of Experiment Execution with Id {}", tcDescriptorId, executionId);
-            configuratorService.applyConfiguration(executionId, tcDescriptorId, runningTestCase.getValue().get("configScript"));
+            String configScript = runningTestCase.getValue().get("configScript");
+            if(configScript == null){
+                ConfigurationResultInternalMessage msg = new ConfigurationResultInternalMessage(ConfigurationStatus.CONFIGURED, "OK", null, false);
+                processConfigurationResult(msg);
+            }else
+                configuratorService.applyConfiguration(executionId, tcDescriptorId, configScript);
         }else
             log.debug("No more Test Cases to run for Experiment Execution with Id {}", executionId);
     }
@@ -461,7 +468,7 @@ public class ExperimentExecutionInstanceManager {
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         String experimentDescriptorId = experimentExecution.getExperimentDescriptorId();
         String nsInstanceId = experimentExecution.getNsInstanceId();
-        try{
+        try {
             Map<String, String> parameters = new HashMap<>();
             Filter filter = new Filter(parameters);
             GeneralizedQueryRequest request = new GeneralizedQueryRequest(filter, null);
@@ -469,7 +476,7 @@ public class ExperimentExecutionInstanceManager {
             log.debug("Going to retrieve Experiment Descriptor with Id {}", experimentDescriptorId);
             parameters.put("ExpD_ID", experimentDescriptorId);
             QueryExpDescriptorResponse expDescriptorResponse = catalogueService.queryExpDescriptor(request);
-            if(expDescriptorResponse.getExpDescriptors().isEmpty())
+            if (expDescriptorResponse.getExpDescriptors().isEmpty())
                 throw new FailedOperationException(String.format("Experiment Descriptor with Id %s not found", experimentDescriptorId));
             expDescriptor = expDescriptorResponse.getExpDescriptors().get(0);
             parameters.remove("ExpD_ID");
@@ -477,7 +484,7 @@ public class ExperimentExecutionInstanceManager {
             log.debug("Going to retrieve Experiment Blueprint with Id {}", expDescriptor.getExpBlueprintId());
             parameters.put("ExpB_ID", expDescriptor.getExpBlueprintId());
             QueryExpBlueprintResponse expBlueprintResponse = catalogueService.queryExpBlueprint(request);
-            if(expBlueprintResponse.getExpBlueprintInfo().isEmpty())
+            if (expBlueprintResponse.getExpBlueprintInfo().isEmpty())
                 throw new FailedOperationException(String.format("Experiment Blueprint with Id %s not found", expDescriptor.getExpBlueprintId()));
             expBlueprint = expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint();
             parameters.remove("ExpB_ID");
@@ -485,7 +492,7 @@ public class ExperimentExecutionInstanceManager {
             log.debug("Going to retrieve Vertical Service Blueprint with Id {}", expBlueprint.getVsBlueprintId());
             parameters.put("VSB_ID", expBlueprint.getVsBlueprintId());
             QueryVsBlueprintResponse vsBlueprintResponse = catalogueService.queryVsBlueprint(request);
-            if(vsBlueprintResponse.getVsBlueprintInfo().isEmpty())
+            if (vsBlueprintResponse.getVsBlueprintInfo().isEmpty())
                 throw new FailedOperationException(String.format("Vertical Service Blueprint with Id %s not found", expBlueprint.getVsBlueprintId()));
             vsBlueprint = vsBlueprintResponse.getVsBlueprintInfo().get(0).getVsBlueprint();
             parameters.remove("VSB_ID");
@@ -494,58 +501,68 @@ public class ExperimentExecutionInstanceManager {
             log.debug("Going to retrieve Vertical Service Descriptor with Id {}", vsDescriptorId);
             parameters.put("VSD_ID", vsDescriptorId);
             QueryVsDescriptorResponse vsDescriptorResponse = catalogueService.queryVsDescriptor(request);
-            if(vsDescriptorResponse.getVsDescriptors().isEmpty())
+            if (vsDescriptorResponse.getVsDescriptors().isEmpty())
                 throw new FailedOperationException(String.format("Vertical Service Descriptor with Id %s not found", vsDescriptorId));
             vsDescriptor = vsDescriptorResponse.getVsDescriptors().get(0);
             parameters.remove("VSD_ID");
             //Retrieve Context Blueprints
-            for (String ctxBId : expBlueprint.getCtxBlueprintIds()){
-                parameters.put("CTXB_ID", ctxBId);
-                QueryCtxBlueprintResponse ctxBlueprintResponse = catalogueService.queryCtxBlueprint(request);
-                if (ctxBlueprintResponse.getCtxBlueprintInfos().isEmpty())
-                    throw new FailedOperationException(String.format("Context Blueprint with Id %s not found", ctxBId));
-                CtxBlueprint ctxBlueprint = ctxBlueprintResponse.getCtxBlueprintInfos().get(0).getCtxBlueprint();
-                ctxBlueprints.add(ctxBlueprint);
-                parameters.remove("CTXB_ID");
+            List<String> ctxBlueprintsIds = expBlueprint.getCtxBlueprintIds();
+            if (ctxBlueprintsIds != null){
+                log.debug("Going to retrieve Context Blueprints with Ids {}", ctxBlueprintsIds);
+                for (String ctxBId : ctxBlueprintsIds) {
+                    parameters.put("CTXB_ID", ctxBId);
+                    QueryCtxBlueprintResponse ctxBlueprintResponse = catalogueService.queryCtxBlueprint(request);
+                    if (ctxBlueprintResponse.getCtxBlueprintInfos().isEmpty())
+                        throw new FailedOperationException(String.format("Context Blueprint with Id %s not found", ctxBId));
+                    CtxBlueprint ctxBlueprint = ctxBlueprintResponse.getCtxBlueprintInfos().get(0).getCtxBlueprint();
+                    ctxBlueprints.add(ctxBlueprint);
+                    parameters.remove("CTXB_ID");
+                }
             }
             //Retrieve Context Descriptors
             List<String> ctxDescriptorIds = expDescriptor.getCtxDescriptorIds();
-            log.debug("Going to retrieve Context Descriptors with Ids {}", ctxDescriptorIds);
-            for(String ctxDescriptorId : ctxDescriptorIds) {
-                parameters.put("CTXD_ID", ctxDescriptorId);
-                QueryCtxDescriptorResponse ctxDescriptorResponse = catalogueService.queryCtxDescriptor(request);
-                if (ctxDescriptorResponse.getCtxDescriptors().isEmpty())
-                    throw new FailedOperationException(String.format("Context Descriptor with Id %s not found", ctxDescriptorId));
-                CtxDescriptor ctxDescriptor = ctxDescriptorResponse.getCtxDescriptors().get(0);
-                ctxDescriptors.add(ctxDescriptor);
-                parameters.remove("CTXD_ID");
+            if(ctxDescriptorIds != null) {
+                log.debug("Going to retrieve Context Descriptors with Ids {}", ctxDescriptorIds);
+                for (String ctxDescriptorId : ctxDescriptorIds) {
+                    parameters.put("CTXD_ID", ctxDescriptorId);
+                    QueryCtxDescriptorResponse ctxDescriptorResponse = catalogueService.queryCtxDescriptor(request);
+                    if (ctxDescriptorResponse.getCtxDescriptors().isEmpty())
+                        throw new FailedOperationException(String.format("Context Descriptor with Id %s not found", ctxDescriptorId));
+                    CtxDescriptor ctxDescriptor = ctxDescriptorResponse.getCtxDescriptors().get(0);
+                    ctxDescriptors.add(ctxDescriptor);
+                    parameters.remove("CTXD_ID");
+                }
             }
             //Retrieve Test Case Descriptors
             List<String> tcDescriptorIds = expDescriptor.getTestCaseDescriptorIds();
-            log.debug("Going to retrieve Test Case Descriptors with Ids {}", tcDescriptorIds);
-            for(String tcDescriptorId : tcDescriptorIds) {
-                parameters.put("TCD_ID", tcDescriptorId);
-                QueryTestCaseDescriptorResponse tcDescriptorResponse = catalogueService.queryTestCaseDescriptor(request);
-                if(tcDescriptorResponse.getTestCaseDescriptors().isEmpty())
-                    throw new FailedOperationException(String.format("Test Case Descriptor with Id %s not found", tcDescriptorId));
-                TestCaseDescriptor tcDescriptor = tcDescriptorResponse.getTestCaseDescriptors().get(0);
-                tcDescriptors.add(tcDescriptor);
-                parameters.remove("TCD_ID");
+            if(tcDescriptorIds != null) {
+                log.debug("Going to retrieve Test Case Descriptors with Ids {}", tcDescriptorIds);
+                for (String tcDescriptorId : tcDescriptorIds) {
+                    parameters.put("TCD_ID", tcDescriptorId);
+                    QueryTestCaseDescriptorResponse tcDescriptorResponse = catalogueService.queryTestCaseDescriptor(request);
+                    if (tcDescriptorResponse.getTestCaseDescriptors().isEmpty())
+                        throw new FailedOperationException(String.format("Test Case Descriptor with Id %s not found", tcDescriptorId));
+                    TestCaseDescriptor tcDescriptor = tcDescriptorResponse.getTestCaseDescriptors().get(0);
+                    tcDescriptors.add(tcDescriptor);
+                    parameters.remove("TCD_ID");
+                }
             }
             //Retrieve Test Case Blueprints
             List<String> tcBlueprintIds = tcDescriptors.stream().map(TestCaseDescriptor::getTestCaseBlueprintId).collect(Collectors.toList());
-            log.debug("Going to retrieve Test Case Blueprints with Ids {}", tcBlueprintIds);
-            for(String tcBlueprintId : tcBlueprintIds) {
-                parameters.put("TCB_ID", tcBlueprintId);
-                QueryTestCaseBlueprintResponse tcBlueprintResponse = catalogueService.queryTestCaseBlueprint(request);
-                if(tcBlueprintResponse.getTestCaseBlueprints().isEmpty())
-                    throw new FailedOperationException(String.format("Test Case Blueprint with Id %s not found", tcBlueprintId));
-                TestCaseBlueprint tcBlueprint = tcBlueprintResponse.getTestCaseBlueprints().get(0).getTestCaseBlueprint();
-                tcBlueprints.add(tcBlueprint);
-                parameters.remove("TCB_ID");
+            if(tcBlueprintIds != null) {
+                log.debug("Going to retrieve Test Case Blueprints with Ids {}", tcBlueprintIds);
+                for (String tcBlueprintId : tcBlueprintIds) {
+                    parameters.put("TCB_ID", tcBlueprintId);
+                    QueryTestCaseBlueprintResponse tcBlueprintResponse = catalogueService.queryTestCaseBlueprint(request);
+                    if (tcBlueprintResponse.getTestCaseBlueprints().isEmpty())
+                        throw new FailedOperationException(String.format("Test Case Blueprint with Id %s not found", tcBlueprintId));
+                    TestCaseBlueprint tcBlueprint = tcBlueprintResponse.getTestCaseBlueprints().get(0).getTestCaseBlueprint();
+                    tcBlueprints.add(tcBlueprint);
+                    parameters.remove("TCB_ID");
+                }
             }
             //Retrieve NsInstance
-            if(nsInstanceId != null && !nsInstanceId.equals("")) {
+            if(nsInstanceId != null) {
                 log.debug("Going to retrieve NsInstance with Id {}", nsInstanceId);
                 parameters.put("NS_ID", nsInstanceId);
                 nsInstance = multiSiteOrchestratorService.queryNs(request);
@@ -575,9 +592,9 @@ public class ExperimentExecutionInstanceManager {
         }
         for(TestCaseBlueprint tcBlueprint: tcBlueprints){
             //Override infrastructure parameters inside script fields in the test case blueprint
-            String executionScript = overrideInfrastuctureParameters(tcBlueprint, tcBlueprint.getExecutionScript());
-            String configurationScript = overrideInfrastuctureParameters(tcBlueprint, tcBlueprint.getConfigurationScript());
-            String resetConfigScript = overrideInfrastuctureParameters(tcBlueprint, tcBlueprint.getResetConfigScript());
+            String executionScript = overrideInfrastructureParameters(tcBlueprint, tcBlueprint.getExecutionScript());
+            String configurationScript = overrideInfrastructureParameters(tcBlueprint, tcBlueprint.getConfigurationScript());
+            String resetConfigScript = overrideInfrastructureParameters(tcBlueprint, tcBlueprint.getResetConfigScript());
             for(TestCaseDescriptor tcDescriptor : tcDescriptors){
                 if(tcBlueprint.getTestcaseBlueprintId().equalsIgnoreCase(tcDescriptor.getTestCaseBlueprintId())){
                     //Override user parameters inside script fields in the test case blueprint
@@ -598,7 +615,7 @@ public class ExperimentExecutionInstanceManager {
         testCasesIterator = testCases.entrySet().iterator();
     }
 
-    private String overrideInfrastuctureParameters(TestCaseBlueprint tcBlueprint, String script) throws FailedOperationException{
+    private String overrideInfrastructureParameters(TestCaseBlueprint tcBlueprint, String script) throws FailedOperationException{
         if(script == null)
             return null;
         for (Map.Entry<String, String> infrastructureParameterEntry : tcBlueprint.getInfrastructureParameters().entrySet()) {
