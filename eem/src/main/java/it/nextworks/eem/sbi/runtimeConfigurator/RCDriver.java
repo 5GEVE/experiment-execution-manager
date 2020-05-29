@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -62,13 +61,13 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 	}
 
 	@Override
-	public void applyConfiguration(String configId, String tcDescriptorId, String configScript){
-		new Thread(() -> {applyConfigurationImplementation(configId, tcDescriptorId, configScript);}).start();
+	public void applyConfiguration(String executionId, String tcDescriptorId, String configScript, String resetScript){
+		new Thread(() -> {applyConfigurationImplementation(executionId, tcDescriptorId, configScript, resetScript);}).start();
 	}
 
 	@Override
-	public void abortConfiguration(String configId, String tcDescriptorId){
-		new Thread(() -> {abortConfigurationImplementation(configId, tcDescriptorId);}).start();
+	public void abortConfiguration(String executionId, String tcDescriptorId, String configId){
+		new Thread(() -> {abortConfigurationImplementation(executionId, tcDescriptorId, configId);}).start();
 	}
 
 	@Override
@@ -77,13 +76,13 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 	}
 
 	@Override
-	public void resetConfiguration(String configId, String tcDescriptorId, String resetScript){
-		new Thread(() -> {resetConfigurationImplementation(configId, tcDescriptorId, resetScript);}).start();
+	public void resetConfiguration(String executionId, String tcDescriptorId, String configId){
+		new Thread(() -> {resetConfigurationImplementation(executionId, tcDescriptorId, configId);}).start();
 	}
 
 	@Override
-	public void removeInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<String> metricConfigIds){
-		new Thread(() -> {removeInfrastructureMetricCollectionImplementation(executionId, tcDescriptorId, metricConfigIds);}).start();
+	public void removeInfrastructureMetricCollection(String executionId, String tcDescriptorId, String metricConfigId){
+		new Thread(() -> {removeInfrastructureMetricCollectionImplementation(executionId, tcDescriptorId, metricConfigId);}).start();
 	}
 
 	@Override
@@ -96,34 +95,34 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		new Thread(() -> {abortTestCaseImplementation(executionId, tcDescriptorId);}).start();
 	}
 
-	private void applyConfigurationImplementation(String configId, String tcDescriptorId, String configScript){
+	private void applyConfigurationImplementation(String executionId, String tcDescriptorId, String configScript, String resetScript){
 		// Prepare CONFIGURATION
 		log.debug("Starting configuration");
 		String result = "";
-		String name = "Configuration_" + configId + "__tcb_" + tcDescriptorId;
+		String name = "Configuration_" + executionId + "__tcb_" + tcDescriptorId;
 
 		log.debug("Getting the template file from resources");
 		File configFile = getFileFromResources("job-template-conf.xml");
 
 		log.debug("Translating the received template to concrete configXML job file");
-		String jenkinsJobDescription = createConfigXMLFileFromTemplate(configFile, configId, tcDescriptorId, configScript);
+		String jenkinsJobDescription = createConfigXMLFileFromTemplate(configFile, executionId, tcDescriptorId, configScript);
 
-		log.debug("Creating a new Jenkins job with configId: {} and configFile {}", configId, jenkinsJobDescription);
+		log.debug("Creating a new Jenkins job with configId: {} and configFile {}", executionId, jenkinsJobDescription);
 		try {
 			jenkinsServer.createJob(name, jenkinsJobDescription);
 		} catch(IOException e1) {
 			log.error("Failed to create Jenkins job {}", e1.getMessage());
-			manageConfigurationError("Failed to create Jenkins job", configId);
+			manageConfigurationError("Failed to create Jenkins job", executionId);
 			return;
 		}
 
 		// Start CONFIGURATION
-		log.debug("Running the configuration job with configId: " + configId);
+		log.debug("Running the configuration job with executionId: " + executionId);
 		try{
 			jenkinsServer.getJob(name).build();
 		} catch(IOException e2){
 			log.error("Failed to build Jenkins job with name {}. Error {}", name, e2.getMessage());
-			manageConfigurationError("Failed to build Jenkins job with name" + "Configuration "+ configId, configId);
+			manageConfigurationError("Failed to build Jenkins job with name" + "Configuration "+ executionId, executionId);
 			return;
 		}
 
@@ -131,26 +130,26 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		try{
 			result = getJenkinsJobResult(name);
 		} catch(IOException e3){
-			log.error("Failed to retrieve Jenkins job with name {} with error {}", "Configuration "+ configId, e3.getMessage());
-			manageConfigurationError("Failed to retrieve Jenkins job with name" + "Configuration " + configId, configId);
+			log.error("Failed to retrieve Jenkins job with name {} with error {}", "Configuration "+ executionId, e3.getMessage());
+			manageConfigurationError("Failed to retrieve Jenkins job with name" + "Configuration " + executionId, executionId);
 			return;
 		}
 
 		// Evaluation of results for CONFIGURATION job
 		switch(result){
-		case "OK": manageConfigurationOK(result, configId, tcDescriptorId); break;
-		case "FAILED": manageConfigurationError("Jenkins job for Configuration task FAILED", configId); break;
-		case "ABORTED": manageConfigurationError("Jenkins job for Configuration task was ABORTED", configId); break;
-		default: manageConfigurationError("Status of Jenkins job for Configuration is UNKNOWN", configId); break;
+		case "OK": manageConfigurationOK(result, executionId, tcDescriptorId, "configId"); break;
+		case "FAILED": manageConfigurationError("Jenkins job for Configuration task FAILED", executionId); break;
+		case "ABORTED": manageConfigurationError("Jenkins job for Configuration task was ABORTED", executionId); break;
+		default: manageConfigurationError("Status of Jenkins job for Configuration is UNKNOWN", executionId); break;
 		}
 	}
 
-	private void abortConfigurationImplementation(String executionId, String tcDescriptorId){
+	private void abortConfigurationImplementation(String executionId, String tcDescriptorId, String configId){
 		//TODO abort configuration
 		//no response message needed
 	}
 
-	private void configureInfrastructureMetricCollectionImplementation(String executionId, String tcDescriptorId, List<MetricInfo> metricst){
+	private void configureInfrastructureMetricCollectionImplementation(String executionId, String tcDescriptorId, List<MetricInfo> metrics){
 		//TODO remove
 		try {
 			log.debug("Configuring infrastructure metrics");
@@ -162,10 +161,8 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		//TODO configure infrastructure metrics
 		//metric configuration ok
 		String result = "OK";
-		List<String> metricConfigIds = new ArrayList<>();
-		metricConfigIds.add("metric1_id");//TODO use IDs returned by RC
 		String topic = "lifecycle.configurationResult." + executionId;
-		InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_CONFIGURED, result, metricConfigIds,false);
+		InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_CONFIGURED, result, "metricConfigId",false);
 		try {
 			sendMessageToQueue(internalMessage, topic);
 		} catch (JsonProcessingException e) {
@@ -178,14 +175,30 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		//manageConfigurationError();
 	}
 
-	private void resetConfigurationImplementation(String executionId, String tcDescriptorId, String resetScript){
+	private void resetConfigurationImplementation(String executionId, String tcDescriptorId, String configId){
 		//TODO reset configuration
-		//no response message needed
+		String result = "OK";
+		String topic = "lifecycle.configurationResult." + executionId;
+		InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.CONF_RESET, result, null,false);
+		try {
+			sendMessageToQueue(internalMessage, topic);
+		} catch (JsonProcessingException e) {
+			log.error("Error while translating internal scheduling message in Json format");
+			manageConfigurationError("Error while translating internal scheduling message in Json format", executionId);
+		}
 	}
 
-	private void removeInfrastructureMetricCollectionImplementation(String executionId, String tcDescriptorId, List<String> metricConfigIds){
+	private void removeInfrastructureMetricCollectionImplementation(String executionId, String tcDescriptorId, String metricConfigId){
 		//TODO remove infrastructure metrics
-		//no response message needed
+		String result = "OK";
+		String topic = "lifecycle.configurationResult." + executionId;
+		InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_RESET, result, null,false);
+		try {
+			sendMessageToQueue(internalMessage, topic);
+		} catch (JsonProcessingException e) {
+			log.error("Error while translating internal scheduling message in Json format");
+			manageConfigurationError("Error while translating internal scheduling message in Json format", executionId);
+		}
 	}
 
 	private void runTestCaseImplementation(String executionId, String tcDescriptorId, String execScript){
@@ -395,14 +408,14 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		}
 	}
 
-	private void manageConfigurationOK (String result, String configId, String tcDescriptorId) {
-		String topic = "lifecycle.configurationResult." + configId;
-		InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.CONFIGURED, result, null, false);
+	private void manageConfigurationOK (String result, String executionId, String tcDescriptorId, String configId) {
+		String topic = "lifecycle.configurationResult." + executionId;
+		InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.CONFIGURED, result, configId, false);
 		try {
 			sendMessageToQueue(internalMessage, topic);
 		} catch (JsonProcessingException e) {
 			log.error("Error while translating internal scheduling message in Json format");
-			manageConfigurationError("Error while translating internal scheduling message in Json format", configId);
+			manageConfigurationError("Error while translating internal scheduling message in Json format", executionId);
 		}
 	}
 

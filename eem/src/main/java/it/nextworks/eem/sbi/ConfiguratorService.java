@@ -45,6 +45,9 @@ public class ConfiguratorService implements ConfiguratorServiceProviderInterface
     @Value("${eem.jenkins.password}")
     private String jenkinsPassword;
 
+    @Value("${runtime.configurator.uri}")
+    private String runTimeConfiguratorURI;
+
     @PostConstruct
     public void init() throws URISyntaxException {
         log.debug("Initializing Configurator driver");
@@ -57,13 +60,13 @@ public class ConfiguratorService implements ConfiguratorServiceProviderInterface
     }
 
     @Override
-    public void applyConfiguration(String executionId, String tcDescriptorId, String configScript){
-        driver.applyConfiguration(executionId, tcDescriptorId, configScript);
+    public void applyConfiguration(String executionId, String tcDescriptorId, String configScript, String resetScript){
+        driver.applyConfiguration(executionId, tcDescriptorId, configScript, resetScript);
     }
 
     @Override
-    public void abortConfiguration(String executionId, String tcDescriptorId){
-        driver.abortConfiguration(executionId, tcDescriptorId);
+    public void abortConfiguration(String executionId, String tcDescriptorId, String configId){
+        driver.abortConfiguration(executionId, tcDescriptorId, configId);
     }
 
     @Override
@@ -72,12 +75,12 @@ public class ConfiguratorService implements ConfiguratorServiceProviderInterface
     }
 
     @Override
-    public void resetConfiguration(String executionId, String tcDescriptorId, String resetScript){
-        driver.resetConfiguration(executionId, tcDescriptorId, resetScript);
+    public void resetConfiguration(String executionId, String tcDescriptorId, String configId){
+        driver.resetConfiguration(executionId, tcDescriptorId, configId);
     }
 
     @Override
-    public void removeInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<String> metricConfigIds){
-        driver.removeInfrastructureMetricCollection(executionId, tcDescriptorId, metricConfigIds);
+    public void removeInfrastructureMetricCollection(String executionId, String tcDescriptorId, String metricConfigId){
+        driver.removeInfrastructureMetricCollection(executionId, tcDescriptorId, metricConfigId);
     }
 }

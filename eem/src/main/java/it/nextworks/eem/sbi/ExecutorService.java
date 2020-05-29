@@ -47,6 +47,9 @@ public class ExecutorService implements ExecutorServiceProviderInterface {
     @Value("${eem.jenkins.validation.url}")
     private String jenkinsValidationBaseUrl;
 
+    @Value("${runtime.configurator.uri}")
+    private String runTimeConfiguratorURI;
+    
     @PostConstruct
     public void init() throws URISyntaxException {
         log.debug("Initializing Executor driver");

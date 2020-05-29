@@ -5,14 +5,13 @@ import java.util.List;
 
 public interface ConfiguratorServiceProviderInterface {
 
-    void applyConfiguration(String executionId, String tcDescriptorId, String configScript);
+    void applyConfiguration(String executionId, String tcDescriptorId, String configScript, String resetScript);
 
-    void abortConfiguration(String executionId, String tcDescriptorId);
+    void abortConfiguration(String executionId, String tcDescriptorId, String configId);
 
     void configureInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<MetricInfo> metrics);
 
-    void resetConfiguration(String executionId, String tcDescriptorId, String resetScript);
+    void resetConfiguration(String executionId, String tcDescriptorId, String configId);
 
-    void removeInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<String> metricConfigIds);
-
+    void removeInfrastructureMetricCollection(String executionId, String tcDescriptorId, String metricConfigId);
 }

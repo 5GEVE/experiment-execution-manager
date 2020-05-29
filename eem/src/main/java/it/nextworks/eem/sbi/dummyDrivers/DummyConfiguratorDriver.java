@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class DummyConfiguratorDriver implements ConfiguratorServiceProviderInterface {
@@ -32,10 +31,10 @@ public class DummyConfiguratorDriver implements ConfiguratorServiceProviderInter
 
 
     @Override
-    public void applyConfiguration(String executionId, String tcDescriptorId, String configScript){
+    public void applyConfiguration(String executionId, String tcDescriptorId, String configScript, String resetScript){
         String result = "OK";
         String topic = "lifecycle.configurationResult." + executionId;
-        InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.CONFIGURED, result, null,false);
+        InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.CONFIGURED, result, "configId",false);
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
@@ -45,17 +44,15 @@ public class DummyConfiguratorDriver implements ConfiguratorServiceProviderInter
     }
 
     @Override
-    public void abortConfiguration(String executionId, String tcDescriptorId){
+    public void abortConfiguration(String executionId, String tcDescriptorId, String configId){
         //No response message
     }
 
     @Override
     public void configureInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<MetricInfo> metrics){
         String result = "OK";
-        List<String> metricConfigIds = new ArrayList<>();
-        metricConfigIds.add("metric1_id");
         String topic = "lifecycle.configurationResult." + executionId;
-        InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_CONFIGURED, result, metricConfigIds,false);
+        InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_CONFIGURED, result, "metricConfigId",false);
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
@@ -65,13 +62,29 @@ public class DummyConfiguratorDriver implements ConfiguratorServiceProviderInter
     }
 
     @Override
-    public void resetConfiguration(String executionId, String tcDescriptorId, String resetScript){
-        //No response message
+    public void resetConfiguration(String executionId, String tcDescriptorId, String configId){
+        String result = "OK";
+        String topic = "lifecycle.configurationResult." + executionId;
+        InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.CONF_RESET, result, null,false);
+        try {
+            sendMessageToQueue(internalMessage, topic);
+        } catch (JsonProcessingException e) {
+            log.error("Error while translating internal scheduling message in Json format");
+            manageConfigurationError("Error while translating internal scheduling message in Json format", executionId);
+        }
     }
 
     @Override
-    public void removeInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<String> metricConfigIds){
-        //No response message
+    public void removeInfrastructureMetricCollection(String executionId, String tcDescriptorId, String metricConfigId){
+        String result = "OK";
+        String topic = "lifecycle.configurationResult." + executionId;
+        InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_RESET, result, null,false);
+        try {
+            sendMessageToQueue(internalMessage, topic);
+        } catch (JsonProcessingException e) {
+            log.error("Error while translating internal scheduling message in Json format");
+            manageConfigurationError("Error while translating internal scheduling message in Json format", executionId);
+        }
     }
 
     private void sendMessageToQueue(InternalMessage msg, String topic) throws JsonProcessingException {

@@ -19,7 +19,6 @@ import it.nextworks.eem.sbi.MultiSiteOrchestratorService;
 import it.nextworks.eem.sbi.ValidatorService;
 import it.nextworks.eem.sbi.expcatalogue.ExperimentCatalogueService;
 import it.nextworks.eem.sbi.rav.model.MetricDataType;
-import it.nextworks.eem.sbi.rav.model.Topic;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.*;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.*;
 import it.nextworks.nfvmano.libs.ifa.common.elements.Filter;
@@ -71,7 +70,8 @@ public class ExperimentExecutionInstanceManager {
     private Map<String, Map<String, String>> testCases = new LinkedHashMap<>();
     private Iterator<Map.Entry<String, Map<String, String>>> testCasesIterator;
     private Map.Entry<String, Map<String, String>> runningTestCase;
-    private List<String> metricConfigIds;
+    private String configId;
+    private String metricConfigId;
 
     public ExperimentExecutionInstanceManager(String executionId, ExperimentExecutionRepository experimentExecutionRepository, EemSubscriptionService subscriptionService, ConfiguratorService configuratorService, ExecutorService executorService, ValidatorService validatorService, ExperimentCatalogueService catalogueService, MultiSiteOrchestratorService multiSiteOrchestratorService) throws NotExistingEntityException
     {
@@ -274,7 +274,7 @@ public class ExperimentExecutionInstanceManager {
             }else if (oldState.equals(ExperimentState.CONFIGURING)){
                 //If CONFIGURING, abort Test Case configuration
                 if (updateAndNotifyExperimentExecutionState(ExperimentState.ABORTED)) {
-                    configuratorService.abortConfiguration(executionId, runningTestCase.getKey());
+                    configuratorService.abortConfiguration(executionId, runningTestCase.getKey(), configId);
                     log.info("Experiment Execution with Id {} aborted", executionId);
                 }
             }
@@ -311,19 +311,7 @@ public class ExperimentExecutionInstanceManager {
         experimentExecution.addTestCaseResult(testCaseId, executionResult);
         experimentExecutionRepository.saveAndFlush(experimentExecution);
         log.info("Test Case with Id {} of Experiment Execution with Id {} completed", testCaseId, executionId);
-        configuratorService.removeInfrastructureMetricCollection(executionId, testCaseId, metricConfigIds);
-        String resetScript = runningTestCase.getValue().get("resetScript");
-        if(resetScript != null)
-            configuratorService.resetConfiguration(executionId, testCaseId, resetScript);
-        //Abort experiment execution if requested
-        if(currentState.equals(ExperimentState.ABORTING) && updateAndNotifyExperimentExecutionState(ExperimentState.ABORTED)) {
-            log.info("Experiment Execution with Id {} aborted", executionId);
-            return;
-        }
-        if(updateAndNotifyExperimentExecutionState(ExperimentState.VALIDATING)) {
-            log.info("Validating Test Case with Id {} of Experiment Execution with Id {}", testCaseId, executionId);
-            validatorService.stopTcValidation(executionId, testCaseId);
-        }
+        configuratorService.removeInfrastructureMetricCollection(executionId, testCaseId, metricConfigId);
     }
 
     private void processValidationResult(ValidationResultInternalMessage msg){
@@ -373,7 +361,6 @@ public class ExperimentExecutionInstanceManager {
                 }else {
                     log.debug("State of the Execution Experiment is not correct");
                 }
-
         }
     }
 
@@ -385,6 +372,7 @@ public class ExperimentExecutionInstanceManager {
         switch (msg.getConfigurationStatus()){
             case CONFIGURED:
                 log.info("Configuration of Test Case with Id {} of Experiment Execution with Id {} completed", runningTestCase.getKey(), executionId);
+                configId = msg.getConfigId();
                 try {
                     configureInfrastructureMetrics();
                 }catch (FailedOperationException e){
@@ -395,8 +383,7 @@ public class ExperimentExecutionInstanceManager {
             case METRIC_CONFIGURED:
                 log.debug("Configuration of Infrastructure Metrics completed for Test Case with Id {}", runningTestCase.getKey());
                 isTestCaseConfigured = true;
-                if(msg.getMetricConfigIds() != null)
-                    metricConfigIds = msg.getMetricConfigIds();
+                metricConfigId = msg.getConfigId();
                 if(isValidationConfigured){
                     if(runType.equals(ExperimentRunType.RUN_ALL)) {
                         if (updateAndNotifyExperimentExecutionState(ExperimentState.RUNNING))
@@ -405,6 +392,24 @@ public class ExperimentExecutionInstanceManager {
                         if (updateAndNotifyExperimentExecutionState(ExperimentState.RUNNING_STEP))
                             runExperimentExecutionTestCase();
                     }
+                }
+                break;
+            case METRIC_RESET:
+                String resetScript = runningTestCase.getValue().get("resetScript");
+                if(resetScript == null)
+                    processConfigurationResult(new ConfigurationResultInternalMessage(ConfigurationStatus.CONF_RESET, "OK", null, false));
+                else
+                    configuratorService.resetConfiguration(executionId, runningTestCase.getKey(), configId);
+                break;
+            case CONF_RESET:
+                //Abort experiment execution if requested
+                if(currentState.equals(ExperimentState.ABORTING) && updateAndNotifyExperimentExecutionState(ExperimentState.ABORTED)) {
+                    log.info("Experiment Execution with Id {} aborted", executionId);
+                    return;
+                }
+                if(updateAndNotifyExperimentExecutionState(ExperimentState.VALIDATING)) {
+                    log.info("Validating Test Case with Id {} of Experiment Execution with Id {}", runningTestCase.getKey(), executionId);
+                    validatorService.stopTcValidation(executionId, runningTestCase.getKey());
                 }
         }
     }
@@ -431,11 +436,12 @@ public class ExperimentExecutionInstanceManager {
             String tcDescriptorId = runningTestCase.getKey();
             log.info("Configuring Test Case with Id {} of Experiment Execution with Id {}", tcDescriptorId, executionId);
             String configScript = runningTestCase.getValue().get("configScript");
+            String resetScript = runningTestCase.getValue().get("resetScript");
             if(configScript == null){
                 ConfigurationResultInternalMessage msg = new ConfigurationResultInternalMessage(ConfigurationStatus.CONFIGURED, "OK", null, false);
                 processConfigurationResult(msg);
             }else
-                configuratorService.applyConfiguration(executionId, tcDescriptorId, configScript);
+                configuratorService.applyConfiguration(executionId, tcDescriptorId, configScript, resetScript);
         }else
             log.debug("No more Test Cases to run for Experiment Execution with Id {}", executionId);
     }
@@ -450,7 +456,7 @@ public class ExperimentExecutionInstanceManager {
         try {
             siteName = EveSite.valueOf(experimentExecution.getSiteNames().get(0).toUpperCase());
         }catch (IllegalArgumentException e){
-            throw new FailedOperationException(String.format("Incorrect site name in the Experiment Execution with Id {}", executionId));
+            throw new FailedOperationException(String.format("Incorrect site name in the Experiment Execution with Id %s", executionId));
         }
         // Infrastructure metrics from Experiment blueprint
         for (InfrastructureMetric im : expBlueprint.getMetrics()){
@@ -639,7 +645,10 @@ public class ExperimentExecutionInstanceManager {
         //vnf.<vnfd_id>.extcp.<extcp_id>.ipaddress
         //vnf.<vnfd_id>.vdu.<vdu_id>.cp.<cp_id>.ipaddress
         //pnf.<pnfd_id>.cp.<cp_id>.ipaddress
-        //$$topic.metricid
+        //$$metric.topic.metricid
+        //$$metric.site.metricid
+        //$$metric.unit.metricid
+        //$$metric.interval.metricid
         String infrastructureParameterValue = null;
         String [] splits = infrastructureParameter.split("\\.");
         List<String> ids = new ArrayList<>();
@@ -702,28 +711,58 @@ public class ExperimentExecutionInstanceManager {
                     log.error("Unacceptable Infrastructure parameter format: {}. Skipping", infrastructureParameter);
             } else
                 log.error("Unacceptable Infrastructure parameter format: {}. Skipping", infrastructureParameter);
-        }else if(infrastructureParameter.startsWith("$$topic")){
+        }else if(infrastructureParameter.startsWith("$$metric")){
             log.debug("Infrastructure parameter related to application metrics");
             Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
             if(!experimentExecutionOptional.isPresent())
                 throw new FailedOperationException(String.format("Experiment Execution with Id %s not found", executionId));
             ExperimentExecution experimentExecution = experimentExecutionOptional.get();
-            String metricId = splits[1];
+            String metricId = splits[2];
             //Check application metrics from Context Blueprints
             for (CtxBlueprint ctxB : ctxBlueprints) {
-                for (ApplicationMetric amd : ctxB.getApplicationMetrics())
-                    if (amd.getMetricId().equalsIgnoreCase(metricId)) {
-                        infrastructureParameterValue = experimentExecution.getUseCase() + "." + experimentExecution.getExperimentId() + "." + experimentExecution.getSiteNames().get(0).toLowerCase() + "." + MetricDataType.APPLICATION_METRIC.toString().toLowerCase() + "." + amd.getMetricId();
-                        break;
+                if(ctxB.getApplicationMetrics() != null) {
+                    for (ApplicationMetric amd : ctxB.getApplicationMetrics()) {
+                        if (amd.getMetricId().equalsIgnoreCase(metricId)) {
+                            switch (splits[1]) {
+                                case "topic":
+                                    infrastructureParameterValue = experimentExecution.getUseCase() + "." + experimentExecution.getExperimentId() + "." + experimentExecution.getSiteNames().get(0).toLowerCase() + "." + MetricDataType.APPLICATION_METRIC.toString().toLowerCase() + "." + amd.getMetricId();
+                                    break;
+                                case "site":
+                                    infrastructureParameterValue = experimentExecution.getSiteNames().get(0);
+                                    break;
+                                case "unit":
+                                    infrastructureParameterValue = amd.getUnit();
+                                    break;
+                                case "interval":
+                                    infrastructureParameterValue = amd.getInterval();
+                            }
+                            break;
+                        }
                     }
+                }
             }
             //Check application metrics from VS Blueprint
             if(infrastructureParameterValue == null) {
-                for (ApplicationMetric amd : vsBlueprint.getApplicationMetrics())
-                    if (amd.getMetricId().equalsIgnoreCase(metricId)) {
-                        infrastructureParameterValue = experimentExecution.getUseCase() + "." + experimentExecution.getExperimentId() + "." + experimentExecution.getSiteNames().get(0).toLowerCase() + "." + MetricDataType.APPLICATION_METRIC.toString().toLowerCase() + "." + amd.getMetricId();
-                        break;
+                if(vsBlueprint.getApplicationMetrics() != null) {
+                    for (ApplicationMetric amd : vsBlueprint.getApplicationMetrics()) {
+                        if (amd.getMetricId().equalsIgnoreCase(metricId)) {
+                            switch (splits[1]) {
+                                case "topic":
+                                    infrastructureParameterValue = experimentExecution.getUseCase() + "." + experimentExecution.getExperimentId() + "." + experimentExecution.getSiteNames().get(0).toLowerCase() + "." + MetricDataType.APPLICATION_METRIC.toString().toLowerCase() + "." + amd.getMetricId();
+                                    break;
+                                case "site":
+                                    infrastructureParameterValue = experimentExecution.getSiteNames().get(0);
+                                    break;
+                                case "unit":
+                                    infrastructureParameterValue = amd.getUnit();
+                                    break;
+                                case "interval":
+                                    infrastructureParameterValue = amd.getInterval();
+                            }
+                            break;
+                        }
                     }
+                }
             }
         } else
             log.error("Unacceptable Infrastructure parameter format: {}. Skipping", infrastructureParameter);

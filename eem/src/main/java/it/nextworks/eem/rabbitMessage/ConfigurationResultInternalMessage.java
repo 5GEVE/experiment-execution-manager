@@ -30,19 +30,19 @@ public class ConfigurationResultInternalMessage extends InternalMessage {
 	@JsonProperty("result")
 	private String result;
 
-	@JsonProperty("metricConfigIds")
-	private List<String> metricConfigIds;
+	@JsonProperty("configId")
+	private String configId;
 
 	@JsonProperty("configurationStatus")
 	private ConfigurationStatus configurationStatus;
 
 	@JsonCreator
-	public ConfigurationResultInternalMessage(@JsonProperty("configurationStatus") ConfigurationStatus configurationStatus, @JsonProperty("result") String result, @JsonProperty("metricConfigIds") List<String> metricConfigIds, @JsonProperty("failed") boolean failed) {
+	public ConfigurationResultInternalMessage(@JsonProperty("configurationStatus") ConfigurationStatus configurationStatus, @JsonProperty("result") String result, @JsonProperty("configId") String configId, @JsonProperty("failed") boolean failed) {
 		this.type = InternalMessageType.CONFIGURATION_RESULT;
 		this.result = result;
 		this.failed = failed;
 		this.configurationStatus = configurationStatus;
-		this.metricConfigIds = metricConfigIds;
+		this.configId = configId;
 	}
 
 	/**
@@ -65,9 +65,7 @@ public class ConfigurationResultInternalMessage extends InternalMessage {
 	}
 
 	/**
-	 * @return metricConfigIds
+	 * @return configId
 	 */
-	public List<String> getMetricConfigIds() {
-		return metricConfigIds;
-	}
+	public String getConfigId() { return configId; }
 }
