@@ -19,7 +19,6 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.IOException;
 /**
  * InfrastructureMetricWrapper
@@ -54,7 +53,6 @@ public class InfrastructureMetricWrapper {
    * Get metricId
    * @return metricId
   **/
-  @Schema(description = "")
   public String getMetricId() {
     return metricId;
   }
@@ -72,7 +70,6 @@ public class InfrastructureMetricWrapper {
    * Get topic
    * @return topic
   **/
-  @Schema(description = "")
   public String getTopic() {
     return topic;
   }
@@ -90,7 +87,6 @@ public class InfrastructureMetricWrapper {
    * Get site
    * @return site
   **/
-  @Schema(description = "")
   public String getSite() {
     return site;
   }
@@ -108,7 +104,6 @@ public class InfrastructureMetricWrapper {
    * Get unit
    * @return unit
   **/
-  @Schema(description = "")
   public String getUnit() {
     return unit;
   }
@@ -126,7 +121,6 @@ public class InfrastructureMetricWrapper {
    * Get interval
    * @return interval
   **/
-  @Schema(description = "")
   public String getInterval() {
     return interval;
   }
@@ -144,7 +138,6 @@ public class InfrastructureMetricWrapper {
    * Get deviceId
    * @return deviceId
   **/
-  @Schema(description = "")
   public String getDeviceId() {
     return deviceId;
   }

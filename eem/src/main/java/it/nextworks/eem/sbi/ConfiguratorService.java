@@ -52,7 +52,7 @@ public class ConfiguratorService implements ConfiguratorServiceProviderInterface
     public void init() throws URISyntaxException {
         log.debug("Initializing Configurator driver");
         if (configuratorType.equals(ConfiguratorType.RC))
-            this.driver = RCDriver.getInstance(jenkinsURI, jenkinsUsername, jenkinsPassword, rabbitTemplate, messageExchange);
+            this.driver = RCDriver.getInstance(jenkinsURI, rabbitTemplate, messageExchange);
         else if (configuratorType.equals((ConfiguratorType.DUMMY)))
             this.driver = new DummyConfiguratorDriver(rabbitTemplate, messageExchange);
         else

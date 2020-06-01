@@ -20,7 +20,6 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import it.nextworks.eem.sbi.runtimeConfigurator.client.model.InfrastructureMetricWrapper;
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +49,6 @@ public class InfrastructureDay2ConfigurationWrapper {
    * Get infrastructureMetricsInfo
    * @return infrastructureMetricsInfo
   **/
-  @Schema(description = "")
   public List<InfrastructureMetricWrapper> getInfrastructureMetricsInfo() {
     return infrastructureMetricsInfo;
   }

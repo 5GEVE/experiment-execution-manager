@@ -191,7 +191,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		
 		// Evaluation of results for configuration job
 		switch (result) {
-		case "OK": manageConfigurationOK(result, executionId, tcDescriptorId); break;
+		case "OK": manageConfigurationOK(result, executionId, tcDescriptorId, configId); break;
 		case "ABORTED": manageConfigurationError("Day-2 Configuration task was ABORTED", executionId); break;
 		case "STOPPED": manageConfigurationError("Day-2 Configuration task was STOPPED", executionId); break;
 		case "FAILED": manageConfigurationError("Day-2 Configuration task FAILED", executionId); break;
@@ -200,12 +200,12 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 	}
 
 	//TODO: does EEM really provide configId? how does it know it? I'm not providing it back in applyConfigurationImplementation...
-	private void resetConfigurationImplementation(String executionId, String tcDescriptorId, String notSoClearId){
+	private void resetConfigurationImplementation(String executionId, String tcDescriptorId, String configId){
 		
 		// PROCESS: Day-2 Configuration reset INIT
 		log.debug("PROCESS: Day-2 Configuration RESET. Initializing day-2 configuration reset for Test Case {} with executionId {}", tcDescriptorId, executionId);
 		String experiments_key = "config_" + tcDescriptorId + "_" + executionId;
-		String configId = experiments.get(experiments_key); // we retrieve the configId from experiments
+		//String configId = experiments.get(experiments_key); // we retrieve the configId from experiments
 		String result = "";
 
 		// PROCESS: Reset day-2 configuration
@@ -302,15 +302,15 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 			InfrastructureMetricWrapper metricWrapper = new InfrastructureMetricWrapper();
 
 			//TODO: check how to ask for these parameters in classes EveSite and InfrastructureMetric, from MetricInfo
-			String metricId = metrics.getInfrastructureMetric(i).getMetricId();
+			String metricId = metrics.get(i).getMetric().getMetricId();
 			metricWrapper.setMetricId(metricId);
-			String unit = metrics.getInfrastructureMetric(i).getUnit();
+			String unit = metrics.get(i).getMetric().getUnit();
 			metricWrapper.setUnit(unit);
-			String interval = metrics.getInfrastructureMetric(i).getInterval();
+			String interval = metrics.get(i).getMetric().getInterval();
 			metricWrapper.setInterval(interval);
-			String topic = metrics.getTopic(i);
+			String topic = metrics.get(i).getTopic();
 			metricWrapper.setTopic(topic);
-			String site = metrics.getEveSite(i).getSiteName();
+			String site = metrics.get(i).getTargetSite().toString();
 			metricWrapper.setSite(site);
 
 			metricsList.add(metricWrapper);
@@ -382,10 +382,10 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		switch (result) {
 		case "OK": {
 			// so far there is a single metricsConfigId that relates to all metrics. TODO: evaluate if this needs change
-			List<String> metricConfigIds = new ArrayList<>();
-			metricConfigIds.add("metricsConfigId");
+			//List<String> metricConfigIds = new ArrayList<>();
+			//metricConfigIds.add("metricsConfigId");
 			String topic = "lifecycle.configurationResult." + executionId;
-			InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_CONFIGURED, result, metricConfigIds, false);
+			InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_CONFIGURED, result, metricsConfigId, false);
 			try {
 				sendMessageToQueue(internalMessage, topic);
 			} catch (JsonProcessingException e) {
@@ -586,9 +586,9 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 	}
 
 	//TODO: do not touch
-	private void manageConfigurationOK (String result, String executionId, String tcDescriptorId) {
+	private void manageConfigurationOK (String result, String executionId, String tcDescriptorId, String configId) {
 		String topic = "lifecycle.configurationResult." + executionId;
-		InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.CONFIGURED, result, null, false);
+		InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.CONFIGURED, result, configId, false);
 		try {
 			sendMessageToQueue(internalMessage, topic);
 		} catch (JsonProcessingException e) {

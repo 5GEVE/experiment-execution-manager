@@ -49,12 +49,12 @@ public class ExecutorService implements ExecutorServiceProviderInterface {
 
     @Value("${runtime.configurator.uri}")
     private String runTimeConfiguratorURI;
-    
+
     @PostConstruct
     public void init() throws URISyntaxException {
         log.debug("Initializing Executor driver");
         if (executorType.equals(ExecutorType.RC))
-            this.driver = RCDriver.getInstance(jenkinsURI, jenkinsUsername, jenkinsPassword, rabbitTemplate, messageExchange);
+            this.driver = RCDriver.getInstance(jenkinsURI, rabbitTemplate, messageExchange);
         else if (executorType.equals(ExecutorType.JENKINS))
             this.driver = JenkinsDriver.getInstance(jenkinsURI, jenkinsUsername, jenkinsPassword, jenkinsValidationBaseUrl, rabbitTemplate, messageExchange);
         else if (executorType.equals(ExecutorType.DUMMY))

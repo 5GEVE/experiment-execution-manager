@@ -14,4 +14,28 @@ public class MetricInfo {
         this.topic = topic;
         this.targetSite = targetSite;
     }
+
+    public InfrastructureMetric getMetric() {
+        return metric;
+    }
+
+    public void setMetric(InfrastructureMetric metric) {
+        this.metric = metric;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public EveSite getTargetSite() {
+        return targetSite;
+    }
+
+    public void setTargetSite(EveSite targetSite) {
+        this.targetSite = targetSite;
+    }
 }
