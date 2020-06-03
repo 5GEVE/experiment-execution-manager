@@ -65,6 +65,8 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		
 		ApiClient apiClient = new ApiClient();
 		apiClient.setBasePath (rcURI);
+		apiClient.setConnectTimeout(60000);
+		apiClient.setReadTimeout(60000);
 		rcApi = new RcnbiControllerApi (apiClient);
 		
 		this.rabbitTemplate = rabbitTemplate;
@@ -259,7 +261,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 
 		// Evaluation of results for configuration reset job
 		switch (result) {
-		case "OK": {
+		case "OK":
 			String topic = "lifecycle.configurationResult." + executionId;
 			InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.CONF_RESET, result, null,false);
 			try {
@@ -268,7 +270,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 				log.error("Error while translating internal scheduling message in JSON format");
 				manageConfigurationError("Error while translating internal scheduling message in Json format", executionId);
 			}
-		}
+			break;
 		case "ABORTED": manageConfigurationError("Day-2 Configuration reset task was ABORTED", executionId); break;
 		case "STOPPED": manageConfigurationError("Day-2 Configuration reset task was STOPPED", executionId); break;
 		case "FAILED": manageConfigurationError("Day-2 Configuration reset task FAILED", executionId); break;
@@ -298,7 +300,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		InfrastructureDay2ConfigurationWrapper metricsWrapper = new InfrastructureDay2ConfigurationWrapper();
 		List<InfrastructureMetricWrapper> metricsList = new ArrayList<>();
 
-		for (int i = 1; i <= numberOfMetrics; i++) {
+		for (int i = 0; i < numberOfMetrics; i++) {
 			InfrastructureMetricWrapper metricWrapper = new InfrastructureMetricWrapper();
 
 			//TODO: check how to ask for these parameters in classes EveSite and InfrastructureMetric, from MetricInfo
@@ -379,8 +381,8 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		log.debug("PROCESS: Metrics configuration loop. Metrics configuration process for Test Case {} with executionId {} finished with result {}", tcDescriptorId, executionId, result);
 
 		// Evaluation of results for metrics configuration job
-		switch (result) {
-		case "OK": {
+		switch (result){
+		case "OK":
 			// so far there is a single metricsConfigId that relates to all metrics. TODO: evaluate if this needs change
 			//List<String> metricConfigIds = new ArrayList<>();
 			//metricConfigIds.add("metricsConfigId");
@@ -402,8 +404,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 //	            log.error("Error while translating internal scheduling message in Json format");
 //	            manageConfigurationError("Error while translating internal scheduling message in Json format", executionId);
 //	        }
-			
-		}
+			break;
 		case "ABORTED": manageConfigurationError("Metrics Configuration task was ABORTED", executionId); break;
 		case "STOPPED": manageConfigurationError("Metrics Configuration task was STOPPED", executionId); break;
 		case "FAILED": manageConfigurationError("Metrics Configuration task FAILED", executionId); break;
@@ -466,7 +467,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 
 		// Evaluation of results for configuration reset job
 		switch (result) {
-		case "OK": {
+		case "OK":
 			String topic = "lifecycle.configurationResult." + executionId;
 			InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_RESET, result, null,false);
 			try {
@@ -475,7 +476,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 				log.error("Error while translating internal scheduling message in Json format");
 				manageConfigurationError("Error while translating internal scheduling message in JSON format", executionId);
 			}
-		}
+			break;
 		case "ABORTED": manageConfigurationError("Metrics stop task was ABORTED", executionId); break;
 		case "STOPPED": manageConfigurationError("Metrics stop task was STOPPED", executionId); break;
 		case "FAILED": manageConfigurationError("Metrics stop task FAILED", executionId); break;

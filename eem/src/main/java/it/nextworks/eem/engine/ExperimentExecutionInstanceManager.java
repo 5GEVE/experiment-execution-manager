@@ -372,6 +372,18 @@ public class ExperimentExecutionInstanceManager {
     private void processConfigurationResult(ConfigurationResultInternalMessage msg){
         if(msg.isFailed()) {
             manageExperimentExecutionError(msg.getResult());
+            /*TODO add this and remove manageExperimentError to avoid setting the entire experiment execution as failed. We need also to discriminate on the configurationStatus to undestrand the phase in which is failing. This require a change also in the message form the configurator. Same for the validation?
+            log.error("Configuration error...Skipping test case...");
+            if(runType.equals(ExperimentRunType.RUN_ALL)){
+                //Run the first test case if run type is RUN_ALL
+                log.info("Running Experiment Execution with Id {}", executionId);
+                configureExperimentExecutionTestCase();
+            } else {
+                //Pause experiment execution if the run type is RUN_IN_STEPS
+                if(updateAndNotifyExperimentExecutionState(ExperimentState.PAUSED))
+                    log.info("Experiment Execution with Id {} paused", executionId);
+            }
+            */
             return;
         }
         switch (msg.getConfigurationStatus()){
@@ -442,7 +454,7 @@ public class ExperimentExecutionInstanceManager {
             String configScript = runningTestCase.getValue().get("configScript");
             log.debug("Configuration Script: {}", configScript);
             String resetScript = runningTestCase.getValue().get("resetScript");
-            log.debug("reset Configuration Script: {}", resetScript);
+            log.debug("Reset Configuration Script: {}", resetScript);
             if(configScript == null || configScript.equals("")){
                 ConfigurationResultInternalMessage msg = new ConfigurationResultInternalMessage(ConfigurationStatus.CONFIGURED, "OK", null, false);
                 processConfigurationResult(msg);
