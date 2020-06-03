@@ -218,7 +218,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 			ApplicationDay2ConfigurationStatusResponse resetResponse = rcApi.applicationDay2ConfigurationReset(configId);
 			
 			switch (resetResponse.getStatus()) {
-			case CLEANED: result = "CLEANED"; isReseting = false; break;
+			case CLEANED: result = "OK"; isReseting = false; break;
 			case ABORTED: result = "ABORTED"; isReseting = false; break;
 			case STOPPED: result = "STOPPED"; isReseting = false; break;
 			case FAILED: result = "FAILED"; isReseting = false; break;
@@ -236,7 +236,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 				ApplicationDay2ConfigurationStatusResponse statusResponse = rcApi.applicationDay2ConfigurationStatus(configId);
 				
 				switch (statusResponse.getStatus()) {
-				case CLEANED: result = "CLEANED"; isReseting = false; break;
+				case CLEANED: result = "OK"; isReseting = false; break;
 				case ABORTED: result = "ABORTED"; isReseting = false; break;
 				case STOPPED: result = "STOPPED"; isReseting = false; break;
 				case FAILED: result = "FAILED"; isReseting = false; break;
@@ -428,7 +428,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 			InfrastructureDay2ConfigurationStatusResponse stopResponse = rcApi.infrastructureDay2ConfigurationStop(metricsConfigId);
 
 			switch (stopResponse.getStatus()) {
-			case CLEANED: result = "CLEANED"; isReseting = false; break;
+			case CLEANED: result = "OK"; isReseting = false; break;
 			case ABORTED: result = "ABORTED"; isReseting = false; break;
 			case STOPPED: result = "STOPPED"; isReseting = false; break;
 			case FAILED: result = "FAILED"; isReseting = false; break;
@@ -446,7 +446,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 				InfrastructureDay2ConfigurationStatusResponse statusResponse = rcApi.infrastructureDay2ConfigurationStatus(metricsConfigId);
 
 				switch (statusResponse.getStatus()) {
-				case CLEANED: result = "CLEANED"; isReseting = false; break;
+				case CLEANED: result = "OK"; isReseting = false; break;
 				case ABORTED: result = "ABORTED"; isReseting = false; break;
 				case STOPPED: result = "STOPPED"; isReseting = false; break;
 				case FAILED: result = "FAILED"; isReseting = false; break;
