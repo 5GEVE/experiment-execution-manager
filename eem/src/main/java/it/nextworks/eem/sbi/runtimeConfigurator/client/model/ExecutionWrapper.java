@@ -26,7 +26,7 @@ import java.io.IOException;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2020-05-29T12:19:50.083Z[GMT]")
 public class ExecutionWrapper {
-  @SerializedName("executionScript")
+  @SerializedName("execScript")
   private String executionScript = null;
 
   public ExecutionWrapper executionScript(String executionScript) {

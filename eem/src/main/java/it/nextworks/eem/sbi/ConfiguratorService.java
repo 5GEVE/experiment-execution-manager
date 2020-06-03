@@ -36,15 +36,6 @@ public class ConfiguratorService implements ConfiguratorServiceProviderInterface
     @Value("${configurator.type}")
     private ConfiguratorType configuratorType;
 
-    @Value("${eem.jenkins.uri}")
-    private String jenkinsURI;
-
-    @Value("${eem.jenkins.username}")
-    private String jenkinsUsername;
-
-    @Value("${eem.jenkins.password}")
-    private String jenkinsPassword;
-
     @Value("${runtime.configurator.uri}")
     private String runTimeConfiguratorURI;
 
@@ -52,7 +43,7 @@ public class ConfiguratorService implements ConfiguratorServiceProviderInterface
     public void init() throws URISyntaxException {
         log.debug("Initializing Configurator driver");
         if (configuratorType.equals(ConfiguratorType.RC))
-            this.driver = RCDriver.getInstance(jenkinsURI, rabbitTemplate, messageExchange);
+            this.driver = RCDriver.getInstance(runTimeConfiguratorURI, rabbitTemplate, messageExchange);
         else if (configuratorType.equals((ConfiguratorType.DUMMY)))
             this.driver = new DummyConfiguratorDriver(rabbitTemplate, messageExchange);
         else

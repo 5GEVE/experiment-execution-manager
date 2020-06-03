@@ -54,7 +54,7 @@ public class ExecutorService implements ExecutorServiceProviderInterface {
     public void init() throws URISyntaxException {
         log.debug("Initializing Executor driver");
         if (executorType.equals(ExecutorType.RC))
-            this.driver = RCDriver.getInstance(jenkinsURI, rabbitTemplate, messageExchange);
+            this.driver = RCDriver.getInstance(runTimeConfiguratorURI, rabbitTemplate, messageExchange);
         else if (executorType.equals(ExecutorType.JENKINS))
             this.driver = JenkinsDriver.getInstance(jenkinsURI, jenkinsUsername, jenkinsPassword, jenkinsValidationBaseUrl, rabbitTemplate, messageExchange);
         else if (executorType.equals(ExecutorType.DUMMY))

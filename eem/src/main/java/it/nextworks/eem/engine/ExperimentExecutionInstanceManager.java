@@ -311,7 +311,10 @@ public class ExperimentExecutionInstanceManager {
         experimentExecution.addTestCaseResult(testCaseId, executionResult);
         experimentExecutionRepository.saveAndFlush(experimentExecution);
         log.info("Test Case with Id {} of Experiment Execution with Id {} completed", testCaseId, executionId);
-        configuratorService.removeInfrastructureMetricCollection(executionId, testCaseId, metricConfigId);
+        if(metricConfigId == null)
+            processConfigurationResult(new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_RESET, "OK", null, false));
+        else
+            configuratorService.removeInfrastructureMetricCollection(executionId, testCaseId, metricConfigId);
     }
 
     private void processValidationResult(ValidationResultInternalMessage msg){
@@ -327,7 +330,9 @@ public class ExperimentExecutionInstanceManager {
                     processConfigurationResult(new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_CONFIGURED, "Validation configured", null,false));
                 break;
             case ACQUIRING:
-                executorService.runTestCase(executionId, runningTestCase.getKey(), runningTestCase.getValue().get("execScript"));
+                String execScript = runningTestCase.getValue().get("execScript");
+                log.debug("Execution Script: {}", execScript);
+                executorService.runTestCase(executionId, runningTestCase.getKey(), execScript);
                 break;
             case VALIDATING:
                 validatorService.queryValidationResult(executionId, runningTestCase.getKey());
@@ -395,8 +400,7 @@ public class ExperimentExecutionInstanceManager {
                 }
                 break;
             case METRIC_RESET:
-                String resetScript = runningTestCase.getValue().get("resetScript");
-                if(resetScript == null)
+                if(configId == null)
                     processConfigurationResult(new ConfigurationResultInternalMessage(ConfigurationStatus.CONF_RESET, "OK", null, false));
                 else
                     configuratorService.resetConfiguration(executionId, runningTestCase.getKey(), configId);
@@ -436,8 +440,10 @@ public class ExperimentExecutionInstanceManager {
             String tcDescriptorId = runningTestCase.getKey();
             log.info("Configuring Test Case with Id {} of Experiment Execution with Id {}", tcDescriptorId, executionId);
             String configScript = runningTestCase.getValue().get("configScript");
+            log.debug("Configuration Script: {}", configScript);
             String resetScript = runningTestCase.getValue().get("resetScript");
-            if(configScript == null){
+            log.debug("reset Configuration Script: {}", resetScript);
+            if(configScript == null || configScript.equals("")){
                 ConfigurationResultInternalMessage msg = new ConfigurationResultInternalMessage(ConfigurationStatus.CONFIGURED, "OK", null, false);
                 processConfigurationResult(msg);
             }else
@@ -462,8 +468,14 @@ public class ExperimentExecutionInstanceManager {
         for (InfrastructureMetric im : expBlueprint.getMetrics()){
             String topic = experimentExecution.getUseCase() + "." + experimentExecution.getExperimentId() + "." + experimentExecution.getSiteNames().get(0).toLowerCase() + "." + MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase() + "." + im.getMetricId();
             MetricInfo metric = new MetricInfo(im, topic, siteName);
+            metrics.add(metric);
         }
-        configuratorService.configureInfrastructureMetricCollection(executionId, runningTestCase.getKey(), metrics);
+        if(!metrics.isEmpty())
+            configuratorService.configureInfrastructureMetricCollection(executionId, runningTestCase.getKey(), metrics);
+        else {
+            ConfigurationResultInternalMessage msg = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_CONFIGURED, "OK", null, false);
+            processConfigurationResult(msg);
+        }
     }
 
     private void retrieveAllInformation() throws FailedOperationException {

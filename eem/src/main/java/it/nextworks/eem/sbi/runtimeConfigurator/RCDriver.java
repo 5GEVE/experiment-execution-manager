@@ -151,10 +151,10 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 			ApplicationDay2ConfigurationStatusResponse startResponse = rcApi.applicationDay2ConfigurationStart(configId);
 			
 			switch (startResponse.getStatus()) {
-			case COMPLETED: result = "OK"; isConfiguring = false;
-			case ABORTED: result = "ABORTED"; isConfiguring = false;
-			case STOPPED: result = "STOPPED"; isConfiguring = false;
-			case FAILED: result = "FAILED"; isConfiguring = false;
+			case COMPLETED: result = "OK"; isConfiguring = false; break;
+			case ABORTED: result = "ABORTED"; isConfiguring = false; break;
+			case STOPPED: result = "STOPPED"; isConfiguring = false; break;
+			case FAILED: result = "FAILED"; isConfiguring = false; break;
 			default:;
 			}
 			
@@ -170,10 +170,10 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 				ApplicationDay2ConfigurationStatusResponse statusResponse = rcApi.applicationDay2ConfigurationStatus(configId);
 				
 				switch (statusResponse.getStatus()) {
-				case COMPLETED: result = "OK"; isConfiguring = false;
-				case ABORTED: result = "ABORTED"; isConfiguring = false;
-				case STOPPED: result = "STOPPED"; isConfiguring = false;
-				case FAILED: result = "FAILED"; isConfiguring = false;
+				case COMPLETED: result = "OK"; isConfiguring = false; break;
+				case ABORTED: result = "ABORTED"; isConfiguring = false; break;
+				case STOPPED: result = "STOPPED"; isConfiguring = false; break;
+				case FAILED: result = "FAILED"; isConfiguring = false; break;
 				default: Thread.sleep(3000);
 				}
 			}
@@ -216,10 +216,10 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 			ApplicationDay2ConfigurationStatusResponse resetResponse = rcApi.applicationDay2ConfigurationReset(configId);
 			
 			switch (resetResponse.getStatus()) {
-			case CLEANED: result = "CLEANED"; isReseting = false;
-			case ABORTED: result = "ABORTED"; isReseting = false;
-			case STOPPED: result = "STOPPED"; isReseting = false;
-			case FAILED: result = "FAILED"; isReseting = false;
+			case CLEANED: result = "CLEANED"; isReseting = false; break;
+			case ABORTED: result = "ABORTED"; isReseting = false; break;
+			case STOPPED: result = "STOPPED"; isReseting = false; break;
+			case FAILED: result = "FAILED"; isReseting = false; break;
 			default:;
 			}
 		} catch (ApiException e1) {
@@ -234,10 +234,10 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 				ApplicationDay2ConfigurationStatusResponse statusResponse = rcApi.applicationDay2ConfigurationStatus(configId);
 				
 				switch (statusResponse.getStatus()) {
-				case CLEANED: result = "CLEANED"; isReseting = false;
-				case ABORTED: result = "ABORTED"; isReseting = false;
-				case STOPPED: result = "STOPPED"; isReseting = false;
-				case FAILED: result = "FAILED"; isReseting = false;
+				case CLEANED: result = "CLEANED"; isReseting = false; break;
+				case ABORTED: result = "ABORTED"; isReseting = false; break;
+				case STOPPED: result = "STOPPED"; isReseting = false; break;
+				case FAILED: result = "FAILED"; isReseting = false; break;
 				default: Thread.sleep(3000);
 				}
 			}
@@ -340,10 +340,10 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 			InfrastructureDay2ConfigurationStatusResponse startResponse = rcApi.infrastructureDay2ConfigurationStart(metricsConfigId);
 
 			switch (startResponse.getStatus()) {
-			case COMPLETED: result = "OK"; isConfiguring = false;
-			case ABORTED: result = "ABORTED"; isConfiguring = false;
-			case STOPPED: result = "STOPPED"; isConfiguring = false;
-			case FAILED: result = "FAILED"; isConfiguring = false;
+			case COMPLETED: result = "OK"; isConfiguring = false; break;
+			case ABORTED: result = "ABORTED"; isConfiguring = false; break;
+			case STOPPED: result = "STOPPED"; isConfiguring = false; break;
+			case FAILED: result = "FAILED"; isConfiguring = false; break;
 			default:;
 			}
 
@@ -359,10 +359,10 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 				InfrastructureDay2ConfigurationStatusResponse statusResponse = rcApi.infrastructureDay2ConfigurationStatus(metricsConfigId);
 
 				switch (statusResponse.getStatus()) {
-				case COMPLETED: result = "OK"; isConfiguring = false;
-				case ABORTED: result = "ABORTED"; isConfiguring = false;
-				case STOPPED: result = "STOPPED"; isConfiguring = false;
-				case FAILED: result = "FAILED"; isConfiguring = false;
+				case COMPLETED: result = "OK"; isConfiguring = false; break;
+				case ABORTED: result = "ABORTED"; isConfiguring = false; break;
+				case STOPPED: result = "STOPPED"; isConfiguring = false; break;
+				case FAILED: result = "FAILED"; isConfiguring = false; break;
 				default: Thread.sleep(3000);
 				}
 			}
@@ -427,10 +427,10 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 			InfrastructureDay2ConfigurationStatusResponse stopResponse = rcApi.infrastructureDay2ConfigurationStop(metricsConfigId);
 
 			switch (stopResponse.getStatus()) {
-			case CLEANED: result = "CLEANED"; isReseting = false;
-			case ABORTED: result = "ABORTED"; isReseting = false;
-			case STOPPED: result = "STOPPED"; isReseting = false;
-			case FAILED: result = "FAILED"; isReseting = false;
+			case CLEANED: result = "CLEANED"; isReseting = false; break;
+			case ABORTED: result = "ABORTED"; isReseting = false; break;
+			case STOPPED: result = "STOPPED"; isReseting = false; break;
+			case FAILED: result = "FAILED"; isReseting = false; break;
 			default:;
 			}
 		} catch (ApiException e1) {
@@ -445,10 +445,10 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 				InfrastructureDay2ConfigurationStatusResponse statusResponse = rcApi.infrastructureDay2ConfigurationStatus(metricsConfigId);
 
 				switch (statusResponse.getStatus()) {
-				case CLEANED: result = "CLEANED"; isReseting = false;
-				case ABORTED: result = "ABORTED"; isReseting = false;
-				case STOPPED: result = "STOPPED"; isReseting = false;
-				case FAILED: result = "FAILED"; isReseting = false;
+				case CLEANED: result = "CLEANED"; isReseting = false; break;
+				case ABORTED: result = "ABORTED"; isReseting = false; break;
+				case STOPPED: result = "STOPPED"; isReseting = false; break;
+				case FAILED: result = "FAILED"; isReseting = false; break;
 				default: Thread.sleep(3000);
 				}
 			}
@@ -513,15 +513,15 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 			ExecutionStatusResponse startResponse = rcApi.executionStart(execId);
 
 			switch (startResponse.getStatus()) {
-			case COMPLETED: result = "OK"; isRunning = false;
-			case ABORTED: result = "ABORTED"; isRunning = false;
-			case FAILED: result = "FAILED"; isRunning = false;
+			case COMPLETED: result = "OK"; isRunning = false; break;
+			case ABORTED: result = "ABORTED"; isRunning = false; break;
+			case FAILED: result = "FAILED"; isRunning = false; break;
 			default:;
 			}
 
 		} catch (ApiException e2) {
 			log.error("PROCESS: Start experiment execution. ApiException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e2.getMessage());
-			manageTestCaseError("API Failure while starting application day-2 configuration", executionId, tcDescriptorId);
+			manageTestCaseError("API Failure while starting execution", executionId, tcDescriptorId);
 			return;
 		}		
 
@@ -531,9 +531,9 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 				ExecutionStatusResponse statusResponse = rcApi.executionStatus(execId);
 
 				switch (statusResponse.getStatus()) {
-				case COMPLETED: result = "OK"; isRunning = false;
-				case ABORTED: result = "ABORTED"; isRunning = false;
-				case FAILED: result = "FAILED"; isRunning = false;
+				case COMPLETED: result = "OK"; isRunning = false; break;
+				case ABORTED: result = "ABORTED"; isRunning = false; break;
+				case FAILED: result = "FAILED"; isRunning = false; break;
 				default: Thread.sleep(3000);
 				}
 			}
