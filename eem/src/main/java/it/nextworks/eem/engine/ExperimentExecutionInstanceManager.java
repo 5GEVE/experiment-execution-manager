@@ -344,10 +344,12 @@ public class ExperimentExecutionInstanceManager {
                     return;
                 }
                 ExperimentExecution experimentExecution = experimentExecutionOptional.get();
+                experimentExecution.setReportUrl(msg.getResult());
+                experimentExecutionRepository.saveAndFlush(experimentExecution);
                 testCasesIterator.remove();
-                if(testCases.size() == 0){
-                    experimentExecution.setReportUrl(msg.getResult());
-                    experimentExecutionRepository.saveAndFlush(experimentExecution);
+                if(this.currentState.equals(ExperimentState.FAILED)){
+                    validatorService.terminateExperiment(executionId);
+                }else if(testCases.size() == 0){
                     //Complete experiment execution if test cases are no longer present
                     if(updateAndNotifyExperimentExecutionState(ExperimentState.COMPLETED)) {
                         log.info("Experiment Execution with Id {} completed", executionId);
@@ -412,12 +414,14 @@ public class ExperimentExecutionInstanceManager {
                 }
                 break;
             case METRIC_RESET:
+                metricConfigId = null;
                 if(configId == null)
                     processConfigurationResult(new ConfigurationResultInternalMessage(ConfigurationStatus.CONF_RESET, "OK", null, false));
                 else
                     configuratorService.resetConfiguration(executionId, runningTestCase.getKey(), configId);
                 break;
             case CONF_RESET:
+                configId = null;
                 //Abort experiment execution if requested
                 if(currentState.equals(ExperimentState.ABORTING) && updateAndNotifyExperimentExecutionState(ExperimentState.ABORTED)) {
                     log.info("Experiment Execution with Id {} aborted", executionId);
@@ -869,6 +873,14 @@ public class ExperimentExecutionInstanceManager {
     private void manageExperimentExecutionError(String errorMessage){
         log.error("Experiment Execution with Id {} failed : {}", executionId, errorMessage);
         if(updateAndNotifyExperimentExecutionState(ExperimentState.FAILED)) {
+            if(this.currentState.equals(ExperimentState.RUNNING) || this.currentState.equals(ExperimentState.RUNNING_STEP))
+                validatorService.stopTcValidation(executionId, runningTestCase.getKey());
+            else if(isValidationConfigured)//stopTcValidation triggers also terminateExperiment when experiment state is failed
+                validatorService.terminateExperiment(executionId);
+            if(metricConfigId != null)
+                configuratorService.removeInfrastructureMetricCollection(executionId, runningTestCase.getKey(), metricConfigId);
+            else if(configId != null)//if metricConfigId != null, resetConfiguration is triggered after receiving METRIC_RESET
+                configuratorService.resetConfiguration(executionId, runningTestCase.getKey(), configId);
             Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
             experimentExecutionOptional.ifPresent(experimentExecution -> experimentExecutionRepository.saveAndFlush(experimentExecution.errorMessage(errorMessage)));
         }
