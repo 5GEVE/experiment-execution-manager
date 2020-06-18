@@ -39,6 +39,7 @@ public class ExperimentExecutionInstanceManager {
 
     private static final Logger log = LoggerFactory.getLogger(ExperimentExecutionInstanceManager.class);
 
+    private String experimentId;
     private String executionId;
     private ExperimentState currentState;
     private ExperimentRunType runType;
@@ -78,6 +79,7 @@ public class ExperimentExecutionInstanceManager {
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         if(!experimentExecutionOptional.isPresent())
             throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", executionId));
+        this.experimentId = experimentExecutionOptional.get().getExperimentId();
         this.executionId = executionId;
         this.currentState = experimentExecutionOptional.get().getState();
         this.runType = experimentExecutionOptional.get().getRunType();
@@ -103,7 +105,7 @@ public class ExperimentExecutionInstanceManager {
         //Restart experiment executions based on the current state
         switch(currentState){
             case CONFIGURING:
-                validatorService.configureExperiment(executionId);
+                validatorService.configureExperiment(experimentId, executionId);
                 if(runType.equals(ExperimentRunType.RUN_ALL)){
                     //Run the first test case if run type is RUN_ALL
                     configureExperimentExecutionTestCase();
@@ -122,7 +124,7 @@ public class ExperimentExecutionInstanceManager {
                 //Consider startTcValidation already sent
                 if(testCasesIterator.hasNext()) {
                     runningTestCase = testCasesIterator.next();
-                    validatorService.stopTcValidation(executionId, runningTestCase.getKey());
+                    validatorService.stopTcValidation(experimentId, executionId, runningTestCase.getKey());
                 }
                 break;
             case ABORTING:
@@ -233,7 +235,7 @@ public class ExperimentExecutionInstanceManager {
                 manageExperimentExecutionError(e.getMessage());
                 return;
             }
-            validatorService.configureExperiment(executionId);
+            validatorService.configureExperiment(experimentId, executionId);
             if(runType.equals(ExperimentRunType.RUN_ALL)){
                 //Run the first test case if run type is RUN_ALL
                 log.info("Running Experiment Execution with Id {}", executionId);
@@ -335,7 +337,7 @@ public class ExperimentExecutionInstanceManager {
                 executorService.runTestCase(executionId, runningTestCase.getKey(), execScript);
                 break;
             case VALIDATING:
-                validatorService.queryValidationResult(executionId, runningTestCase.getKey());
+                validatorService.queryValidationResult(experimentId, executionId, runningTestCase.getKey());
                 break;
             case VALIDATED:
                 Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
@@ -348,12 +350,12 @@ public class ExperimentExecutionInstanceManager {
                 experimentExecutionRepository.saveAndFlush(experimentExecution);
                 testCasesIterator.remove();
                 if(this.currentState.equals(ExperimentState.FAILED)){
-                    validatorService.terminateExperiment(executionId);
+                    validatorService.terminateExperiment(experimentId, executionId);
                 }else if(testCases.size() == 0){
                     //Complete experiment execution if test cases are no longer present
                     if(updateAndNotifyExperimentExecutionState(ExperimentState.COMPLETED)) {
                         log.info("Experiment Execution with Id {} completed", executionId);
-                        validatorService.terminateExperiment(executionId);
+                        validatorService.terminateExperiment(experimentId, executionId);
                     }
                 }else if(runType.equals(ExperimentRunType.RUN_IN_STEPS) || (runType.equals(ExperimentRunType.RUN_ALL) && interruptRunning)) {
                     //Pause experiment execution if the run type is RUN_IN_STEPS or if requested
@@ -429,7 +431,7 @@ public class ExperimentExecutionInstanceManager {
                 }
                 if(updateAndNotifyExperimentExecutionState(ExperimentState.VALIDATING)) {
                     log.info("Validating Test Case with Id {} of Experiment Execution with Id {}", runningTestCase.getKey(), executionId);
-                    validatorService.stopTcValidation(executionId, runningTestCase.getKey());
+                    validatorService.stopTcValidation(experimentId, executionId, runningTestCase.getKey());
                 }
         }
     }
@@ -446,7 +448,7 @@ public class ExperimentExecutionInstanceManager {
     private void runExperimentExecutionTestCase(){
         log.info("Running Test Case with Id {} of Experiment Execution with Id {} ", runningTestCase.getKey(), executionId);
         isTestCaseConfigured = false;
-        validatorService.startTcValidation(executionId, runningTestCase.getKey());
+        validatorService.startTcValidation(experimentId, executionId, runningTestCase.getKey());
     }
 
     private void configureExperimentExecutionTestCase(){
@@ -872,11 +874,12 @@ public class ExperimentExecutionInstanceManager {
 
     private void manageExperimentExecutionError(String errorMessage){
         log.error("Experiment Execution with Id {} failed : {}", executionId, errorMessage);
+        ExperimentState oldState = this.currentState;
         if(updateAndNotifyExperimentExecutionState(ExperimentState.FAILED)) {
-            if(this.currentState.equals(ExperimentState.RUNNING) || this.currentState.equals(ExperimentState.RUNNING_STEP))
-                validatorService.stopTcValidation(executionId, runningTestCase.getKey());
+            if(oldState.equals(ExperimentState.RUNNING) || oldState.equals(ExperimentState.RUNNING_STEP))
+                validatorService.stopTcValidation(experimentId, executionId, runningTestCase.getKey());
             else if(isValidationConfigured)//stopTcValidation triggers also terminateExperiment when experiment state is failed
-                validatorService.terminateExperiment(executionId);
+                validatorService.terminateExperiment(experimentId, executionId);
             if(metricConfigId != null)
                 configuratorService.removeInfrastructureMetricCollection(executionId, runningTestCase.getKey(), metricConfigId);
             else if(configId != null)//if metricConfigId != null, resetConfiguration is triggered after receiving METRIC_RESET

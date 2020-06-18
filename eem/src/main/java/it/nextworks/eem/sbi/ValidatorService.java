@@ -78,27 +78,27 @@ public class ValidatorService implements ValidatorServiceProviderInterface {
     }
 
     @Override
-    public void configureExperiment(String executionId){
-        driver.configureExperiment(executionId);
+    public void configureExperiment(String experimentId, String executionId){
+        driver.configureExperiment(experimentId, executionId);
     }
 
     @Override
-    public void startTcValidation(String executionId, String tcDescriptorId){
-        driver.startTcValidation(executionId, tcDescriptorId);
+    public void startTcValidation(String experimentId, String executionId, String tcDescriptorId){
+        driver.startTcValidation(experimentId, executionId, tcDescriptorId);
     }
 
     @Override
-    public void stopTcValidation(String executionId, String tcDescriptorId){
-        driver.stopTcValidation(executionId, tcDescriptorId);
+    public void stopTcValidation(String experimentId, String executionId, String tcDescriptorId){
+        driver.stopTcValidation(experimentId, executionId, tcDescriptorId);
     }
 
     @Override
-    public void queryValidationResult(String executionId, String tcDescriptorId){
-        driver.queryValidationResult(executionId, tcDescriptorId);
+    public void queryValidationResult(String experimentId, String executionId, String tcDescriptorId){
+        driver.queryValidationResult(experimentId, executionId, tcDescriptorId);
     }
 
     @Override
-    public void terminateExperiment(String executionId){
-        driver.terminateExperiment(executionId);
+    public void terminateExperiment(String experimentId, String executionId){
+        driver.terminateExperiment(experimentId, executionId);
     }
 }

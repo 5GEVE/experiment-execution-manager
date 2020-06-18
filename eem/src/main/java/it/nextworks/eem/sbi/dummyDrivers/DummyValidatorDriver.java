@@ -29,7 +29,7 @@ public class DummyValidatorDriver implements ValidatorServiceProviderInterface {
     }
 
     @Override
-    public void configureExperiment(String executionId){
+    public void configureExperiment(String experimentId, String executionId){
         log.debug("ConfiguringExperiment request: {}", executionId);
         String topic = "lifecycle.validation." + executionId;
         InternalMessage internalMessage = new ValidationResultInternalMessage(ValidationStatus.CONFIGURED, "Validation done by DUMMY", false);
@@ -42,7 +42,7 @@ public class DummyValidatorDriver implements ValidatorServiceProviderInterface {
     }
 
     @Override
-    public void startTcValidation(String executionId, String tcDescriptorId){
+    public void startTcValidation(String experimentId, String executionId, String tcDescriptorId){
         log.debug("Started test case validation for execution {} and test case descriptor {}", executionId, tcDescriptorId);
         String validationStarted = "OK";
         String topic = "lifecycle.validation." + executionId;
@@ -56,7 +56,7 @@ public class DummyValidatorDriver implements ValidatorServiceProviderInterface {
     }
 
     @Override
-    public void stopTcValidation(String executionId, String tcDescriptorId){
+    public void stopTcValidation(String experimentId, String executionId, String tcDescriptorId){
         log.debug("Requested to stop test case validation for experiment {} and test case descriptor {}", executionId, tcDescriptorId);
         String validationStarted = "OK";
         String topic = "lifecycle.validation." + executionId;
@@ -70,7 +70,7 @@ public class DummyValidatorDriver implements ValidatorServiceProviderInterface {
     }
 
     @Override
-    public void queryValidationResult(String executionId, String tcDescriptorId){
+    public void queryValidationResult(String experimentId, String executionId, String tcDescriptorId){
         log.debug("Query validation result on execution {} and test case descriptor {}", executionId, tcDescriptorId);
         String reportUrl = "http://dummy.url" + executionId + "/index.html";
         String topic = "lifecycle.validation." + executionId;
@@ -84,7 +84,7 @@ public class DummyValidatorDriver implements ValidatorServiceProviderInterface {
     }
 
     @Override
-    public void terminateExperiment(String executionId){
+    public void terminateExperiment(String experimentId, String executionId){
         log.debug("Termination request for execution {}", executionId);
     }
 

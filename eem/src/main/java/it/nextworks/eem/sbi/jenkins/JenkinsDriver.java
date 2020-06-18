@@ -58,7 +58,7 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
 
     //validation
     @Override
-    public void configureExperiment(String executionId){
+    public void configureExperiment(String experimentId, String executionId){
         //Validation is done by Jenkins during test case execution
         String topic = "lifecycle.validation." + executionId;
         InternalMessage internalMessage = new ValidationResultInternalMessage(ValidationStatus.CONFIGURED, "Validation done by Jenkins", false);
@@ -71,7 +71,7 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
     }
 
     @Override
-    public void startTcValidation(String executionId, String tcDescriptorId){
+    public void startTcValidation(String experimentId, String executionId, String tcDescriptorId){
         String validationStarted = "OK";
         String topic = "lifecycle.validation." + executionId;
         InternalMessage internalMessage = new ValidationResultInternalMessage(ValidationStatus.ACQUIRING, validationStarted, false);
@@ -84,7 +84,7 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
     }
 
     @Override
-    public void stopTcValidation(String executionId, String tcDescriptorId){
+    public void stopTcValidation(String experimentId, String executionId, String tcDescriptorId){
         String validationStarted = "OK";
         String topic = "lifecycle.validation." + executionId;
         InternalMessage internalMessage = new ValidationResultInternalMessage(ValidationStatus.VALIDATING, validationStarted, false);
@@ -97,7 +97,7 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
     }
 
     @Override
-    public void queryValidationResult(String executionId, String tcDescriptorId){
+    public void queryValidationResult(String experimentId, String executionId, String tcDescriptorId){
         String reportUrl = this.jenkinsValidationBaseUrl + executionId + "/index.html";
         String topic = "lifecycle.validation." + executionId;
         InternalMessage internalMessage = new ValidationResultInternalMessage(ValidationStatus.VALIDATED, reportUrl, false);
@@ -110,7 +110,7 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
     }
 
     @Override
-    public void terminateExperiment(String executionId){
+    public void terminateExperiment(String experimentId, String executionId){
         //nothing to do in this case
     }
 

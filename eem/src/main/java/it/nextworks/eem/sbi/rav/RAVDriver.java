@@ -70,42 +70,42 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
     }
 
     @Override
-    public void configureExperiment(String executionId){
+    public void configureExperiment(String experimentId, String executionId){
         new Thread(() -> {
-            configurationStuff(executionId);
+            configurationStuff(experimentId, executionId);
         }).start();
     }
 
     @Override
-    public void startTcValidation(String executionId, String tcDescriptorId){
+    public void startTcValidation(String experimentId, String executionId, String tcDescriptorId){
         new Thread(() -> {
-            startValidationStuff(executionId, tcDescriptorId);
+            startValidationStuff(experimentId, executionId, tcDescriptorId);
         }).start();
     }
 
     @Override
-    public void stopTcValidation(String executionId, String tcDescriptorId){
+    public void stopTcValidation(String experimentId, String executionId, String tcDescriptorId){
         new Thread(() -> {
-            stopValidationStuff(executionId, tcDescriptorId);
+            stopValidationStuff(experimentId, executionId, tcDescriptorId);
         }).start();
     }
 
     @Override
-    public void queryValidationResult(String executionId, String tcDescriptorId){
+    public void queryValidationResult(String experimentId, String executionId, String tcDescriptorId){
         new Thread(() -> {
-            queryValidationResultStuff(executionId, tcDescriptorId);
+            queryValidationResultStuff(experimentId, executionId, tcDescriptorId);
         }).start();
     }
 
     @Override
-    public void terminateExperiment(String executionId){
+    public void terminateExperiment(String experimentId, String executionId){
         new Thread(() -> {
-            terminationStuff(executionId);
+            terminationStuff(experimentId, executionId);
         }).start();
     }
 
-    private void startValidationStuff(String executionId, String tcDescriptorId){//TODO modify name
-        log.info("Staring new validation task for execution {} and test case {}", executionId, tcDescriptorId);
+    private void startValidationStuff(String experimentId, String executionId, String tcDescriptorId){//TODO modify name
+        log.info("Starting new validation task for execution {} and test case {}", executionId, tcDescriptorId);
 
         try {
             Call call = ravApi.startTestcaseValidationCall(executionId, tcDescriptorId, null, null);
@@ -113,11 +113,13 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
             if (response.code() != 200){
                 log.error("Status code {} on start validation of execution {} and tcDescriptor {}", response.code(), executionId, tcDescriptorId);
                 manageValidationError("Status code "+ response.code() +" on start validation of execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
+                return;
             }
         } catch (Exception e1) {
             log.error("Exception on start validation of execution {} and tcDescriptor {}", executionId, tcDescriptorId);
             e1.getMessage();
             manageValidationError("Exception on start validation of execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
+            return;
         }
 
         String validationStarted = "OK";
@@ -131,7 +133,7 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
         }
     }
 
-    private void stopValidationStuff(String executionId, String tcDescriptorId){//TODO modify name
+    private void stopValidationStuff(String experimentId, String executionId, String tcDescriptorId){//TODO modify name
         //TODO stop TC validation
         try {//TODO remove
             Call call = ravApi.terminateCurrentTestcaseCall(executionId, tcDescriptorId, null, null);
@@ -139,11 +141,13 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
             if (response.code() != 200){
                 log.error("Status code {} on stop validation of execution {} and tcDescriptor {}", response.code(), executionId, tcDescriptorId);
                 manageValidationError("Status code "+ response.code() +" on stop validation of execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
+                return;
             }
         } catch (Exception e) {
             log.error("Exception on stop validation of execution {} and tcDescriptor {}", executionId, tcDescriptorId);
             e.getMessage();
-            manageValidationError("Exception on start validation of execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
+            manageValidationError("Exception on stop validation of execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
+            return;
         }
 
         String validationStarted = "OK";
@@ -159,7 +163,7 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
         //manageValidationError();
     }
 
-    private void queryValidationResultStuff(String executionId, String tcDescriptorId){//TODO modify name
+    private void queryValidationResultStuff(String experimentId, String executionId, String tcDescriptorId){//TODO modify name
           StatusResponse statusResponse = null;
 //        try {
 //            Call call = ravApi.startTestcaseValidationCall(executionId, tcDescriptorId, null, null);
@@ -180,6 +184,7 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
             } catch (Exception e2){
                 log.error("Error trying to validate execution {} and tcDescriptor {}", executionId, tcDescriptorId);
                 manageValidationError("Error trying to validate execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
+                return;
             }
 
         //TODO insert some delay in performing queries..Every time EEM receives a VALIDATING message, it sends immediately a new queryValidationResult
@@ -205,13 +210,14 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
 
     }
 
-    private void configurationStuff(String executionId){
+    private void configurationStuff(String experimentId, String executionId){
         //TODO configure experiment validation
         // Get experimentDescriptorId from experiment execution id
         Optional<ExperimentExecution> expExecutionInstance = experimentExecutionRepository.findByExecutionId(executionId);
         if (! expExecutionInstance.isPresent()) {
             log.error("Experiment execution with id {} not found", executionId);
             manageValidationError("Experiment execution with id {} not found", executionId);
+            return;
         }
         ExperimentExecution expExecution = expExecutionInstance.get();
 
@@ -228,10 +234,12 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
         } catch (Exception e1){
             log.error("Unable to retrieve Experiment Descriptor identified with {} from the catalogue", expExecution.getExperimentDescriptorId());
             manageValidationError("Unable to retrieve Experiment Descriptor from the catalogue", executionId);
+            return;
         }
         if (expDescriptorResponse.getExpDescriptors().size() != 1){
             log.error("List should contain a single experiment descriptor with id {}", expExecution.getExperimentDescriptorId());
             manageValidationError("List should contain a single experiment descriptor", executionId);
+            return;
         }
         ExpDescriptor expDescriptor = expDescriptorResponse.getExpDescriptors().get(0);
 
@@ -244,6 +252,7 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
         } catch (Exception e2) {
             log.error("Unable to retrieve Experiment blueprint identified with {} from the catalogue", expDescriptor.getExpBlueprintId());
             manageValidationError("Unable to retrieve Experiment blueprint from the catalogue", executionId);
+            return;
         }
         ExpBlueprint expBlueprint = expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint();
         parameters.remove("ExpB_ID");
@@ -258,12 +267,14 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
                 if(contextBlueprints.getCtxBlueprintInfos().size() != 1 ){
                     log.error("Catalogue should return single ctxB. Returned list size: {}", contextBlueprints.getCtxBlueprintInfos().size());
                     manageValidationError("Catalogue should return single ctxB", executionId);
+                    return;
                 } else {
                     ctxBlueprintList.add(contextBlueprints.getCtxBlueprintInfos().get(0).getCtxBlueprint());
                 }
             } catch (Exception e3) {
                 log.error("Unable to retrieve context blueprint identified with {} from the catalogue", ctxBId);
                 manageValidationError("Unable to retrieve context blueprint from the catalogue", executionId);
+                return;
             }
             parameters.remove("CTXB_ID");
         }
@@ -272,10 +283,10 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
         QueryVsBlueprintResponse vsBlueprintResponse = null;
         try{
             vsBlueprintResponse = catalogueService.queryVsBlueprint(request);
-
         } catch( Exception e4){
             log.error("Unable to retrieve Virtual Service Blueprint identified with {} from the catalogue", expBlueprint.getVsBlueprintId());
             manageValidationError("Unable to retrieve Virtual Service Blueprint from the catalogue", executionId);
+            return;
         }
         VsBlueprint vsBlueprint = vsBlueprintResponse.getVsBlueprintInfo().get(0).getVsBlueprint();
 
@@ -325,7 +336,7 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
             pt.setBrokerAddr(monitoringAddress+":"+monitoringPort);
             pt.setKpi(kpi.getKpiId());
             pt.setFormula(kpi.getFormula());
-            pt.setInterval(new BigDecimal(kpi.getInterval().replaceAll("[^0-9]+", ""))); //TODO check if converts it in a proper way
+            pt.setInterval(new BigDecimal(kpi.getInterval().replaceAll("[^0-9.]+", ""))); //TODO check if converts it in a proper way
             List<String> metricsIds = new ArrayList<>();
             pt.setUnit(kpi.getUnit());
             for (String metric : kpi.getMetricIds()){
@@ -378,7 +389,7 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
 
     }
 
-    private void terminationStuff(String executionId){
+    private void terminationStuff(String experimentId, String executionId){
         Call call = null;
         try{
             call = ravApi.terminateExperimentCall(executionId, null, null);

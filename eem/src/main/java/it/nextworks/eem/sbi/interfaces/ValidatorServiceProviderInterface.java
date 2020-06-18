@@ -2,9 +2,9 @@ package it.nextworks.eem.sbi.interfaces;
 
 public interface ValidatorServiceProviderInterface {
 
-    void configureExperiment(String executionId);
-    void startTcValidation(String executionId, String tcDescriptorId);
-    void stopTcValidation(String executionId, String tcDescriptorId);
-    void queryValidationResult(String executionId, String tcDescriptorId);
-    void terminateExperiment(String executionId);
+    void configureExperiment(String experimentId, String executionId);
+    void startTcValidation(String experimentId, String executionId, String tcDescriptorId);
+    void stopTcValidation(String experimentId, String executionId, String tcDescriptorId);
+    void queryValidationResult(String experimentId, String executionId, String tcDescriptorId);
+    void terminateExperiment(String experimentId, String executionId);
 }
