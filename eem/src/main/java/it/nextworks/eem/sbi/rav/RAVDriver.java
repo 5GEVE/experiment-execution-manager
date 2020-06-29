@@ -342,8 +342,9 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
             for (String metric : kpi.getMetricIds()){
                 metricsIds.add(metric);
             }
-            //TODO : Fix this on expDesciptor. Need to have both lowerBound and UpperBound for the KPI
-            pt.setUpperBound(expDescriptor.getKpiThresholds().get(kpi.getKpiId()));
+            KpiThreshold kpiThreshold = expDescriptor.getKpiThresholds().get(kpi.getKpiId());
+            pt.setUpperBound(String.valueOf(kpiThreshold.getUpperBound()));
+            pt.setLowerBound(String.valueOf(kpiThreshold.getLowerBound()));
             pt.setInput(metricsIds);
             pt.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
             log.debug("KPI topics created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
@@ -352,7 +353,8 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
 
         ConfigurationDict confDict = new ConfigurationDict();
         confDict.setVertical(expExecution.getTenantId());
-        confDict.setExpID(executionId);
+        confDict.setExpID(experimentId);
+        confDict.setExecutionID(executionId);
         List<ConfigurationDictTestcases> testCasesListConfig = new ArrayList<ConfigurationDictTestcases>();
         for (String tcdId : expDescriptor.getTestCaseDescriptorIds()){
             ConfigurationDictTestcases confDictTC = new ConfigurationDictTestcases();
