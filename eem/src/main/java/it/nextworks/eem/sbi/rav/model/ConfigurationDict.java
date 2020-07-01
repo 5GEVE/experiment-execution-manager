@@ -28,8 +28,8 @@ public class ConfigurationDict {
   @SerializedName("expID")
   private String expID = null;
 
-  @SerializedName("executeID")
-  private String executionID = null;
+//  @SerializedName("executeID")
+//  private String executionID = null;
 
   @SerializedName("testcases")
   private List<ConfigurationDictTestcases> testcases = new ArrayList<ConfigurationDictTestcases>();
@@ -78,19 +78,19 @@ public class ConfigurationDict {
     return this;
   }
 
-  public String getExecutionID() {
-    return executionID;
-  }
-
-  public void setExecutionID(String executionID) {
-    this.executionID = executionID;
-  }
-
-
-  public ConfigurationDict executionId(String executionID){
-    this.executionID = executionID;
-    return this;
-  }
+//  public String getExecutionID() {
+//    return executionID;
+//  }
+//
+//  public void setExecutionID(String executionID) {
+//    this.executionID = executionID;
+//  }
+//
+//
+//  public ConfigurationDict executionId(String executionID){
+//    this.executionID = executionID;
+//    return this;
+//  }
 
    /**
    * Get testcases
@@ -116,8 +116,9 @@ public class ConfigurationDict {
     ConfigurationDict configurationDict = (ConfigurationDict) o;
     return Objects.equals(this.vertical, configurationDict.vertical) &&
         Objects.equals(this.expID, configurationDict.expID) &&
-        Objects.equals(this.testcases, configurationDict.testcases) &&
-        Objects.equals(this.executionID, configurationDict.executionID);
+        Objects.equals(this.testcases, configurationDict.testcases);
+//    &&
+//        Objects.equals(this.executionID, configurationDict.executionID);
   }
 
   @Override
@@ -133,7 +134,7 @@ public class ConfigurationDict {
     
     sb.append("    vertical: ").append(toIndentedString(vertical)).append("\n");
     sb.append("    expID: ").append(toIndentedString(expID)).append("\n");
-    sb.append("    executeID: ").append(toIndentedString(executionID)).append("\n");
+//    sb.append("    executeID: ").append(toIndentedString(executionID)).append("\n");
     sb.append("    testcases: ").append(toIndentedString(testcases)).append("\n");
     sb.append("}");
     return sb.toString();
