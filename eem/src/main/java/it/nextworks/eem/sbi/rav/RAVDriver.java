@@ -353,7 +353,8 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
 
         ConfigurationDict confDict = new ConfigurationDict();
         confDict.setVertical(expExecution.getTenantId());
-        confDict.setExpID(experimentId);
+        confDict.setExpID(executionId);
+//        confDict.setExpID(experimentId);
 //        confDict.setExecutionID(executionId);
         List<ConfigurationDictTestcases> testCasesListConfig = new ArrayList<ConfigurationDictTestcases>();
         for (String tcdId : expDescriptor.getTestCaseDescriptorIds()){
