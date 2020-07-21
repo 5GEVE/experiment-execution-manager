@@ -307,7 +307,8 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 			metricWrapper.setTopic(topic);
 			String site = metrics.get(i).getTargetSite().toString();
 			metricWrapper.setSite(site);
-
+			String metricType = metrics.get(i).getMetric().getiMetricType().toString();
+			metricWrapper.setMetricType(metricType);
 			metricsList.add(metricWrapper);
 		}
 

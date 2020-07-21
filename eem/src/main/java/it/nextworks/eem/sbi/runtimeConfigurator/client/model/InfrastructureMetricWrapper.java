@@ -44,6 +44,9 @@ public class InfrastructureMetricWrapper {
   @SerializedName("deviceId")
   private String deviceId = null;
 
+  @SerializedName("metricType")
+  private String metricType = null;
+
   public InfrastructureMetricWrapper metricId(String metricId) {
     this.metricId = metricId;
     return this;
@@ -146,6 +149,23 @@ public class InfrastructureMetricWrapper {
     this.deviceId = deviceId;
   }
 
+  public InfrastructureMetricWrapper metricType(String metricType) {
+    this.metricType = metricType;
+    return this;
+  }
+
+  /**
+   * Get metricType
+   * @return metricType
+   **/
+
+  public String getMetricType() {
+    return metricType;
+  }
+
+  public void setMetricType(String metricType) {
+    this.metricType = metricType;
+  }
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -161,12 +181,13 @@ public class InfrastructureMetricWrapper {
         Objects.equals(this.site, infrastructureMetricWrapper.site) &&
         Objects.equals(this.unit, infrastructureMetricWrapper.unit) &&
         Objects.equals(this.interval, infrastructureMetricWrapper.interval) &&
+        Objects.equals(this.metricType, infrastructureMetricWrapper.metricType) &&
         Objects.equals(this.deviceId, infrastructureMetricWrapper.deviceId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(metricId, topic, site, unit, interval, deviceId);
+    return Objects.hash(metricId, topic, site, unit, interval, deviceId, metricType);
   }
 
 
@@ -181,6 +202,7 @@ public class InfrastructureMetricWrapper {
     sb.append("    unit: ").append(toIndentedString(unit)).append("\n");
     sb.append("    interval: ").append(toIndentedString(interval)).append("\n");
     sb.append("    deviceId: ").append(toIndentedString(deviceId)).append("\n");
+    sb.append("    metricType: ").append(toIndentedString(metricType)).append("\n");
     sb.append("}");
     return sb.toString();
   }
