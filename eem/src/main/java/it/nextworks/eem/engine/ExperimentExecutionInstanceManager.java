@@ -570,7 +570,11 @@ public class ExperimentExecutionInstanceManager {
                 }
             }
             //Retrieve Test Case Descriptors
-            List<String> tcDescriptorIds = expDescriptor.getTestCaseDescriptorIds();
+            List<TestCaseExecutionConfiguration> executionConfigurations = experimentExecution.getTestCaseDescriptorConfiguration();
+            List<String> tcDescriptorIds = executionConfigurations.stream().map(TestCaseExecutionConfiguration::getTcDescriptorId).collect(Collectors.toList());
+            tcDescriptorIds.removeIf(id -> !expDescriptor.getTestCaseDescriptorIds().contains(id));
+            if(tcDescriptorIds.size() == 0)//if no tcDescriptorIds are defined in the executionConfigurations, then use all the testCaseDescriptors available in the expDescriptor
+                tcDescriptorIds = expDescriptor.getTestCaseDescriptorIds();
             if(tcDescriptorIds != null) {
                 log.debug("Going to retrieve Test Case Descriptors with Ids {}", tcDescriptorIds);
                 for (String tcDescriptorId : tcDescriptorIds) {
