@@ -476,6 +476,7 @@ public class ExperimentExecutionInstanceManager {
         if(!experimentExecutionOptional.isPresent())
             throw new FailedOperationException(String.format("Experiment Execution with Id %s not found", executionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
+
         EveSite siteName;//TODO handle multiple sites performing multiple requests or better sending a list of sites
         try {
             siteName = EveSite.valueOf(experimentExecution.getSiteNames().get(0).toUpperCase());
@@ -489,7 +490,7 @@ public class ExperimentExecutionInstanceManager {
             metrics.add(metric);
         }
         if(!metrics.isEmpty())
-            configuratorService.configureInfrastructureMetricCollection(executionId, runningTestCase.getKey(), metrics);
+            configuratorService.configureInfrastructureMetricCollection(executionId, runningTestCase.getKey(), metrics, experimentExecution.getNsInstanceId());
         else {
             ConfigurationResultInternalMessage msg = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_CONFIGURED, "OK", null, false);
             processConfigurationResult(msg);

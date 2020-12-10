@@ -61,8 +61,8 @@ public class ConfiguratorService implements ConfiguratorServiceProviderInterface
     }
 
     @Override
-    public void configureInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<MetricInfo> metrics){
-        driver.configureInfrastructureMetricCollection(executionId, tcDescriptorId, metrics);
+    public void configureInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<MetricInfo> metrics, String nsInstanceId){
+        driver.configureInfrastructureMetricCollection(executionId, tcDescriptorId, metrics, nsInstanceId);
     }
 
     @Override

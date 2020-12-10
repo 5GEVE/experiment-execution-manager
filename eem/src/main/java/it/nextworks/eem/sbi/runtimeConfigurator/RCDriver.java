@@ -98,8 +98,8 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 	}
 
 	@Override
-	public void configureInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<MetricInfo> metrics){
-		new Thread(() -> {configureInfrastructureMetricCollectionImplementation(executionId, tcDescriptorId, metrics);}).start();
+	public void configureInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<MetricInfo> metrics, String nsInstanceId){
+		new Thread(() -> {configureInfrastructureMetricCollectionImplementation(executionId, tcDescriptorId, metrics, nsInstanceId);}).start();
 	}
 
 	@Override
@@ -278,7 +278,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		//no response message needed
 	}
 
-	private void configureInfrastructureMetricCollectionImplementation(String executionId, String tcDescriptorId, List<MetricInfo> metrics){
+	private void configureInfrastructureMetricCollectionImplementation(String executionId, String tcDescriptorId, List<MetricInfo> metrics, String nsInstanceId){
 
 		// PROCESS: Infrastructure Metrics Configuration INIT
 		log.debug("PROCESS: Infrastructure Metrics Configuration INIT. Initializing metrics configuration task for Test Case {} with executionId {}", tcDescriptorId, executionId);
@@ -315,7 +315,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		metricsWrapper.setInfrastructureMetricsInfo(metricsList);
 
 		try {
-			InfrastructureDay2ConfigurationResponse metricsConfigIdResponse = rcApi.infrastructureDay2ConfigurationInit(metricsWrapper);
+			InfrastructureDay2ConfigurationResponse metricsConfigIdResponse = rcApi.infrastructureDay2ConfigurationInit(metricsWrapper, nsInstanceId);
 			metricsConfigId = metricsConfigIdResponse.getConfigurationId();
 			log.debug("PROCESS: Request metricsConfigId from RC. metricsConfigId for Test Case {} with executionId {} is: {}", tcDescriptorId, executionId, metricsConfigId);
 

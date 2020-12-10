@@ -9,7 +9,7 @@ public interface ConfiguratorServiceProviderInterface {
 
     void abortConfiguration(String executionId, String tcDescriptorId, String configId);
 
-    void configureInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<MetricInfo> metrics);
+    void configureInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<MetricInfo> metrics, String nsInstanceId);
 
     void resetConfiguration(String executionId, String tcDescriptorId, String configId);
 

@@ -1192,11 +1192,11 @@ public class RcnbiControllerApi {
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
      */
-    public com.squareup.okhttp.Call infrastructureDay2ConfigurationInitCall(InfrastructureDay2ConfigurationWrapper body, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    public com.squareup.okhttp.Call infrastructureDay2ConfigurationInitCall(InfrastructureDay2ConfigurationWrapper body, String nsInstanceId, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         Object localVarPostBody = body;
         
         // create path and map variables
-        String localVarPath = "/rc/nbi/infrastructure/day2/configuration";
+        String localVarPath = "/rc/nbi/infrastructure/day2/configuration/" + nsInstanceId;
 
         List<Pair> localVarQueryParams = new ArrayList<Pair>();
         List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
@@ -1234,18 +1234,18 @@ public class RcnbiControllerApi {
     }
     
     @SuppressWarnings("rawtypes")
-    private com.squareup.okhttp.Call infrastructureDay2ConfigurationInitValidateBeforeCall(InfrastructureDay2ConfigurationWrapper body, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+    private com.squareup.okhttp.Call infrastructureDay2ConfigurationInitValidateBeforeCall(InfrastructureDay2ConfigurationWrapper body, String nsInstanceId, final ProgressResponseBody.ProgressListener progressListener, final ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         // verify the required parameter 'body' is set
         if (body == null) {
             throw new ApiException("Missing the required parameter 'body' when calling infrastructureDay2ConfigurationInit(Async)");
         }
         
-        com.squareup.okhttp.Call call = infrastructureDay2ConfigurationInitCall(body, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = infrastructureDay2ConfigurationInitCall(body, nsInstanceId, progressListener, progressRequestListener);
         return call;
 
-        
-        
-        
+
+
+
         
     }
 
@@ -1256,8 +1256,8 @@ public class RcnbiControllerApi {
      * @return InfrastructureDay2ConfigurationResponse
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public InfrastructureDay2ConfigurationResponse infrastructureDay2ConfigurationInit(InfrastructureDay2ConfigurationWrapper body) throws ApiException {
-        ApiResponse<InfrastructureDay2ConfigurationResponse> resp = infrastructureDay2ConfigurationInitWithHttpInfo(body);
+    public InfrastructureDay2ConfigurationResponse infrastructureDay2ConfigurationInit(InfrastructureDay2ConfigurationWrapper body, String nsInstanceid) throws ApiException {
+        ApiResponse<InfrastructureDay2ConfigurationResponse> resp = infrastructureDay2ConfigurationInitWithHttpInfo(body, nsInstanceid);
         return resp.getData();
     }
 
@@ -1268,8 +1268,8 @@ public class RcnbiControllerApi {
      * @return ApiResponse&lt;InfrastructureDay2ConfigurationResponse&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
-    public ApiResponse<InfrastructureDay2ConfigurationResponse> infrastructureDay2ConfigurationInitWithHttpInfo(InfrastructureDay2ConfigurationWrapper body) throws ApiException {
-        com.squareup.okhttp.Call call = infrastructureDay2ConfigurationInitValidateBeforeCall(body, null, null);
+    public ApiResponse<InfrastructureDay2ConfigurationResponse> infrastructureDay2ConfigurationInitWithHttpInfo(InfrastructureDay2ConfigurationWrapper body, String nsInstanceId) throws ApiException {
+        com.squareup.okhttp.Call call = infrastructureDay2ConfigurationInitValidateBeforeCall(body, nsInstanceId, null, null);
         Type localVarReturnType = new TypeToken<InfrastructureDay2ConfigurationResponse>(){}.getType();
         return apiClient.execute(call, localVarReturnType);
     }
@@ -1282,7 +1282,7 @@ public class RcnbiControllerApi {
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
      */
-    public com.squareup.okhttp.Call infrastructureDay2ConfigurationInitAsync(InfrastructureDay2ConfigurationWrapper body, final ApiCallback<InfrastructureDay2ConfigurationResponse> callback) throws ApiException {
+    public com.squareup.okhttp.Call infrastructureDay2ConfigurationInitAsync(InfrastructureDay2ConfigurationWrapper body, String nsInstanceId, final ApiCallback<InfrastructureDay2ConfigurationResponse> callback) throws ApiException {
 
         ProgressResponseBody.ProgressListener progressListener = null;
         ProgressRequestBody.ProgressRequestListener progressRequestListener = null;
@@ -1303,7 +1303,7 @@ public class RcnbiControllerApi {
             };
         }
 
-        com.squareup.okhttp.Call call = infrastructureDay2ConfigurationInitValidateBeforeCall(body, progressListener, progressRequestListener);
+        com.squareup.okhttp.Call call = infrastructureDay2ConfigurationInitValidateBeforeCall(body, nsInstanceId, progressListener, progressRequestListener);
         Type localVarReturnType = new TypeToken<InfrastructureDay2ConfigurationResponse>(){}.getType();
         apiClient.executeAsync(call, localVarReturnType, callback);
         return call;

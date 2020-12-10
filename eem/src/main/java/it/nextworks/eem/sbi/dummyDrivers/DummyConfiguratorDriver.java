@@ -49,7 +49,7 @@ public class DummyConfiguratorDriver implements ConfiguratorServiceProviderInter
     }
 
     @Override
-    public void configureInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<MetricInfo> metrics){
+    public void configureInfrastructureMetricCollection(String executionId, String tcDescriptorId, List<MetricInfo> metrics, String nsInstanceId){
         String result = "OK";
         String topic = "lifecycle.configurationResult." + executionId;
         InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_CONFIGURED, result, "metricConfigId",false);
