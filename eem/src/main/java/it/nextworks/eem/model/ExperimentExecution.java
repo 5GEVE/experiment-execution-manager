@@ -89,6 +89,18 @@ public class ExperimentExecution {
   @JsonProperty("useCase")
   private String useCase = "";
 
+  @JsonProperty("infrastructureMetrics")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private Map<String, String> infrastructureMetrics = new HashMap<>();
+
+  @JsonProperty("applicationMetrics")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private Map<String, String> applicationMetrics = new HashMap<>();
+
+  @JsonProperty("kpiMetrics")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private Map<String, String> kpiMetrics = new HashMap<>();
+
   @JsonIgnore
   private ExperimentRunType runType;
 
@@ -334,6 +346,31 @@ public class ExperimentExecution {
     this.experimentId = experimentId;
     return this;
   }
+
+  public Map<String, String> getInfrastructureMetrics() {
+    return infrastructureMetrics;
+  }
+
+  public void setInfrastructureMetrics(Map<String, String> infrastructureMetrics) {
+    this.infrastructureMetrics = infrastructureMetrics;
+  }
+
+  public Map<String, String> getApplicationMetrics() {
+    return applicationMetrics;
+  }
+
+  public void setApplicationMetrics(Map<String, String> applicationMetrics) {
+    this.applicationMetrics = applicationMetrics;
+  }
+
+  public Map<String, String> getKpiMetrics() {
+    return kpiMetrics;
+  }
+
+  public void setKpiMetrics(Map<String, String> kpiMetrics) {
+    this.kpiMetrics = kpiMetrics;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
