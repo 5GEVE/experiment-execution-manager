@@ -59,7 +59,7 @@ public class ExperimentExecutionInstanceManager {
 
     private ExpBlueprint expBlueprint;
     private ExpDescriptor expDescriptor;
-    private VsBlueprint vsBlueprint;
+    private List<VsBlueprint> vsBlueprints = new ArrayList<>();
     private VsDescriptor vsDescriptor;
     private List<CtxDescriptor> ctxDescriptors = new ArrayList<>();
     private List<CtxBlueprint> ctxBlueprints = new ArrayList<>();
@@ -476,16 +476,10 @@ public class ExperimentExecutionInstanceManager {
         if(!experimentExecutionOptional.isPresent())
             throw new FailedOperationException(String.format("Experiment Execution with Id %s not found", executionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
-        EveSite siteName;//TODO handle multiple sites performing multiple requests or better sending a list of sites
-        try {
-            siteName = EveSite.valueOf(experimentExecution.getSiteNames().get(0).toUpperCase());
-        }catch (IllegalArgumentException e){
-            throw new FailedOperationException(String.format("Incorrect site name in the Experiment Execution with Id %s", executionId));
-        }
         // Infrastructure metrics from Experiment blueprint
         for (InfrastructureMetric im : expBlueprint.getMetrics()){
-            String topic = experimentExecution.getUseCase() + "." + experimentExecution.getExperimentId() + "." + experimentExecution.getSiteNames().get(0).toLowerCase() + "." + MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase() + "." + im.getMetricId();
-            MetricInfo metric = new MetricInfo(im, topic, siteName);
+            String topic = experimentExecution.getInfrastructureMetrics().get(im.getMetricId());
+            MetricInfo metric = new MetricInfo(im, topic, EveSite.valueOf(im.getTargetSite()));
             metrics.add(metric);
         }
         if(!metrics.isEmpty())
@@ -530,7 +524,21 @@ public class ExperimentExecutionInstanceManager {
             QueryVsBlueprintResponse vsBlueprintResponse = catalogueService.queryVsBlueprint(request);
             if (vsBlueprintResponse.getVsBlueprintInfo().isEmpty())
                 throw new FailedOperationException(String.format("Vertical Service Blueprint with Id %s not found", expBlueprint.getVsBlueprintId()));
-            vsBlueprint = vsBlueprintResponse.getVsBlueprintInfo().get(0).getVsBlueprint();
+            VsBlueprint vsBlueprint = vsBlueprintResponse.getVsBlueprintInfo().get(0).getVsBlueprint();
+            if(vsBlueprint.isInterSite()){
+                log.debug("Going to retrieve nested Vertical Service Blueprints");
+                for(VsComponent atomicComponent : vsBlueprint.getAtomicComponents()){
+                    if(atomicComponent.getType().equals(VsComponentType.SERVICE)) {
+                        log.debug("Going to retrieve Vertical Service Blueprint with Id {}", atomicComponent.getAssociatedVsbId());
+                        parameters.put("VSB_ID", atomicComponent.getAssociatedVsbId());
+                        vsBlueprintResponse = catalogueService.queryVsBlueprint(request);
+                        if (vsBlueprintResponse.getVsBlueprintInfo().isEmpty())
+                            throw new FailedOperationException(String.format("Vertical Service Blueprint with Id %s not found", atomicComponent.getAssociatedVsbId()));
+                        vsBlueprints.add(vsBlueprintResponse.getVsBlueprintInfo().get(0).getVsBlueprint());
+                    }
+                }
+            }else
+                vsBlueprints.add(vsBlueprint);
             parameters.remove("VSB_ID");
             //Retrieve Vertical Service Descriptor
             String vsDescriptorId = expDescriptor.getVsDescriptorId();
@@ -589,17 +597,15 @@ public class ExperimentExecutionInstanceManager {
             }
             //Retrieve Test Case Blueprints
             List<String> tcBlueprintIds = tcDescriptors.stream().map(TestCaseDescriptor::getTestCaseBlueprintId).collect(Collectors.toList());
-            if(tcBlueprintIds != null) {
-                log.debug("Going to retrieve Test Case Blueprints with Ids {}", tcBlueprintIds);
-                for (String tcBlueprintId : tcBlueprintIds) {
-                    parameters.put("TCB_ID", tcBlueprintId);
-                    QueryTestCaseBlueprintResponse tcBlueprintResponse = catalogueService.queryTestCaseBlueprint(request);
-                    if (tcBlueprintResponse.getTestCaseBlueprints().isEmpty())
-                        throw new FailedOperationException(String.format("Test Case Blueprint with Id %s not found", tcBlueprintId));
-                    TestCaseBlueprint tcBlueprint = tcBlueprintResponse.getTestCaseBlueprints().get(0).getTestCaseBlueprint();
-                    tcBlueprints.add(tcBlueprint);
-                    parameters.remove("TCB_ID");
-                }
+            log.debug("Going to retrieve Test Case Blueprints with Ids {}", tcBlueprintIds);
+            for (String tcBlueprintId : tcBlueprintIds) {
+                parameters.put("TCB_ID", tcBlueprintId);
+                QueryTestCaseBlueprintResponse tcBlueprintResponse = catalogueService.queryTestCaseBlueprint(request);
+                if (tcBlueprintResponse.getTestCaseBlueprints().isEmpty())
+                    throw new FailedOperationException(String.format("Test Case Blueprint with Id %s not found", tcBlueprintId));
+                TestCaseBlueprint tcBlueprint = tcBlueprintResponse.getTestCaseBlueprints().get(0).getTestCaseBlueprint();
+                tcBlueprints.add(tcBlueprint);
+                parameters.remove("TCB_ID");
             }
             //Retrieve NsInstance
             if(nsInstanceId != null) {
@@ -752,48 +758,50 @@ public class ExperimentExecutionInstanceManager {
                 throw new FailedOperationException(String.format("Experiment Execution with Id %s not found", executionId));
             ExperimentExecution experimentExecution = experimentExecutionOptional.get();
             String metricId = splits[2];
-            //Check application metrics from Context Blueprints
-            for (CtxBlueprint ctxB : ctxBlueprints) {
-                if(ctxB.getApplicationMetrics() != null) {
-                    for (ApplicationMetric amd : ctxB.getApplicationMetrics()) {
-                        if (amd.getMetricId().equalsIgnoreCase(metricId)) {
-                            switch (splits[1]) {
-                                case "topic":
-                                    infrastructureParameterValue = experimentExecution.getUseCase() + "." + experimentExecution.getExperimentId() + "." + experimentExecution.getSiteNames().get(0).toLowerCase() + "." + MetricDataType.APPLICATION_METRIC.toString().toLowerCase() + "." + amd.getMetricId();
-                                    break;
-                                case "site":
-                                    infrastructureParameterValue = experimentExecution.getSiteNames().get(0);
-                                    break;
-                                case "unit":
-                                    infrastructureParameterValue = amd.getUnit();
-                                    break;
-                                case "interval":
-                                    infrastructureParameterValue = amd.getInterval();
+            if(splits[1].equalsIgnoreCase("topic"))
+                infrastructureParameterValue = experimentExecution.getApplicationMetrics().get(metricId);
+            else if (splits[1].equalsIgnoreCase("site")){
+                String topic = experimentExecution.getApplicationMetrics().get(metricId);
+                if(topic != null) {
+                    String[] topicSplits = topic.split("\\.");
+                    if(topicSplits.length >= 3)
+                        infrastructureParameterValue = topicSplits[2];
+                }
+            }
+            else {
+                //Check application metrics from Context Blueprints
+                for (CtxBlueprint ctxB : ctxBlueprints) {
+                    if (ctxB.getApplicationMetrics() != null) {
+                        for (ApplicationMetric amd : ctxB.getApplicationMetrics()) {
+                            if (amd.getMetricId().equalsIgnoreCase(metricId)) {
+                                switch (splits[1]) {
+                                    case "unit":
+                                        infrastructureParameterValue = amd.getUnit();
+                                        break;
+                                    case "interval":
+                                        infrastructureParameterValue = amd.getInterval();
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
                 }
-            }
-            //Check application metrics from VS Blueprint
-            if(infrastructureParameterValue == null) {
-                if(vsBlueprint.getApplicationMetrics() != null) {
-                    for (ApplicationMetric amd : vsBlueprint.getApplicationMetrics()) {
-                        if (amd.getMetricId().equalsIgnoreCase(metricId)) {
-                            switch (splits[1]) {
-                                case "topic":
-                                    infrastructureParameterValue = experimentExecution.getUseCase() + "." + experimentExecution.getExperimentId() + "." + experimentExecution.getSiteNames().get(0).toLowerCase() + "." + MetricDataType.APPLICATION_METRIC.toString().toLowerCase() + "." + amd.getMetricId();
+                //Check application metrics from VS Blueprint
+                if (infrastructureParameterValue == null) {
+                    for (VsBlueprint vsB : vsBlueprints) {
+                        if (vsB.getApplicationMetrics() != null) {
+                            for (ApplicationMetric amd : vsB.getApplicationMetrics()) {
+                                if (amd.getMetricId().equalsIgnoreCase(metricId)) {
+                                    switch (splits[1]) {
+                                        case "unit":
+                                            infrastructureParameterValue = amd.getUnit();
+                                            break;
+                                        case "interval":
+                                            infrastructureParameterValue = amd.getInterval();
+                                    }
                                     break;
-                                case "site":
-                                    infrastructureParameterValue = experimentExecution.getSiteNames().get(0);
-                                    break;
-                                case "unit":
-                                    infrastructureParameterValue = amd.getUnit();
-                                    break;
-                                case "interval":
-                                    infrastructureParameterValue = amd.getInterval();
+                                }
                             }
-                            break;
                         }
                     }
                 }
