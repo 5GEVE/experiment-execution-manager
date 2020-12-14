@@ -295,61 +295,108 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
         List<Topic> topics = new ArrayList<>();
         List<Publishtopic> publishTopics = new ArrayList<>();
 
-        // Application metrics from Context blueprints
-        for (CtxBlueprint ctxB : ctxBlueprintList) {
-            log.debug("Adding application metrics for context: {}", ctxB.getName());
-            for (ApplicationMetric amd : ctxB.getApplicationMetrics()) {
-                Topic topic = new Topic();
-                topic.brokerAddr(monitoringAddress+":"+monitoringPort);
-                topic.setMetric(amd.getMetricId().toLowerCase());
-                topic.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
-                log.debug("topic name created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
-                topics.add(topic);
-            }
-        }
-        // Application metrics from VS Blueprint
-        log.debug("Adding application metrics for vsBlueprint: {}", vsBlueprint.getName());
-        for (ApplicationMetric amd : vsBlueprint.getApplicationMetrics()){
+        log.debug("Started generating application metrics");
+        for (Map.Entry<String, String> entry: expExecution.getApplicationMetrics().entrySet()){
             Topic topic = new Topic();
             topic.brokerAddr(monitoringAddress+":"+monitoringPort);
-            topic.setMetric(amd.getMetricId().toLowerCase());
-            topic.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
-            log.debug("topic created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
+            topic.setMetric(entry.getKey());
+            topic.setTopic(entry.getValue());
+            log.debug("topic name created for RAV: {}", entry.getValue());
             topics.add(topic);
         }
+        log.debug("Stopped generating application metrics");
+
+        log.debug("Started generating infrastructure metrics");
+        for (Map.Entry<String, String> entry: expExecution.getInfrastructureMetrics().entrySet()){
+            Topic topic = new Topic();
+            topic.brokerAddr(monitoringAddress+":"+monitoringPort);
+            topic.setMetric(entry.getKey());
+            topic.setTopic(entry.getValue());
+            log.debug("topic name created for RAV: {}", entry.getValue());
+            topics.add(topic);
+        }
+        log.debug("Stopped generating infrastructure metrics");
+
+        log.debug("Start generating application metrics");
+        for (Map.Entry<String, String> entry: expExecution.getKpiMetrics().entrySet()){
+            for (KeyPerformanceIndicator kpi : expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint().getKpis()){
+                if (entry.getKey().equals(kpi.getKpiId())){
+                    Publishtopic pt = new Publishtopic();
+                    pt.setBrokerAddr(monitoringAddress+":"+monitoringPort);
+                    pt.setKpi(kpi.getKpiId());
+                    pt.setFormula(kpi.getFormula());
+                    pt.setInterval(new BigDecimal(kpi.getInterval().replaceAll("[^0-9.]+", ""))); //TODO check if converts it in a proper way
+                    List<String> metricsIds = new ArrayList<>();
+                    pt.setUnit(kpi.getUnit());
+                    for (String metric : kpi.getMetricIds()){
+                        metricsIds.add(metric);
+                    }
+                    KpiThreshold kpiThreshold = expDescriptor.getKpiThresholds().get(kpi.getKpiId());
+                    pt.setUpperBound(String.valueOf(kpiThreshold.getUpperBound()));
+                    pt.setLowerBound(String.valueOf(kpiThreshold.getLowerBound()));
+                    pt.setInput(metricsIds);
+                    pt.setTopic(entry.getValue());
+                    log.debug("KPI topics created for RAV: {}", entry.getValue());
+                    publishTopics.add(pt);
+                }
+            }
+        }
+        log.debug("Stopped generating kpi metrics");
+        // Application metrics from Context blueprints
+//        for (CtxBlueprint ctxB : ctxBlueprintList) {
+//            log.debug("Adding application metrics for context: {}", ctxB.getName());
+//            for (ApplicationMetric amd : ctxB.getApplicationMetrics()) {
+//                Topic topic = new Topic();
+//                topic.brokerAddr(monitoringAddress+":"+monitoringPort);
+//                topic.setMetric(amd.getMetricId().toLowerCase());
+//                topic.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
+//                log.debug("topic name created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
+//                topics.add(topic);
+//            }
+//        }
+        // Application metrics from VS Blueprint
+//        log.debug("Adding application metrics for vsBlueprint: {}", vsBlueprint.getName());
+//        for (ApplicationMetric amd : vsBlueprint.getApplicationMetrics()){
+//            Topic topic = new Topic();
+//            topic.brokerAddr(monitoringAddress+":"+monitoringPort);
+//            topic.setMetric(amd.getMetricId().toLowerCase());
+//            topic.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
+//            log.debug("topic created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
+//            topics.add(topic);
+//        }
 
         // Infrastructure metrics from Experiment blueprint
-        log.debug("Adding infrastructure metrics for expBlueprint {}", expBlueprintResponse.getExpBlueprintInfo().get(0).getName());
-        for (InfrastructureMetric im : expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint().getMetrics()){
-            Topic topic = new Topic();
-            topic.brokerAddr(monitoringAddress+":"+monitoringPort);
-            topic.setMetric(im.getMetricId().toLowerCase());
-            topic.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getMetricId());
-            log.debug("topic created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getMetricId());
-            topics.add(topic);
-        }
+//        log.debug("Adding infrastructure metrics for expBlueprint {}", expBlueprintResponse.getExpBlueprintInfo().get(0).getName());
+//        for (InfrastructureMetric im : expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint().getMetrics()){
+//            Topic topic = new Topic();
+//            topic.brokerAddr(monitoringAddress+":"+monitoringPort);
+//            topic.setMetric(im.getMetricId().toLowerCase());
+//            topic.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getMetricId());
+//            log.debug("topic created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getMetricId());
+//            topics.add(topic);
+//        }
 
         // KPIs
-        log.debug("Adding KPIs for expBlueprint {}", expBlueprintResponse.getExpBlueprintInfo().get(0).getName());
-        for (KeyPerformanceIndicator kpi : expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint().getKpis()){
-            Publishtopic pt = new Publishtopic();
-            pt.setBrokerAddr(monitoringAddress+":"+monitoringPort);
-            pt.setKpi(kpi.getKpiId());
-            pt.setFormula(kpi.getFormula());
-            pt.setInterval(new BigDecimal(kpi.getInterval().replaceAll("[^0-9.]+", ""))); //TODO check if converts it in a proper way
-            List<String> metricsIds = new ArrayList<>();
-            pt.setUnit(kpi.getUnit());
-            for (String metric : kpi.getMetricIds()){
-                metricsIds.add(metric);
-            }
-            KpiThreshold kpiThreshold = expDescriptor.getKpiThresholds().get(kpi.getKpiId());
-            pt.setUpperBound(String.valueOf(kpiThreshold.getUpperBound()));
-            pt.setLowerBound(String.valueOf(kpiThreshold.getLowerBound()));
-            pt.setInput(metricsIds);
-            pt.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
-            log.debug("KPI topics created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
-            publishTopics.add(pt);
-        }
+//        log.debug("Adding KPIs for expBlueprint {}", expBlueprintResponse.getExpBlueprintInfo().get(0).getName());
+//        for (KeyPerformanceIndicator kpi : expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint().getKpis()){
+//            Publishtopic pt = new Publishtopic();
+//            pt.setBrokerAddr(monitoringAddress+":"+monitoringPort);
+//            pt.setKpi(kpi.getKpiId());
+//            pt.setFormula(kpi.getFormula());
+//            pt.setInterval(new BigDecimal(kpi.getInterval().replaceAll("[^0-9.]+", ""))); //TODO check if converts it in a proper way
+//            List<String> metricsIds = new ArrayList<>();
+//            pt.setUnit(kpi.getUnit());
+//            for (String metric : kpi.getMetricIds()){
+//                metricsIds.add(metric);
+//            }
+//            KpiThreshold kpiThreshold = expDescriptor.getKpiThresholds().get(kpi.getKpiId());
+//            pt.setUpperBound(String.valueOf(kpiThreshold.getUpperBound()));
+//            pt.setLowerBound(String.valueOf(kpiThreshold.getLowerBound()));
+//            pt.setInput(metricsIds);
+//            pt.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
+//            log.debug("KPI topics created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
+//            publishTopics.add(pt);
+//        }
 
         ConfigurationDict confDict = new ConfigurationDict();
         confDict.setVertical(expExecution.getTenantId());

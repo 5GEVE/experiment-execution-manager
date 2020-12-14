@@ -91,14 +91,17 @@ public class ExperimentExecution {
 
   @JsonProperty("infrastructureMetrics")
   @JsonInclude(JsonInclude.Include.NON_NULL)
+  @ElementCollection
   private Map<String, String> infrastructureMetrics = new HashMap<>();
 
   @JsonProperty("applicationMetrics")
   @JsonInclude(JsonInclude.Include.NON_NULL)
+  @ElementCollection
   private Map<String, String> applicationMetrics = new HashMap<>();
 
   @JsonProperty("kpiMetrics")
   @JsonInclude(JsonInclude.Include.NON_NULL)
+  @ElementCollection
   private Map<String, String> kpiMetrics = new HashMap<>();
 
   @JsonIgnore
