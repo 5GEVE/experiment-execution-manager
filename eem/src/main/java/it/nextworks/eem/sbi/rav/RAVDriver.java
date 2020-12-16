@@ -320,7 +320,7 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
         log.debug("Start generating application metrics");
         for (Map.Entry<String, String> entry: expExecution.getKpiMetrics().entrySet()){
             for (KeyPerformanceIndicator kpi : expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint().getKpis()){
-                if (entry.getKey().equals(kpi.getKpiId())){
+                if (entry.getKey().equalsIgnoreCase(kpi.getKpiId())){
                     Publishtopic pt = new Publishtopic();
                     pt.setBrokerAddr(monitoringAddress+":"+monitoringPort);
                     pt.setKpi(kpi.getKpiId());

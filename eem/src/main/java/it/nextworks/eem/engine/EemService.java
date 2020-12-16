@@ -162,6 +162,9 @@ public class EemService{
                 .siteNames(request.getSiteNames())
                 .testCaseDescriptorConfiguration(testCaseExecutionConfigurations)
                 .useCase(request.getUseCase())
+                .applicationMetrics(request.getApplicationMetrics())
+                .kpiMetrics(request.getKpiMetrics())
+                .infrastructureMetrics(request.getInfrastructureMetrics())
                 .runType(runType);
         experimentExecutionRepository.saveAndFlush(experimentExecution);
         experimentExecutionInstances.get(executionId).setRunType(runType);

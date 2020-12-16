@@ -91,17 +91,23 @@ public class ExperimentExecution {
 
   @JsonProperty("infrastructureMetrics")
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  @ElementCollection
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SELECT)
+	@Cascade(org.hibernate.annotations.CascadeType.ALL)
   private Map<String, String> infrastructureMetrics = new HashMap<>();
 
   @JsonProperty("applicationMetrics")
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  @ElementCollection
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SELECT)
+	@Cascade(org.hibernate.annotations.CascadeType.ALL)
   private Map<String, String> applicationMetrics = new HashMap<>();
 
   @JsonProperty("kpiMetrics")
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  @ElementCollection
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SELECT)
+	@Cascade(org.hibernate.annotations.CascadeType.ALL)
   private Map<String, String> kpiMetrics = new HashMap<>();
 
   @JsonIgnore
@@ -275,6 +281,23 @@ public class ExperimentExecution {
       tc.setExecution(this);
     }
     return this;
+  }
+
+  public ExperimentExecution applicationMetrics(Map<String, String> applicationMetrics){
+    this.applicationMetrics = applicationMetrics;
+    return this; 
+  }
+
+
+  public ExperimentExecution kpiMetrics(Map<String, String> kpiMetrics){
+    this.kpiMetrics = kpiMetrics;
+    return this; 
+  }
+
+
+  public ExperimentExecution infrastructureMetrics(Map<String, String> infrastructureMetrics){
+    this.infrastructureMetrics = infrastructureMetrics;
+    return this; 
   }
 
   /**
