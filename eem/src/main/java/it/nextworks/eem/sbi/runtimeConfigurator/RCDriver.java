@@ -317,7 +317,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		try {
 			InfrastructureDay2ConfigurationResponse metricsConfigIdResponse = rcApi.infrastructureDay2ConfigurationInit(metricsWrapper, nsInstanceId);
 			metricsConfigId = metricsConfigIdResponse.getConfigurationId();
-			log.debug("PROCESS: Request metricsConfigId from RC. metricsConfigId for Test Case {} with executionId {} is: {}", tcDescriptorId, executionId, metricsConfigId);
+			log.debug("PROCESS: Request metricsConfigId from RC. nsInstanceID {} with metricsConfigId for Test Case {} with executionId {} is: {}", nsInstanceId, tcDescriptorId, executionId, metricsConfigId);
 
 			// TODO: we associate the metricsConfigId with the specific ELM-provided ID --> confirm this is not needed for the reset method and remove
 			experiments.put(experiments_key, metricsConfigId);
