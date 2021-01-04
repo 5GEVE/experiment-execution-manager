@@ -57,7 +57,7 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 				return null;
 			} else return ebis.get(0).getExpBlueprint();
 		} catch (Exception e) {
-			log.error("Error while retrieving experiment blueprint: " + e.getMessage());
+			log.error("Error while retrieving experiment blueprint", e);
 			return null;
 		}
  	}
@@ -70,10 +70,9 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 		try {
 			experimentBlueprintId = request.getFilter().getParameters().get("ExpB_ID");
 		} catch (Exception e) {
-			log.error("Malformatted Generalized Query Request for retrieving experiment blueprint.");
-			throw new MalformattedElementException("Malformatted Generalized Query Request for retrieving experiment blueprint.");
+			throw new MalformattedElementException("EEM: Malformed Generalized Query Request for retrieving experiment blueprint", e);
 		}
-		if (experimentBlueprintId == null) throw new MalformattedElementException("Malformatted Generalized Query Request for retrieving experiment blueprint: null ID.");
+		if (experimentBlueprintId == null) throw new MalformattedElementException("EEM: Malformed Generalized Query Request for retrieving experiment blueprint: null ID.");
 		return experimentCatalogueRestClient.queryExperimentBlueprint(experimentBlueprintId);
 	}
 	
@@ -85,10 +84,9 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 		try {
 			experimentDescriptorId = request.getFilter().getParameters().get("ExpD_ID");
 		} catch (Exception e) {
-			log.error("Malformatted Generalized Query Request for retrieving experiment descriptor.");
-			throw new MalformattedElementException("Malformatted Generalized Query Request for retrieving experiment descriptor.");
+			throw new MalformattedElementException("EEM: Malformed Generalized Query Request for retrieving experiment descriptor.", e);
 		}
-		if (experimentDescriptorId == null) throw new MalformattedElementException("Malformatted Generalized Query Request for retrieving experiment descriptor: null ID.");
+		if (experimentDescriptorId == null) throw new MalformattedElementException("EEM: Malformed Generalized Query Request for retrieving experiment descriptor: null ID.");
 		return experimentCatalogueRestClient.queryExperimentDescriptor(experimentDescriptorId);
 	}
 	
@@ -100,10 +98,9 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 		try {
 			blueprintId = request.getFilter().getParameters().get("VSB_ID");
 		} catch (Exception e) {
-			log.error("Malformatted Generalized Query Request for retrieving VS blueprint.");
-			throw new MalformattedElementException("Malformatted Generalized Query Request for retrieving VS blueprint.");
+			throw new MalformattedElementException("EEM: Malformed Generalized Query Request for retrieving VS blueprint.", e);
 		}
-		if (blueprintId == null) throw new MalformattedElementException("Malformatted Generalized Query Request for retrieving VS blueprint: null ID.");
+		if (blueprintId == null) throw new MalformattedElementException("EEM: Malformed Generalized Query Request for retrieving VS blueprint: null ID.");
 		return experimentCatalogueRestClient.queryVsBlueprint(blueprintId);
 	}
 	
@@ -115,10 +112,9 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 		try {
 			descriptorId = request.getFilter().getParameters().get("VSD_ID");
 		} catch (Exception e) {
-			log.error("Malformatted Generalized Query Request for retrieving VS descriptor.");
-			throw new MalformattedElementException("Malformatted Generalized Query Request for retrieving VS descriptor.");
+			throw new MalformattedElementException("EEM: Malformed Generalized Query Request for retrieving VS descriptor.", e);
 		}
-		if (descriptorId == null) throw new MalformattedElementException("Malformatted Generalized Query Request for retrieving VS descriptor: null ID.");
+		if (descriptorId == null) throw new MalformattedElementException("EEM: Malformed Generalized Query Request for retrieving VS descriptor: null ID.");
 		return experimentCatalogueRestClient.queryVsDescriptor(descriptorId);
 	}
 	
@@ -130,10 +126,9 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 		try {
 			blueprintId = request.getFilter().getParameters().get("CTXB_ID");
 		} catch (Exception e) {
-			log.error("Malformatted Generalized Query Request for retrieving CTX blueprint.");
-			throw new MalformattedElementException("Malformatted Generalized Query Request for retrieving CTX blueprint.");
+			throw new MalformattedElementException("EEM: Malformed Generalized Query Request for retrieving CTX blueprint.", e);
 		}
-		if (blueprintId == null) throw new MalformattedElementException("Malformatted Generalized Query Request for retrieving CTX blueprint: null ID.");
+		if (blueprintId == null) throw new MalformattedElementException("EEM: Malformed Generalized Query Request for retrieving CTX blueprint: null ID.");
 		return experimentCatalogueRestClient.queryCtxBlueprint(blueprintId);
 	}
 	
@@ -145,10 +140,9 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 		try {
 			descriptorId = request.getFilter().getParameters().get("CTXD_ID");
 		} catch (Exception e) {
-			log.error("Malformatted Generalized Query Request for retrieving CTX descriptor.");
-			throw new MalformattedElementException("Malformatted Generalized Query Request for retrieving CTX descriptor.");
+			throw new MalformattedElementException("EEM: Malformed Generalized Query Request for retrieving CTX descriptor.", e);
 		}
-		if (descriptorId == null) throw new MalformattedElementException("Malformatted Generalized Query Request for retrieving CTX descriptor: null ID.");
+		if (descriptorId == null) throw new MalformattedElementException("EEM: Malformed Generalized Query Request for retrieving CTX descriptor: null ID.");
 		return experimentCatalogueRestClient.queryCtxDescriptor(descriptorId);
 	}
 	
@@ -160,10 +154,9 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 		try {
 			blueprintId = request.getFilter().getParameters().get("TCB_ID");
 		} catch (Exception e) {
-			log.error("Malformatted Generalized Query Request for retrieving TC blueprint.");
-			throw new MalformattedElementException("Malformatted Generalized Query Request for retrieving TC blueprint.");
+			throw new MalformattedElementException("EEM: Malformed Generalized Query Request for retrieving TC blueprint.", e);
 		}
-		if (blueprintId == null) throw new MalformattedElementException("Malformatted Generalized Query Request for retrieving TC blueprint: null ID.");
+		if (blueprintId == null) throw new MalformattedElementException("EEM: Malformed Generalized Query Request for retrieving TC blueprint: null ID.");
 		return experimentCatalogueRestClient.queryTestCaseBlueprint(blueprintId);
 	}
 	
@@ -175,17 +168,16 @@ implements ExpDescriptorCatalogueInterface, ExpBlueprintCatalogueInterface, Tran
 		try {
 			descriptorId = request.getFilter().getParameters().get("TCD_ID");
 		} catch (Exception e) {
-			log.error("Malformatted Generalized Query Request for retrieving TC descriptor.");
-			throw new MalformattedElementException("Malformatted Generalized Query Request for retrieving TC descriptor.");
+			throw new MalformattedElementException("EEM: Malformed Generalized Query Request for retrieving TC descriptor.", e);
 		}
-		if (descriptorId == null) throw new MalformattedElementException("Malformatted Generalized Query Request for retrieving TC descriptor: null ID.");
+		if (descriptorId == null) throw new MalformattedElementException("EEM: Malformed Generalized Query Request for retrieving TC descriptor: null ID.");
 		return experimentCatalogueRestClient.queryTestCaseDescriptor(descriptorId);
 	}
 	
 	@Override
 	public NfvNsInstantiationInfo translateExpd(String expdId) throws MalformattedElementException, FailedOperationException {
 		log.debug("Received request to translate experiment descriptor into NFV NS specification");
-		if (expdId == null) throw new MalformattedElementException("Malformatted Translation Request: null experiment ID.");
+		if (expdId == null) throw new MalformattedElementException("EEM: Malformed Translation Request: null experiment ID.");
 		return experimentCatalogueRestClient.translateExpd(expdId);
 	}
 	

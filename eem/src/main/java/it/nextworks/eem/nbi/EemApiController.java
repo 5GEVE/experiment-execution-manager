@@ -51,8 +51,7 @@ public class EemApiController implements EemApi {
                 List<ExperimentExecution> response = eemService.getExperimentExecutions(state);
                 return new ResponseEntity<List<ExperimentExecution>>(response, HttpStatus.OK);
             } catch(FailedOperationException e){
-                log.debug(null, e);
-                log.error(e.getMessage());
+                log.error(e.getMessage(), e);
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                         HttpStatus.INTERNAL_SERVER_ERROR);
@@ -71,14 +70,12 @@ public class EemApiController implements EemApi {
             eemService.abortExperimentExecution(id);
             return new ResponseEntity<Void>(HttpStatus.OK);
         }catch(FailedOperationException e){
-            log.debug(null, e);
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }catch(NotExistingEntityException e){
-            log.debug(null, e);
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                     HttpStatus.NOT_FOUND);
@@ -91,14 +88,12 @@ public class EemApiController implements EemApi {
             eemService.removeExperimentExecutionRecord(id);
             return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
         }catch(FailedOperationException e){
-            log.debug(null, e);
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }catch(NotExistingEntityException e){
-            log.debug(null, e);
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                     HttpStatus.NOT_FOUND);
@@ -112,14 +107,12 @@ public class EemApiController implements EemApi {
                 ExperimentExecution response = eemService.getExperimentExecution(id);
                 return new ResponseEntity<ExperimentExecution>(response, HttpStatus.OK);
             } catch(FailedOperationException e){
-                log.debug(null, e);
-                log.error(e.getMessage());
+                log.error(e.getMessage(), e);
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                         HttpStatus.INTERNAL_SERVER_ERROR);
             }catch(NotExistingEntityException e){
-                log.debug(null, e);
-                log.error(e.getMessage());
+                log.error(e.getMessage(), e);
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                         HttpStatus.NOT_FOUND);
@@ -143,14 +136,12 @@ public class EemApiController implements EemApi {
             eemService.pauseExperimentExecution(id);
             return new ResponseEntity<Void>(HttpStatus.OK);
         }catch(FailedOperationException e){
-            log.debug(null, e);
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }catch(NotExistingEntityException e){
-            log.debug(null, e);
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                     HttpStatus.NOT_FOUND);
@@ -163,14 +154,12 @@ public class EemApiController implements EemApi {
             eemService.resumeExperimentExecution(id);
             return new ResponseEntity<Void>(HttpStatus.OK);
         }catch(FailedOperationException e){
-            log.debug(null, e);
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }catch(NotExistingEntityException e){
-            log.debug(null, e);
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                     HttpStatus.NOT_FOUND);
@@ -185,20 +174,17 @@ public class EemApiController implements EemApi {
             eemService.runExperimentExecution(id, body, runType);
             return new ResponseEntity<Void>(HttpStatus.OK);
         }catch(FailedOperationException e){
-            log.debug(null, e);
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }catch(NotExistingEntityException e){
-            log.debug(null, e);
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                     HttpStatus.NOT_FOUND);
         }catch(MalformattedElementException e){
-            log.debug(null, e);
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.BAD_REQUEST.value()).detail(e.getMessage()),
                     HttpStatus.BAD_REQUEST);
@@ -211,14 +197,12 @@ public class EemApiController implements EemApi {
             eemService.stepExperimentExecution(id);
             return new ResponseEntity<Void>(HttpStatus.OK);
         }catch(FailedOperationException e){
-            log.debug(null, e);
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }catch(NotExistingEntityException e){
-            log.debug(null, e);
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                     HttpStatus.NOT_FOUND);
@@ -237,8 +221,7 @@ public class EemApiController implements EemApi {
                 String response = eemService.createExperimentExecutionInstance();
                 return new ResponseEntity<String>(response, HttpStatus.CREATED);
             } catch(FailedOperationException e){
-                log.debug(null, e);
-                log.error(e.getMessage());
+                log.error(e.getMessage(), e);
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                         HttpStatus.INTERNAL_SERVER_ERROR);
@@ -274,7 +257,7 @@ public class EemApiController implements EemApi {
                 return new ResponseEntity<List<ExperimentExecutionSubscription>>(response, HttpStatus.OK);
             } catch(FailedOperationException e){
                 log.debug(null, e);
-                log.error(e.getMessage());
+                log.error(e.getMessage(), e);
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                         HttpStatus.INTERNAL_SERVER_ERROR);
@@ -299,21 +282,18 @@ public class EemApiController implements EemApi {
                 String response = eemService.subscribe(body);
                 return new ResponseEntity<String>(response, HttpStatus.CREATED);
             } catch(FailedOperationException e){
-                log.debug(null, e);
-                log.error(e.getMessage());
+                log.error(e.getMessage(), e);
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                         HttpStatus.INTERNAL_SERVER_ERROR);
             }catch(NotExistingEntityException e){
-                log.debug(null, e);
-                log.error(e.getMessage());
+                log.error(e.getMessage(), e);
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                         HttpStatus.NOT_FOUND);
             }
             catch(MalformattedElementException e){
-                log.debug(null, e);
-                log.error(e.getMessage());
+                log.error(e.getMessage(), e);
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.BAD_REQUEST.value()).detail(e.getMessage()),
                         HttpStatus.BAD_REQUEST);
@@ -332,14 +312,12 @@ public class EemApiController implements EemApi {
             eemService.unsubscribe(subscriptionId);
             return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
         }catch(FailedOperationException e){
-            log.debug(null, e);
-            log.error(e.getMessage());
+            log.error(e.getMessage(),  e);
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }catch(NotExistingEntityException e){
-            log.debug(null, e);
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             return new ResponseEntity<ErrorInfo>(
                     new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                     HttpStatus.NOT_FOUND);
@@ -353,14 +331,12 @@ public class EemApiController implements EemApi {
                 ExperimentExecutionSubscription response = eemService.getExperimentExecutionSubscription(subscriptionId);
                 return new ResponseEntity<ExperimentExecutionSubscription>(response, HttpStatus.OK);
             } catch(FailedOperationException e){
-                log.debug(null, e);
-                log.error(e.getMessage());
+                log.error(e.getMessage(), e);
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.INTERNAL_SERVER_ERROR.value()).detail(e.getMessage()),
                         HttpStatus.INTERNAL_SERVER_ERROR);
             }catch(NotExistingEntityException e){
-                log.debug(null, e);
-                log.error(e.getMessage());
+                log.error(e.getMessage(), e);
                 return new ResponseEntity<ErrorInfo>(
                         new ErrorInfo().status(HttpStatus.NOT_FOUND.value()).detail(e.getMessage()),
                         HttpStatus.NOT_FOUND);

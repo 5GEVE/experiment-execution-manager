@@ -124,7 +124,7 @@ public class EemService{
         log.info("Received request for getting Experiment Execution with Id {}", experimentExecutionId);
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(experimentExecutionId);
         if(!experimentExecutionOptional.isPresent())
-            throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", experimentExecutionId));
+            throw new NotExistingEntityException(String.format("EEM: Experiment Execution with Id %s not found", experimentExecutionId));
         log.debug("{}", experimentExecutionOptional.get().toString());
         return experimentExecutionOptional.get();
     }
@@ -133,10 +133,10 @@ public class EemService{
         log.info("Received request for deleting Experiment Execution with Id {}", experimentExecutionId);
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(experimentExecutionId);
         if(!experimentExecutionOptional.isPresent())
-            throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", experimentExecutionId));
+            throw new NotExistingEntityException(String.format("EEM: Experiment Execution with Id %s not found", experimentExecutionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         if(!experimentExecution.getState().equals(ExperimentState.INIT) && !experimentExecution.getState().equals(ExperimentState.FAILED) && !experimentExecution.getState().equals(ExperimentState.ABORTED) && !experimentExecution.getState().equals(ExperimentState.COMPLETED))
-            throw new FailedOperationException(String.format("Experiment Execution with Id %s is neither in INIT or FAILED or ABORTED or COMPLETED state", experimentExecutionId));
+            throw new FailedOperationException(String.format("EEM: Experiment Execution with Id %s is neither in INIT or FAILED or ABORTED or COMPLETED state", experimentExecutionId));
         experimentExecutionRepository.delete(experimentExecutionOptional.get());
         experimentExecutionInstances.remove(experimentExecutionId);
         subscriptionService.deleteAllSubscriptions(experimentExecutionId);
@@ -148,10 +148,10 @@ public class EemService{
         log.info("Received request for running Experiment Execution with Id {}", executionId);
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         if(!experimentExecutionOptional.isPresent())
-            throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", executionId));
+            throw new NotExistingEntityException(String.format("EEM: Experiment Execution with Id %s not found", executionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         if(!experimentExecution.getState().equals(ExperimentState.INIT))
-            throw new FailedOperationException(String.format("Experiment Execution with Id %s is not in INIT state", executionId));
+            throw new FailedOperationException(String.format("EEM: Experiment Execution with Id %s is not in INIT state", executionId));
         //Put user parameters to be overwritten for the given run inside the experiment execution object
         List<TestCaseExecutionConfiguration> testCaseExecutionConfigurations = new ArrayList<>();
         request.getTestCaseDescriptorConfiguration().forEach((x, y) -> testCaseExecutionConfigurations.add(new TestCaseExecutionConfiguration(x, y)));
@@ -174,8 +174,7 @@ public class EemService{
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            throw new FailedOperationException("Internal error with queues");
+            throw new FailedOperationException("EEM: Error while translating internal scheduling message in Json format", e);
         }
     }
 
@@ -183,18 +182,17 @@ public class EemService{
         log.info("Received request for aborting Experiment Execution with Id {}", experimentExecutionId);
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(experimentExecutionId);
         if(!experimentExecutionOptional.isPresent())
-            throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", experimentExecutionId));
+            throw new NotExistingEntityException(String.format("EEM: Experiment Execution with Id %s not found", experimentExecutionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         if(!experimentExecution.getState().equals(ExperimentState.RUNNING) && !experimentExecution.getState().equals(ExperimentState.RUNNING_STEP) && !experimentExecution.getState().equals(ExperimentState.PAUSED) && !experimentExecution.getState().equals(ExperimentState.CONFIGURING))
-            throw new FailedOperationException(String.format("Experiment Execution with Id %s is neither in RUNNING or RUNNING_STEP or PAUSED state", experimentExecutionId));
+            throw new FailedOperationException(String.format("EEM: Experiment Execution with Id %s is neither in RUNNING or RUNNING_STEP or PAUSED state", experimentExecutionId));
 
         String topic = "lifecycle.abort." + experimentExecutionId;
         InternalMessage internalMessage = new AbortExperimentInternalMessage();
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            throw new FailedOperationException("Internal error with queues");
+            throw new FailedOperationException("EEM: Error while translating internal scheduling message in Json format", e);
         }
     }
 
@@ -202,20 +200,19 @@ public class EemService{
         log.info("Received request for resuming Experiment Execution with Id {}", experimentExecutionId);
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(experimentExecutionId);
         if(!experimentExecutionOptional.isPresent())
-            throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", experimentExecutionId));
+            throw new NotExistingEntityException(String.format("EEM: Experiment Execution with Id %s not found", experimentExecutionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         if(!experimentExecution.getRunType().equals(ExperimentRunType.RUN_ALL))
-            throw new FailedOperationException(String.format("Experiment Execution with Id %s is not a RUN_ALL execution", experimentExecutionId));
+            throw new FailedOperationException(String.format("EEM: Experiment Execution with Id %s is not a RUN_ALL execution", experimentExecutionId));
         if(!experimentExecution.getState().equals(ExperimentState.PAUSED))
-            throw new FailedOperationException(String.format("Experiment Execution with Id %s is not in PAUSED state", experimentExecutionId));
+            throw new FailedOperationException(String.format("EEM: Experiment Execution with Id %s is not in PAUSED state", experimentExecutionId));
 
         String topic = "lifecycle.resume." + experimentExecutionId;
         InternalMessage internalMessage = new ResumeExperimentInternalMessage();
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            throw new FailedOperationException("Internal error with queues");
+            throw new FailedOperationException("EEM: Error while translating internal scheduling message in Json format", e);
         }
     }
 
@@ -223,18 +220,17 @@ public class EemService{
         log.info("Received request for pausing Experiment Execution with Id {}", experimentExecutionId);
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(experimentExecutionId);
         if(!experimentExecutionOptional.isPresent())
-            throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", experimentExecutionId));
+            throw new NotExistingEntityException(String.format("EEM: Experiment Execution with Id %s not found", experimentExecutionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         if(!experimentExecution.getState().equals(ExperimentState.RUNNING))
-            throw new FailedOperationException(String.format("Experiment Execution with Id %s is not in RUNNING state", experimentExecutionId));
+            throw new FailedOperationException(String.format("EEM: Experiment Execution with Id %s is not in RUNNING state", experimentExecutionId));
 
         String topic = "lifecycle.pause." + experimentExecutionId;
         InternalMessage internalMessage = new PauseExperimentInternalMessage();
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            throw new FailedOperationException("Internal error with queues");
+            throw new FailedOperationException("EEM: error while translating internal scheduling message in Json format", e);
         }
     }
 
@@ -242,18 +238,17 @@ public class EemService{
         log.info("Received request for performing a step of the Experiment Execution with Id {}", experimentExecutionId);
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(experimentExecutionId);
         if(!experimentExecutionOptional.isPresent())
-            throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", experimentExecutionId));
+            throw new NotExistingEntityException(String.format("EEM: Experiment Execution with Id %s not found", experimentExecutionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         if(!experimentExecution.getState().equals(ExperimentState.PAUSED))
-            throw new FailedOperationException(String.format("Experiment Execution with Id %s is not in PAUSED state", experimentExecutionId));
+            throw new FailedOperationException(String.format("EEM: Experiment Execution with Id %s is not in PAUSED state", experimentExecutionId));
 
         String topic = "lifecycle.step." + experimentExecutionId;
         InternalMessage internalMessage = new StepExperimentInternalMessage();
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            throw new FailedOperationException("Internal error with queues");
+            throw new FailedOperationException("EEM: error while translating internal scheduling message in Json format", e);
         }
     }
 
@@ -276,7 +271,7 @@ public class EemService{
             log.info("Received subscribe request to Experiment Execution with Id {}", executionId);
             Optional<ExperimentExecution> experimentExecution = experimentExecutionRepository.findByExecutionId(executionId);
             if (!experimentExecution.isPresent())
-                throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", executionId));
+                throw new NotExistingEntityException(String.format("EEM: Experiment Execution with Id %s not found", executionId));
         }
         return subscriptionService.subscribe(subscriptionRequest);
     }
@@ -292,11 +287,11 @@ public class EemService{
         try {
             eeim = new ExperimentExecutionInstanceManager(experimentExecutionId, experimentExecutionRepository, subscriptionService, configuratorService, executorService, validatorService, catalogueService, multiSiteOrchestratorService);
         }catch (NotExistingEntityException e) {
-            throw new FailedOperationException(String.format("Initialization of Experiment Execution Instance Manager with Id %s failed : %s", experimentExecutionId, e.getMessage()));
+            throw new FailedOperationException(String.format("Initialization of Experiment Execution Instance Manager with Id %s failed. %s", experimentExecutionId, e.getMessage()), e);
         }
         createQueue(experimentExecutionId, eeim);
         experimentExecutionInstances.put(experimentExecutionId, eeim);
-        log.debug("Experiment Execution Instance Manager with Id {} initialized", experimentExecutionId);
+        log.info("Experiment Execution Instance Manager with Id {} initialized", experimentExecutionId);
     }
 
     private void createQueue(String experimentExecutionId, ExperimentExecutionInstanceManager eeim) {
