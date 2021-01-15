@@ -160,6 +160,7 @@ public class EemService{
                 .tenantId(request.getTenantId())
                 .experimentId(request.getExperimentId())
                 .siteNames(request.getSiteNames())
+                .perfDiag(request.isPerfDiag())
                 .testCaseDescriptorConfiguration(testCaseExecutionConfigurations)
                 .useCase(request.getUseCase())
                 .applicationMetrics(request.getApplicationMetrics())

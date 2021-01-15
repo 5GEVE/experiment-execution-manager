@@ -78,8 +78,8 @@ public class ValidatorService implements ValidatorServiceProviderInterface {
     }
 
     @Override
-    public void configureExperiment(String experimentId, String executionId){
-        driver.configureExperiment(experimentId, executionId);
+    public void configureExperiment(String experimentId, String executionId, boolean perfDiag, String nsInstanceId){
+        driver.configureExperiment(experimentId, executionId, perfDiag, nsInstanceId);
     }
 
     @Override

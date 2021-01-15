@@ -58,7 +58,7 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
 
     //validation
     @Override
-    public void configureExperiment(String experimentId, String executionId){
+    public void configureExperiment(String experimentId, String executionId, boolean perfDiag, String nsInstanceId){
         //Validation is done by Jenkins during test case execution
         String topic = "lifecycle.validation." + executionId;
         InternalMessage internalMessage = new ValidationResultInternalMessage(ValidationStatus.CONFIGURED, "Validation done by Jenkins", false);

@@ -28,7 +28,15 @@ public class ConfigurationDict {
   @SerializedName("expID")
   private String expID = null;
 
-//  @SerializedName("executeID")
+  @SerializedName("perfdiag")
+  private boolean perfDiag = false;
+
+  @SerializedName("identifier")
+  private String nsInstanceId = null;
+
+
+
+  //  @SerializedName("executeID")
 //  private String executionID = null;
 
   @SerializedName("testcases")
@@ -91,6 +99,21 @@ public class ConfigurationDict {
 //    this.executionID = executionID;
 //    return this;
 //  }
+public boolean getPerfDiag() {
+  return perfDiag;
+}
+
+  public void setPerfDiag(boolean perfDiag) {
+    this.perfDiag = perfDiag;
+  }
+
+  public String getNsInstanceId() {
+    return nsInstanceId;
+  }
+
+  public void setNsInstanceId(String nsInstanceId) {
+    this.nsInstanceId = nsInstanceId;
+  }
 
    /**
    * Get testcases

@@ -5,6 +5,7 @@ import java.util.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sun.corba.se.impl.ior.NewObjectKeyTemplateBase;
 import io.swagger.annotations.ApiModelProperty;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import org.hibernate.annotations.Cascade;
@@ -43,6 +44,11 @@ public class ExperimentExecutionRequest   {
 
   @JsonProperty("useCase")
   private String useCase;
+
+
+  @JsonProperty("perfDiag")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private boolean perfDiag;
 
   @JsonProperty("infrastructureMetrics")
   @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -145,6 +151,19 @@ public class ExperimentExecutionRequest   {
     return this; 
   }
 
+
+  public boolean isPerfDiag() {
+    return perfDiag;
+  }
+
+  public void setPerfDiag(boolean perfDiag) {
+    this.perfDiag = perfDiag;
+  }
+
+  public ExperimentExecutionRequest perfDiag(boolean perfDiag){
+    this.perfDiag = perfDiag;
+    return this;
+  }
 
   public ExperimentExecutionRequest infrastructureMetrics(Map<String, String> infrastructureMetrics){
     this.infrastructureMetrics = infrastructureMetrics;

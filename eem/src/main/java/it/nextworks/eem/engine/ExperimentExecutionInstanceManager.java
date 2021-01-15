@@ -104,7 +104,7 @@ public class ExperimentExecutionInstanceManager {
         //Restart experiment executions based on the current state
         switch(currentState){
             case CONFIGURING:
-                validatorService.configureExperiment(experimentId, executionId);
+                validatorService.configureExperiment(experimentId, executionId, experimentExecutionOptional.get().isPerfDiag(), experimentExecutionOptional.get().getNsInstanceId());
                 if(runType.equals(ExperimentRunType.RUN_ALL)){
                     //Run the first test case if run type is RUN_ALL
                     configureExperimentExecutionTestCase();
@@ -224,7 +224,7 @@ public class ExperimentExecutionInstanceManager {
         }
     }
 
-    private void processRunRequest(){
+    private void processRunRequest() throws NotExistingEntityException {
         if(updateAndNotifyExperimentExecutionState(ExperimentState.CONFIGURING)) {
             log.info("Configuring Experiment Execution with Id {}", executionId);
             try {
@@ -234,7 +234,10 @@ public class ExperimentExecutionInstanceManager {
                 manageExperimentExecutionError(e.getMessage());
                 return;
             }
-            validatorService.configureExperiment(experimentId, executionId);
+            Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
+            if(!experimentExecutionOptional.isPresent())
+                throw new NotExistingEntityException(String.format("EEM: Experiment Execution with Id %s not found", executionId));
+            validatorService.configureExperiment(experimentId, executionId, experimentExecutionOptional.get().isPerfDiag(), experimentExecutionOptional.get().getNsInstanceId());
             if(runType.equals(ExperimentRunType.RUN_ALL)){
                 //Run the first test case if run type is RUN_ALL
                 log.info("Running Experiment Execution with Id {}", executionId);

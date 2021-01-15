@@ -89,6 +89,12 @@ public class ExperimentExecution {
   @JsonProperty("useCase")
   private String useCase = "";
 
+
+  @JsonIgnore
+  @JsonProperty("perfDiag")
+  private boolean perfDiag = false;
+
+
   @JsonProperty("infrastructureMetrics")
   @JsonInclude(JsonInclude.Include.NON_NULL)
   @ElementCollection(fetch = FetchType.EAGER)
@@ -169,6 +175,19 @@ public class ExperimentExecution {
 
   public ExperimentExecution tenantId(String tenantId){
     this.tenantId = tenantId;
+    return this;
+  }
+
+  public boolean isPerfDiag() {
+    return perfDiag;
+  }
+
+  public void setPerfDiag(boolean perfDiag) {
+    this.perfDiag = perfDiag;
+  }
+
+  public ExperimentExecution perfDiag(boolean perfDiag){
+    this.perfDiag = perfDiag;
     return this;
   }
 

@@ -44,10 +44,11 @@ public class DummyValidatorDriver implements ValidatorServiceProviderInterface {
     }
 
     @Override
-    public void configureExperiment(String experimentId, String executionId){
+    public void configureExperiment(String experimentId, String executionId, boolean perfDiag, String nsInstanceId){
         /*
         *  TEST EEM MULTISITE
         * */
+        log.debug("Configuring experiment {} for execution {} with perfDiag {} and nsInstance {}", experimentId, executionId, perfDiag, nsInstanceId);
         Optional<ExperimentExecution> expExecutionInstance = experimentExecutionRepository.findByExecutionId(executionId);
         if (! expExecutionInstance.isPresent()) {
             log.error("Experiment execution with id {} not found", executionId);

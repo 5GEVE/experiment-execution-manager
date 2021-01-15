@@ -74,9 +74,9 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
     }
 
     @Override
-    public void configureExperiment(String experimentId, String executionId){
+    public void configureExperiment(String experimentId, String executionId, boolean perfDiag, String nsInstanceId){
         new Thread(() -> {
-            configurationImplementation(experimentId, executionId);
+            configurationImplementation(experimentId, executionId, perfDiag, nsInstanceId);
         }).start();
     }
 
@@ -108,7 +108,7 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
         }).start();
     }
 
-    private void configurationImplementation(String experimentId, String executionId){
+    private void configurationImplementation(String experimentId, String executionId, boolean perfDiag, String nsInstanceId){
         //TODO configure experiment validation
         // Get experimentDescriptorId from experiment execution id
         Optional<ExperimentExecution> expExecutionInstance = experimentExecutionRepository.findByExecutionId(executionId);
@@ -299,6 +299,10 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
         ConfigurationDict confDict = new ConfigurationDict();
         confDict.setVertical(expExecution.getTenantId());
         confDict.setExpID(executionId);
+        if (perfDiag){
+            confDict.setNsInstanceId(nsInstanceId);
+            confDict.setPerfDiag(perfDiag);
+        }
 //        confDict.setExpID(experimentId);
 //        confDict.setExecutionID(executionId);
         List<ConfigurationDictTestcases> testCasesListConfig = new ArrayList<ConfigurationDictTestcases>();
