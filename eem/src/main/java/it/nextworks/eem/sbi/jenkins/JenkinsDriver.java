@@ -58,15 +58,15 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
 
     //validation
     @Override
-    public void configureExperiment(String experimentId, String executionId){
+    public void configureExperiment(String experimentId, String executionId, boolean perfDiag, String nsInstanceId){
         //Validation is done by Jenkins during test case execution
         String topic = "lifecycle.validation." + executionId;
         InternalMessage internalMessage = new ValidationResultInternalMessage(ValidationStatus.CONFIGURED, "Validation done by Jenkins", false);
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            manageValidationError("Error while translating internal scheduling message in Json format", executionId);
+            log.error("Error while translating internal scheduling message in Json format", e);
+            manageValidationError("EEM: Error while translating internal scheduling message in Json format", executionId);
         }
     }
 
@@ -78,8 +78,8 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            manageValidationError("Error while translating internal scheduling message in Json format", executionId);
+            log.error("Error while translating internal scheduling message in Json format", e);
+            manageValidationError("EEM: Error while translating internal scheduling message in Json format", executionId);
         }
     }
 
@@ -91,8 +91,8 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            manageValidationError("Error while translating internal scheduling message in Json format", executionId);
+            log.error("Error while translating internal scheduling message in Json format", e);
+            manageValidationError("EEM: Error while translating internal scheduling message in Json format", executionId);
         }
     }
 
@@ -104,8 +104,8 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            manageValidationError("Error while translating internal scheduling message in Json format", executionId);
+            log.error("Error while translating internal scheduling message in Json format", e);
+            manageValidationError("EEM: Error while translating internal scheduling message in Json format", executionId);
         }
     }
 
@@ -141,8 +141,8 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
         try {
             jenkinsServer.createJob(name, jenkinsJobDescription);
         } catch(IOException e1) {
-            log.error("Failed to create jenkins job {}", e1.getMessage());
-            manageTestCaseError("Failed to create jenkins job", executionId, tcDescriptorId);
+            log.error("Failed to create jenkins job", e1);
+            manageTestCaseError("EEM: Failed to create jenkins job", executionId, tcDescriptorId);
             return;
         }
         // RUN EXPERIMENT
@@ -150,23 +150,23 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
         try{
             jenkinsServer.getJob(name).build();
         } catch(IOException e2){
-            log.error("Failed to build jenkins job with name {}. Error {}", name, e2.getMessage());
-            manageTestCaseError("Failed to build jenkins job with name" + "Execution "+ executionId, executionId, tcDescriptorId);
+            log.error("Failed to build jenkins job with name {}", name, e2);
+            manageTestCaseError("EEM: Failed to build jenkins job with name " + name, executionId, tcDescriptorId);
             return;
         }
         // LOOP UNTIL TERMINATION IS DONE
         try{
             result = getJenkinsJobResult(name);
         } catch(IOException e3){
-            log.error("Failed to retrieve jenkins job with name {} with error {}", "Execution "+ executionId, e3.getMessage());
-            manageTestCaseError("Failed to retrieve jenkins job with name" + "Execution "+ executionId, executionId, tcDescriptorId);
+            log.error("Failed to retrieve jenkins job with name {}", name, e3);
+            manageTestCaseError("EEM: Failed to retrieve jenkins job with name  " + name, executionId, tcDescriptorId);
             return;
         }
 
         switch(result){
             case "OK": manageTestCaseOK(result, executionId, tcDescriptorId); break;
-            case "FAILED": manageTestCaseError(result, executionId, tcDescriptorId); break;
-            case "ABORTED": manageTestCaseError(result, executionId, tcDescriptorId); break;
+            case "FAILED": manageTestCaseError("JENKINS: Execution of Jenkins job FAILED", executionId, tcDescriptorId); break;
+            case "ABORTED": manageTestCaseError("JENKINS: Execution of Jenkins job was ABORTED", executionId, tcDescriptorId); break;
             default: manageTestCaseError(result, executionId, tcDescriptorId); break;
         }
 
@@ -182,8 +182,8 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
         try{
             jobInfo = jenkinsServer.getJob(name);
         } catch (IOException e1){
-            log.error("Failed to abort jenkins job with name {}", name);
-            manageAbortingError("Failed to abort jenkins job with name" + name, executionId);
+            log.error("Failed to abort jenkins job with name {}", name, e1);
+            manageAbortingError("EEM: Failed to abort jenkins job with name" + name, executionId);
             return;
         }
         try {
@@ -191,11 +191,11 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
                 jobInfo.getLastBuild().Stop();
             } else {
                 log.error("Failed to abort jenkins job with name {} cause no running tasks are active", name);
-                manageAbortingError("Failed to abort jenkins job with name {} cause no running tasks are active" + name, executionId);
+                manageAbortingError("EEM: Failed to abort jenkins job with name {} cause no running tasks are active" + name, executionId);
             }
         } catch(IOException e1){
-            log.error("Failed to abort jenkins job with name {} cause {}", name, e1.getMessage());
-            manageAbortingError("Failed to abort jenkins job with name" + name, executionId);
+            log.error("Failed to abort jenkins job with name {}", name, e1);
+            manageAbortingError("EEM: Failed to abort jenkins job with name" + name, executionId);
         }
         try{
             jobInfo = jenkinsServer.getJob(name);
@@ -206,16 +206,16 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
                 try {
                     sendMessageToQueue(internalMessage, topic);
                 } catch (JsonProcessingException e) {
-                    log.error("Error while translating internal scheduling message in Json format");
-                    manageAbortingError("Error while translating internal scheduling message in Json format", executionId);
+                    log.error("Error while translating internal scheduling message in Json format", e);
+                    manageAbortingError("EEM: Error while translating internal scheduling message in Json format", executionId);
                 }
             } else {
                 log.error("Failed to abort jenkins job with name {} ", name);
-                manageAbortingError("Failed to abort jenkins job with name" + name, executionId);
+                manageAbortingError("JENKINS: Failed to abort jenkins job with name" + name, executionId);
             }
         } catch(IOException e2){
-            log.error("Failed to abort jenkins job with name {} cause {}", name, e2.getMessage());
-            manageAbortingError("Failed to abort jenkins job with name" + name, executionId);
+            log.error("Failed to abort jenkins job with name {}", name, e2);
+            manageAbortingError("EEM: Failed to abort jenkins job with name" + name, executionId);
         }
 
     }
@@ -226,8 +226,7 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format {}", e.getMessage());
-
+            log.error("Error while translating internal scheduling message in Json format", e);
         }
     }
 
@@ -239,8 +238,7 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            log.debug(null, e);
+            log.error("Error while translating internal scheduling message in Json format", e);
         }
     }
 
@@ -252,8 +250,7 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            log.debug(null, e);
+            log.error("Error while translating internal scheduling message in Json format",  e);
         }
     }
 
@@ -265,8 +262,7 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            log.debug(null, e);
+            log.error("Error while translating internal scheduling message in Json format", e);
         }
     }
 
@@ -295,12 +291,8 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
                 log.debug("LINE: {}", line);
                 configXML = configXML.concat(line);
             }
-        } catch (FileNotFoundException e) {
-            log.error("Template file not found");
-            e.printStackTrace();
         } catch (IOException e) {
-            log.error("Template file not found");
-            e.printStackTrace();
+            log.error("Template file not found", e);
         }
         log.debug("Generated Jenkins job file before substitution: {}", configXML );
 
@@ -321,14 +313,13 @@ public class JenkinsDriver implements ExecutorServiceProviderInterface, Validato
         return configXML;
     }
 
-
     private File getFileFromResources(String fileName) {
 
         ClassLoader classLoader = getClass().getClassLoader();
 
         URL resource = classLoader.getResource(fileName);
         if (resource == null) {
-            throw new IllegalArgumentException("file is not found!");
+            throw new IllegalArgumentException("EEM: file is not found!");
         } else {
             return new File(resource.getFile());
         }

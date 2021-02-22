@@ -42,7 +42,7 @@ public class ExperimentLcmService {
 		try {
 			experimentLcmRestClient.notifyExperimentExecutionStateChange(url, msg);
 		} catch (FailedOperationException e) {
-			log.error(e.getMessage());
+			log.error(e.getMessage(), e);
 			//TODO handle error?
 		}
  	}

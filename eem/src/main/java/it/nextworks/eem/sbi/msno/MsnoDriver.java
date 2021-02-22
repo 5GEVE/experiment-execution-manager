@@ -43,9 +43,10 @@ public class MsnoDriver implements MultiSiteOrchestratorProviderInterface {
     }
 
     @Override
-    public NsInstance queryNs(GeneralizedQueryRequest request) throws FailedOperationException, MalformattedElementException {
-        if (request == null)
-            throw new MalformattedElementException("Query NS request is null");
+    public NsInstance queryNs(GeneralizedQueryRequest request) throws FailedOperationException, MalformattedElementException{
+        if (request == null) {
+            throw new MalformattedElementException("EEM: Query NS request is null");
+        }
         request.isValid();
         try {
             String nsInstanceId = request.getFilter().getParameters().get("NS_ID");
@@ -55,8 +56,11 @@ public class MsnoDriver implements MultiSiteOrchestratorProviderInterface {
                 throw new NotExistingEntityException("NS instance not found");
             log.debug("NsInstance correctly retrieved");
             return nsInstance;
+        }
+        catch (NotExistingEntityException e) {
+            throw new FailedOperationException("MSNO: " + e.getMessage(), e);
         } catch (Exception e) {
-            throw new FailedOperationException("Failure when interacting with NFVO : " + e.getMessage());
+            throw new FailedOperationException("EEM: Failure when interacting with MSNO", e);
         }
         /*
         return null;

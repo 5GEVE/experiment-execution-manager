@@ -81,13 +81,13 @@ public class ExperimentCatalogueRestClient {
 			}else
 				return null;
 		} catch (HttpClientErrorException e) {
-			throw new FailedOperationException("Error during Experiment Blueprint retrieval : Client error");
+			throw new FailedOperationException("EEM: Error during Experiment Blueprint retrieval : Client error", e);
 		} catch (HttpServerErrorException e) {
-			throw new FailedOperationException("Error during Experiment Blueprint retrieval : Server error");
+			throw new FailedOperationException("Portal Catalogue: Error during Experiment Blueprint retrieval : Server error", e);
 		} catch (UnknownHttpStatusCodeException e) {
-			throw new FailedOperationException("Error during Experiment Blueprint retrieval: Unknown error");
+			throw new FailedOperationException("EEM: Error during Experiment Blueprint retrieval: Unknown error", e);
 		} catch (Exception e) {
-			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
+			throw new FailedOperationException("EEM: Generic error while interacting with Portal Catalogue at url " + url, e);
 		}
 	}
 	
@@ -118,13 +118,13 @@ public class ExperimentCatalogueRestClient {
 			}else
 				return null;
 		} catch (HttpClientErrorException e) {
-			throw new FailedOperationException("Error during Experiment Descriptor retrieval : Client error");
+			throw new FailedOperationException("EEM: Error during Experiment Descriptor retrieval : Client error", e);
 		} catch (HttpServerErrorException e) {
-			throw new FailedOperationException("Error during Experiment Descriptor retrieval : Server error");
+			throw new FailedOperationException("Portal Catalogue: Error during Experiment Descriptor retrieval : Server error", e);
 		} catch (UnknownHttpStatusCodeException e) {
-			throw new FailedOperationException("Error during Experiment Descriptor retrieval: Unknown error");
+			throw new FailedOperationException("EEM: Error during Experiment Descriptor retrieval: Unknown error", e);
 		} catch (Exception e) {
-			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
+			throw new FailedOperationException("EEM: Generic error while interacting with Portal Catalogue at url " + url, e);
 		}
 	}
 	
@@ -155,13 +155,13 @@ public class ExperimentCatalogueRestClient {
 			}else
 				return null;
 		} catch (HttpClientErrorException e) {
-			throw new FailedOperationException("Error during Vertical Service Blueprint retrieval : Client error");
+			throw new FailedOperationException("EEM: Error during Vertical Service Blueprint retrieval : Client error", e);
 		} catch (HttpServerErrorException e) {
-			throw new FailedOperationException("Error during Vertical Service Blueprint retrieval : Server error");
+			throw new FailedOperationException("Portal Catalogue: Error during Vertical Service Blueprint retrieval : Server error", e);
 		} catch (UnknownHttpStatusCodeException e) {
-			throw new FailedOperationException("Error during Vertical Service Blueprint retrieval: Unknown error");
+			throw new FailedOperationException("EEM: Error during Vertical Service Blueprint retrieval: Unknown error", e);
 		} catch (Exception e) {
-			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
+			throw new FailedOperationException("EEM: Generic error while interacting with Portal Catalogue at url " + url, e);
 		}
 	}
 
@@ -190,13 +190,13 @@ public class ExperimentCatalogueRestClient {
 			}else
 				return null;
 		} catch (HttpClientErrorException e) {
-			throw new FailedOperationException("Error during Vertical Service Descriptor retrieval : Client error");
+			throw new FailedOperationException("EEM: Error during Vertical Service Descriptor retrieval : Client error", e);
 		} catch (HttpServerErrorException e) {
-			throw new FailedOperationException("Error during Vertical Service Descriptor retrieval : Server error");
+			throw new FailedOperationException("Portal Catalogue: Error during Vertical Service Descriptor retrieval : Server error", e);
 		} catch (UnknownHttpStatusCodeException e) {
-			throw new FailedOperationException("Error during Vertical Service Descriptor retrieval: Unknown error");
+			throw new FailedOperationException("EEM: Error during Vertical Service Descriptor retrieval: Unknown error", e);
 		} catch (Exception e) {
-			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
+			throw new FailedOperationException("EEM: Generic error while interacting with Portal Catalogue at url " + url, e);
 		}
 	}
 	
@@ -225,13 +225,13 @@ public class ExperimentCatalogueRestClient {
 			}else
 				return null;
 		} catch (HttpClientErrorException e) {
-			throw new FailedOperationException("Error during Context Blueprint retrieval : Client error");
+			throw new FailedOperationException("EEM: Error during Context Blueprint retrieval : Client error", e);
 		} catch (HttpServerErrorException e) {
-			throw new FailedOperationException("Error during Context Blueprint retrieval : Server error");
+			throw new FailedOperationException("Portal Catalogue: Error during Context Blueprint retrieval : Server error", e);
 		} catch (UnknownHttpStatusCodeException e) {
-			throw new FailedOperationException("Error during Context Blueprint retrieval: Unknown error");
+			throw new FailedOperationException("EEM: Error during Context Blueprint retrieval: Unknown error", e);
 		} catch (Exception e) {
-			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
+			throw new FailedOperationException("EEM: Generic error while interacting with Portal Catalogue at url " + url, e);
 		}
 	}
 	
@@ -260,13 +260,13 @@ public class ExperimentCatalogueRestClient {
 			}else
 				return null;
 		} catch (HttpClientErrorException e) {
-			throw new FailedOperationException("Error during Context Descriptor retrieval : Client error");
+			throw new FailedOperationException("EEM: Error during Context Descriptor retrieval : Client error", e);
 		} catch (HttpServerErrorException e) {
-			throw new FailedOperationException("Error during Context Descriptor retrieval : Server error");
+			throw new FailedOperationException("Portal Catalogue: Error during Context Descriptor retrieval : Server error", e);
 		} catch (UnknownHttpStatusCodeException e) {
-			throw new FailedOperationException("Error during Context Descriptor retrieval: Unknown error");
+			throw new FailedOperationException("EEM: Error during Context Descriptor retrieval: Unknown error", e);
 		} catch (Exception e) {
-			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
+			throw new FailedOperationException("EEM: Generic error while interacting with Portal Catalogue at url " + url, e);
 		}
 	}
 	
@@ -295,13 +295,13 @@ public class ExperimentCatalogueRestClient {
 			}else
 				return null;
 		} catch (HttpClientErrorException e) {
-			throw new FailedOperationException("Error during Test Case Blueprint retrieval : Client error");
+			throw new FailedOperationException("EEM: Error during Test Case Blueprint retrieval : Client error", e);
 		} catch (HttpServerErrorException e) {
-			throw new FailedOperationException("Error during Test Case Blueprint retrieval : Server error");
+			throw new FailedOperationException("Portal Catalogue: Error during Test Case Blueprint retrieval : Server error", e);
 		} catch (UnknownHttpStatusCodeException e) {
-			throw new FailedOperationException("Error during Test Case Blueprint retrieval: Unknown error");
+			throw new FailedOperationException("EEM: Error during Test Case Blueprint retrieval: Unknown error", e);
 		} catch (Exception e) {
-			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
+			throw new FailedOperationException("EEM: Generic error while interacting with Portal Catalogue at url " + url, e);
 		}
 	}
 	
@@ -330,13 +330,13 @@ public class ExperimentCatalogueRestClient {
 			}else
 				return null;
 		} catch (HttpClientErrorException e) {
-			throw new FailedOperationException("Error during Test Case Descriptor retrieval : Client error");
+			throw new FailedOperationException("EEM: Error during Test Case Descriptor retrieval : Client error", e);
 		} catch (HttpServerErrorException e) {
-			throw new FailedOperationException("Error during Test Case Descriptor retrieval : Server error");
+			throw new FailedOperationException("Portal Catalogue: Error during Test Case Descriptor retrieval : Server error", e);
 		} catch (UnknownHttpStatusCodeException e) {
-			throw new FailedOperationException("Error during Test Case Descriptor retrieval: Unknown error");
+			throw new FailedOperationException("EEM: Error during Test Case Descriptor retrieval: Unknown error", e);
 		} catch (Exception e) {
-			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
+			throw new FailedOperationException("EEM: Generic error while interacting with Portal Catalogue at url " + url, e);
 		}
 	}
 	
@@ -363,13 +363,13 @@ public class ExperimentCatalogueRestClient {
 			}else
 				return null;
 		} catch (HttpClientErrorException e) {
-			throw new FailedOperationException("Error during Translated Experiment Descriptor retrieval : Client error");
+			throw new FailedOperationException("EEM: Error during Translated Experiment Descriptor retrieval : Client error", e);
 		} catch (HttpServerErrorException e) {
-			throw new FailedOperationException("Error during Translated Experiment Descriptor : Server error");
+			throw new FailedOperationException("Portal Catalogue: Error during Translated Experiment Descriptor : Server error", e);
 		} catch (UnknownHttpStatusCodeException e) {
-			throw new FailedOperationException("Error during Translated Experiment Descriptor Unknown error");
+			throw new FailedOperationException("EEM: Error during Translated Experiment Descriptor Unknown error", e);
 		} catch (Exception e) {
-			throw new FailedOperationException("Generic error while interacting with Portal Catalogue at url " + url);
+			throw new FailedOperationException("EEM: Generic error while interacting with Portal Catalogue at url " + url, e);
 		}
 	}
 }

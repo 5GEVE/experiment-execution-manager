@@ -57,13 +57,13 @@ public class ExperimentLcmRestClient {
 			if (code.equals(HttpStatus.OK))
 				log.debug("Experiment Execution state change notification sent correctly");
 		} catch (HttpClientErrorException e) {
-			throw new FailedOperationException("Error sending Experiment Execution state change notification : Client error");
+			throw new FailedOperationException("EEM: Error sending Experiment Execution state change notification to Lcm: Client error", e);
 		} catch (HttpServerErrorException e) {
-			throw new FailedOperationException("Error sending Experiment Execution state change notification : Server error");
+			throw new FailedOperationException("LCM: Error sending Experiment Execution state change notification to Lcm: Server error", e);
 		} catch (UnknownHttpStatusCodeException e) {
-			throw new FailedOperationException("Error sending Experiment Execution state change notification : Unknown error");
+			throw new FailedOperationException("EEM: Error sending Experiment Execution state change notification to Lcm: Unknown error", e);
 		}catch (Exception e){
-			throw new FailedOperationException("Generic Error while interacting with Experiment-Lcm : " + e.getMessage());
+			throw new FailedOperationException("EEM: Generic Error while interacting with Experiment Lcm", e);
 		}
 	}
 }

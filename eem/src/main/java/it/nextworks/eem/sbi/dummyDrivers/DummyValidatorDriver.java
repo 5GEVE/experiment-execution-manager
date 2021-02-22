@@ -5,14 +5,26 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import it.nextworks.eem.model.ExperimentExecution;
 import it.nextworks.eem.rabbitMessage.InternalMessage;
 import it.nextworks.eem.rabbitMessage.ValidationResultInternalMessage;
+import it.nextworks.eem.repo.ExperimentExecutionRepository;
 import it.nextworks.eem.sbi.interfaces.ValidatorServiceProviderInterface;
 import it.nextworks.eem.model.ValidationStatus;
+import it.nextworks.eem.sbi.rav.model.Publishtopic;
+import it.nextworks.eem.sbi.rav.model.Topic;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.KeyPerformanceIndicator;
+import it.nextworks.nfvmano.catalogue.blueprint.elements.KpiThreshold;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class DummyValidatorDriver implements ValidatorServiceProviderInterface {
 
@@ -21,15 +33,48 @@ public class DummyValidatorDriver implements ValidatorServiceProviderInterface {
     private RabbitTemplate rabbitTemplate;
     private TopicExchange messageExchange;
 
-    public DummyValidatorDriver(RabbitTemplate rabbitTemplate, TopicExchange messageExchange) {
+    private ExperimentExecutionRepository experimentExecutionRepository;
+
+    public DummyValidatorDriver(RabbitTemplate rabbitTemplate, TopicExchange messageExchange, ExperimentExecutionRepository experimentExecutionRepository) {
         log.debug("Initializing Dummy Validator Driver");
         this.rabbitTemplate = rabbitTemplate;
         this.messageExchange = messageExchange;
+        this.experimentExecutionRepository = experimentExecutionRepository;
 
     }
 
     @Override
-    public void configureExperiment(String experimentId, String executionId){
+    public void configureExperiment(String experimentId, String executionId, boolean perfDiag, String nsInstanceId){
+        /*
+        *  TEST EEM MULTISITE
+        * */
+        log.debug("Configuring experiment {} for execution {} with perfDiag {} and nsInstance {}", experimentId, executionId, perfDiag, nsInstanceId);
+        Optional<ExperimentExecution> expExecutionInstance = experimentExecutionRepository.findByExecutionId(executionId);
+        if (! expExecutionInstance.isPresent()) {
+            log.error("Experiment execution with id {} not found", executionId);
+            manageValidationError("Experiment execution with id {} not found", executionId);
+            return;
+        }
+        ExperimentExecution expExecution = expExecutionInstance.get();
+
+        log.debug("Started generating application metrics");
+        for (Map.Entry<String, String> entry: expExecution.getApplicationMetrics().entrySet()){
+            log.debug("topic name created for RAV: {}", entry.getValue());
+        }
+        log.debug("Stopped generating application metrics");
+
+        log.debug("Started generating infrastructure metrics");
+        for (Map.Entry<String, String> entry: expExecution.getInfrastructureMetrics().entrySet()){
+            log.debug("topic name created for RAV: {}", entry.getValue());
+        }
+        log.debug("Stopped generating infrastructure metrics");
+
+        log.debug("Start generating application metrics");
+        for (Map.Entry<String, String> entry: expExecution.getKpiMetrics().entrySet()){
+            log.debug("KPI topics created for RAV: {}", entry.getValue());
+        }
+        log.debug("Stopped generating kpi metrics");
+
         log.debug("ConfiguringExperiment request: {}", executionId);
         String topic = "lifecycle.validation." + executionId;
         InternalMessage internalMessage = new ValidationResultInternalMessage(ValidationStatus.CONFIGURED, "Validation done by DUMMY", false);

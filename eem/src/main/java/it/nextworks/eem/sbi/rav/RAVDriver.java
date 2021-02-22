@@ -49,9 +49,13 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
     // private constructor restricted to this class itself
     private RAVDriver(String ravURI, String monitoringAddress, String monitoringPort, ExperimentCatalogueService catalogueService, ExperimentExecutionRepository experimentExecutionRepository, RabbitTemplate rabbitTemplate, TopicExchange messageExchange) {
         log.debug("Initializing RAV Driver : uri {}", ravURI);
+
         ApiClient apiClient = new ApiClient();
         apiClient.setBasePath(ravURI);
+        apiClient.setConnectTimeout(60000);
+        apiClient.setReadTimeout(60000);
         ravApi = new ValidationApi(apiClient);
+
         this.monitoringAddress = monitoringAddress;
         this.monitoringPort = monitoringPort;
         this.catalogueService = catalogueService;
@@ -70,153 +74,47 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
     }
 
     @Override
-    public void configureExperiment(String experimentId, String executionId){
+    public void configureExperiment(String experimentId, String executionId, boolean perfDiag, String nsInstanceId){
         new Thread(() -> {
-            configurationStuff(experimentId, executionId);
+            configurationImplementation(experimentId, executionId, perfDiag, nsInstanceId);
         }).start();
     }
 
     @Override
     public void startTcValidation(String experimentId, String executionId, String tcDescriptorId){
         new Thread(() -> {
-            startValidationStuff(experimentId, executionId, tcDescriptorId);
+            startValidationImplementation(experimentId, executionId, tcDescriptorId);
         }).start();
     }
 
     @Override
     public void stopTcValidation(String experimentId, String executionId, String tcDescriptorId){
         new Thread(() -> {
-            stopValidationStuff(experimentId, executionId, tcDescriptorId);
+            stopValidationImplementation(experimentId, executionId, tcDescriptorId);
         }).start();
     }
 
     @Override
     public void queryValidationResult(String experimentId, String executionId, String tcDescriptorId){
         new Thread(() -> {
-            queryValidationResultStuff(experimentId, executionId, tcDescriptorId);
+            queryValidationResultImplementation(experimentId, executionId, tcDescriptorId);
         }).start();
     }
 
     @Override
     public void terminateExperiment(String experimentId, String executionId){
         new Thread(() -> {
-            terminationStuff(experimentId, executionId);
+            terminationImplementation(experimentId, executionId);
         }).start();
     }
 
-    private void startValidationStuff(String experimentId, String executionId, String tcDescriptorId){//TODO modify name
-        log.info("Starting new validation task for execution {} and test case {}", executionId, tcDescriptorId);
-
-        try {
-            Call call = ravApi.startTestcaseValidationCall(executionId, tcDescriptorId, null, null);
-            Response response = call.execute();
-            if (response.code() != 200){
-                log.error("Status code {} on start validation of execution {} and tcDescriptor {}", response.code(), executionId, tcDescriptorId);
-                manageValidationError("Status code "+ response.code() +" on start validation of execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
-                return;
-            }
-        } catch (Exception e1) {
-            log.error("Exception on start validation of execution {} and tcDescriptor {}", executionId, tcDescriptorId);
-            e1.getMessage();
-            manageValidationError("Exception on start validation of execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
-            return;
-        }
-
-        String validationStarted = "OK";
-        String topic = "lifecycle.validation." + executionId;
-        InternalMessage internalMessage = new ValidationResultInternalMessage(ValidationStatus.ACQUIRING, validationStarted, false);
-        try {
-            sendMessageToQueue(internalMessage, topic);
-        } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            manageValidationError("Error while translating internal scheduling message in Json format", executionId);
-        }
-    }
-
-    private void stopValidationStuff(String experimentId, String executionId, String tcDescriptorId){//TODO modify name
-        //TODO stop TC validation
-        try {//TODO remove
-            Call call = ravApi.terminateCurrentTestcaseCall(executionId, tcDescriptorId, null, null);
-            Response response = call.execute();
-            if (response.code() != 200){
-                log.error("Status code {} on stop validation of execution {} and tcDescriptor {}", response.code(), executionId, tcDescriptorId);
-                manageValidationError("Status code "+ response.code() +" on stop validation of execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
-                return;
-            }
-        } catch (Exception e) {
-            log.error("Exception on stop validation of execution {} and tcDescriptor {}", executionId, tcDescriptorId);
-            e.getMessage();
-            manageValidationError("Exception on stop validation of execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
-            return;
-        }
-
-        String validationStarted = "OK";
-        String topic = "lifecycle.validation." + executionId;
-        InternalMessage internalMessage = new ValidationResultInternalMessage(ValidationStatus.VALIDATING, validationStarted, false);
-        try {
-            sendMessageToQueue(internalMessage, topic);
-        } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            manageValidationError("Error while translating internal scheduling message in Json format", executionId);
-        }
-        //validation not stopped
-        //manageValidationError();
-    }
-
-    private void queryValidationResultStuff(String experimentId, String executionId, String tcDescriptorId){//TODO modify name
-          StatusResponse statusResponse = null;
-//        try {
-//            Call call = ravApi.startTestcaseValidationCall(executionId, tcDescriptorId, null, null);
-//            Response response = call.execute();
-//            if (response.code() != 200){
-//                log.error("Failed to start validation of execution {} and tcDiD {}: Response code  received {}", executionId, tcDescriptorId, response.code());
-//                manageValidationError("Failed to start validation of execution " + executionId + " and tcDiD " + tcDescriptorId + ": Response code received " + response.code() , executionId);
-//            }
-//        } catch(Exception e1){
-//            log.error("Failed to start validation of execution {} and tcDiD {}", executionId, tcDescriptorId);
-//            e1.getMessage();
-//            manageValidationError("Error while translating internal scheduling message in Json format", executionId);
-//        }
-
-            try {
-                Thread.sleep(5000);
-                statusResponse = ravApi.showTestcaseValidationStatus(executionId, tcDescriptorId);
-            } catch (Exception e2){
-                log.error("Error trying to validate execution {} and tcDescriptor {}", executionId, tcDescriptorId);
-                manageValidationError("Error trying to validate execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
-                return;
-            }
-
-        //TODO insert some delay in performing queries..Every time EEM receives a VALIDATING message, it sends immediately a new queryValidationResult
-
-        //TODO remove, handled via Notification Endpoint
-        ValidationStatus validationStatus;
-        String reportUrl = null;
-        String topic = "lifecycle.validation." + executionId;
-        //if VALIDATING
-        if(! statusResponse.getStatus().equalsIgnoreCase("VALIDATED"))
-            validationStatus = ValidationStatus.VALIDATING;
-        else{
-            validationStatus = ValidationStatus.VALIDATED;
-            reportUrl = statusResponse.getReport();
-        }
-        InternalMessage internalMessage = new ValidationResultInternalMessage(validationStatus, reportUrl, false);
-        try {
-            sendMessageToQueue(internalMessage, topic);
-        } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            manageValidationError("Error while translating internal scheduling message in Json format", executionId);
-        }
-
-    }
-
-    private void configurationStuff(String experimentId, String executionId){
+    private void configurationImplementation(String experimentId, String executionId, boolean perfDiag, String nsInstanceId){
         //TODO configure experiment validation
         // Get experimentDescriptorId from experiment execution id
         Optional<ExperimentExecution> expExecutionInstance = experimentExecutionRepository.findByExecutionId(executionId);
-        if (! expExecutionInstance.isPresent()) {
+        if (!expExecutionInstance.isPresent()) {
             log.error("Experiment execution with id {} not found", executionId);
-            manageValidationError("Experiment execution with id {} not found", executionId);
+            manageValidationError("EEM: Experiment execution with id {} not found", executionId);
             return;
         }
         ExperimentExecution expExecution = expExecutionInstance.get();
@@ -230,15 +128,15 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
         parameters.put("ExpD_ID", expExecution.getExperimentDescriptorId());
         QueryExpDescriptorResponse expDescriptorResponse = null;
         try{
-            expDescriptorResponse = catalogueService.queryExpDescriptor(request);
+            expDescriptorResponse = catalogueService.queryExpDescriptor(request);//TODO add check on status code
         } catch (Exception e1){
-            log.error("Unable to retrieve Experiment Descriptor identified with {} from the catalogue", expExecution.getExperimentDescriptorId());
-            manageValidationError("Unable to retrieve Experiment Descriptor from the catalogue", executionId);
+            log.error("Unable to retrieve Experiment Descriptor identified with {} from the catalogue", expExecution.getExperimentDescriptorId(), e1);
+            manageValidationError("EEM: Unable to retrieve Experiment Descriptor identified with " + expExecution.getExperimentDescriptorId() + " from the catalogue", executionId);
             return;
         }
         if (expDescriptorResponse.getExpDescriptors().size() != 1){
             log.error("List should contain a single experiment descriptor with id {}", expExecution.getExperimentDescriptorId());
-            manageValidationError("List should contain a single experiment descriptor", executionId);
+            manageValidationError("Portal Catalogue: List should contain a single experiment descriptor", executionId);
             return;
         }
         ExpDescriptor expDescriptor = expDescriptorResponse.getExpDescriptors().get(0);
@@ -248,10 +146,10 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
         parameters.put("ExpB_ID", expDescriptor.getExpBlueprintId());
         QueryExpBlueprintResponse expBlueprintResponse =  null;
         try {
-            expBlueprintResponse = catalogueService.queryExpBlueprint(request);
+            expBlueprintResponse = catalogueService.queryExpBlueprint(request);//TODO add check on status code
         } catch (Exception e2) {
-            log.error("Unable to retrieve Experiment blueprint identified with {} from the catalogue", expDescriptor.getExpBlueprintId());
-            manageValidationError("Unable to retrieve Experiment blueprint from the catalogue", executionId);
+            log.error("Unable to retrieve Experiment blueprint identified with {} from the catalogue", expDescriptor.getExpBlueprintId(), e2);
+            manageValidationError("EEM: Unable to retrieve Experiment blueprint identified with " + expDescriptor.getExpBlueprintId() + " from the catalogue", executionId);
             return;
         }
         ExpBlueprint expBlueprint = expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint();
@@ -263,17 +161,17 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
         for (String ctxBId : expBlueprint.getCtxBlueprintIds()){
             parameters.put("CTXB_ID", ctxBId);
             try {
-                contextBlueprints = catalogueService.queryCtxBlueprint(request);
+                contextBlueprints = catalogueService.queryCtxBlueprint(request);//TODO add check on status code
                 if(contextBlueprints.getCtxBlueprintInfos().size() != 1 ){
                     log.error("Catalogue should return single ctxB. Returned list size: {}", contextBlueprints.getCtxBlueprintInfos().size());
-                    manageValidationError("Catalogue should return single ctxB", executionId);
+                    manageValidationError("Portal Catalogue: Catalogue should return single ctxB", executionId);
                     return;
                 } else {
                     ctxBlueprintList.add(contextBlueprints.getCtxBlueprintInfos().get(0).getCtxBlueprint());
                 }
             } catch (Exception e3) {
-                log.error("Unable to retrieve context blueprint identified with {} from the catalogue", ctxBId);
-                manageValidationError("Unable to retrieve context blueprint from the catalogue", executionId);
+                log.error("Unable to retrieve context blueprint identified with {} from the catalogue", ctxBId, e3);
+                manageValidationError("EEM: Unable to retrieve context blueprint identified with " + ctxBId + " from the catalogue", executionId);
                 return;
             }
             parameters.remove("CTXB_ID");
@@ -282,10 +180,10 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
         parameters.put("VSB_ID", expBlueprint.getVsBlueprintId());//todo
         QueryVsBlueprintResponse vsBlueprintResponse = null;
         try{
-            vsBlueprintResponse = catalogueService.queryVsBlueprint(request);
+            vsBlueprintResponse = catalogueService.queryVsBlueprint(request);//TODO add check on status code
         } catch( Exception e4){
-            log.error("Unable to retrieve Virtual Service Blueprint identified with {} from the catalogue", expBlueprint.getVsBlueprintId());
-            manageValidationError("Unable to retrieve Virtual Service Blueprint from the catalogue", executionId);
+            log.error("Unable to retrieve Virtual Service Blueprint identified with {} from the catalogue", expBlueprint.getVsBlueprintId(), e4);
+            manageValidationError("EEM: Unable to retrieve Virtual Service Blueprint identified with " + expBlueprint.getVsBlueprintId() + " from the catalogue", executionId);
             return;
         }
         VsBlueprint vsBlueprint = vsBlueprintResponse.getVsBlueprintInfo().get(0).getVsBlueprint();
@@ -295,65 +193,116 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
         List<Topic> topics = new ArrayList<>();
         List<Publishtopic> publishTopics = new ArrayList<>();
 
-        // Application metrics from Context blueprints
-        for (CtxBlueprint ctxB : ctxBlueprintList) {
-            log.debug("Adding application metrics for context: {}", ctxB.getName());
-            for (ApplicationMetric amd : ctxB.getApplicationMetrics()) {
-                Topic topic = new Topic();
-                topic.brokerAddr(monitoringAddress+":"+monitoringPort);
-                topic.setMetric(amd.getMetricId().toLowerCase());
-                topic.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
-                log.debug("topic name created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
-                topics.add(topic);
-            }
-        }
-        // Application metrics from VS Blueprint
-        log.debug("Adding application metrics for vsBlueprint: {}", vsBlueprint.getName());
-        for (ApplicationMetric amd : vsBlueprint.getApplicationMetrics()){
+        log.debug("Started generating application metrics");
+        for (Map.Entry<String, String> entry: expExecution.getApplicationMetrics().entrySet()){
             Topic topic = new Topic();
             topic.brokerAddr(monitoringAddress+":"+monitoringPort);
-            topic.setMetric(amd.getMetricId().toLowerCase());
-            topic.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
-            log.debug("topic created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
+            topic.setMetric(entry.getKey());
+            topic.setTopic(entry.getValue());
+            log.debug("topic name created for RAV: {}", entry.getValue());
             topics.add(topic);
         }
+        log.debug("Stopped generating application metrics");
+
+        log.debug("Started generating infrastructure metrics");
+        for (Map.Entry<String, String> entry: expExecution.getInfrastructureMetrics().entrySet()){
+            Topic topic = new Topic();
+            topic.brokerAddr(monitoringAddress+":"+monitoringPort);
+            topic.setMetric(entry.getKey());
+            topic.setTopic(entry.getValue());
+            log.debug("topic name created for RAV: {}", entry.getValue());
+            topics.add(topic);
+        }
+        log.debug("Stopped generating infrastructure metrics");
+
+        log.debug("Start generating application metrics");
+        for (Map.Entry<String, String> entry: expExecution.getKpiMetrics().entrySet()){
+            for (KeyPerformanceIndicator kpi : expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint().getKpis()){
+                if (entry.getKey().equalsIgnoreCase(kpi.getKpiId())){
+                    Publishtopic pt = new Publishtopic();
+                    pt.setBrokerAddr(monitoringAddress+":"+monitoringPort);
+                    pt.setKpi(kpi.getKpiId());
+                    pt.setFormula(kpi.getFormula());
+                    pt.setInterval(new BigDecimal(kpi.getInterval().replaceAll("[^0-9.]+", ""))); //TODO check if converts it in a proper way
+                    List<String> metricsIds = new ArrayList<>();
+                    pt.setUnit(kpi.getUnit());
+                    for (String metric : kpi.getMetricIds()){
+                        metricsIds.add(metric);
+                    }
+                    KpiThreshold kpiThreshold = expDescriptor.getKpiThresholds().get(kpi.getKpiId());
+                    pt.setUpperBound(String.valueOf(kpiThreshold.getUpperBound()));
+                    pt.setLowerBound(String.valueOf(kpiThreshold.getLowerBound()));
+                    pt.setInput(metricsIds);
+                    pt.setTopic(entry.getValue());
+                    log.debug("KPI topics created for RAV: {}", entry.getValue());
+                    publishTopics.add(pt);
+                }
+            }
+        }
+        log.debug("Stopped generating kpi metrics");
+        // Application metrics from Context blueprints
+//        for (CtxBlueprint ctxB : ctxBlueprintList) {
+//            log.debug("Adding application metrics for context: {}", ctxB.getName());
+//            for (ApplicationMetric amd : ctxB.getApplicationMetrics()) {
+//                Topic topic = new Topic();
+//                topic.brokerAddr(monitoringAddress+":"+monitoringPort);
+//                topic.setMetric(amd.getMetricId().toLowerCase());
+//                topic.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
+//                log.debug("topic name created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
+//                topics.add(topic);
+//            }
+//        }
+        // Application metrics from VS Blueprint
+//        log.debug("Adding application metrics for vsBlueprint: {}", vsBlueprint.getName());
+//        for (ApplicationMetric amd : vsBlueprint.getApplicationMetrics()){
+//            Topic topic = new Topic();
+//            topic.brokerAddr(monitoringAddress+":"+monitoringPort);
+//            topic.setMetric(amd.getMetricId().toLowerCase());
+//            topic.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
+//            log.debug("topic created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.APPLICATION_METRIC.toString().toLowerCase()+"."+amd.getMetricId());
+//            topics.add(topic);
+//        }
 
         // Infrastructure metrics from Experiment blueprint
-        log.debug("Adding infrastructure metrics for expBlueprint {}", expBlueprintResponse.getExpBlueprintInfo().get(0).getName());
-        for (InfrastructureMetric im : expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint().getMetrics()){
-            Topic topic = new Topic();
-            topic.brokerAddr(monitoringAddress+":"+monitoringPort);
-            topic.setMetric(im.getMetricId().toLowerCase());
-            topic.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getMetricId());
-            log.debug("topic created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getMetricId());
-            topics.add(topic);
-        }
+//        log.debug("Adding infrastructure metrics for expBlueprint {}", expBlueprintResponse.getExpBlueprintInfo().get(0).getName());
+//        for (InfrastructureMetric im : expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint().getMetrics()){
+//            Topic topic = new Topic();
+//            topic.brokerAddr(monitoringAddress+":"+monitoringPort);
+//            topic.setMetric(im.getMetricId().toLowerCase());
+//            topic.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getMetricId());
+//            log.debug("topic created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase()+"."+im.getMetricId());
+//            topics.add(topic);
+//        }
 
         // KPIs
-        log.debug("Adding KPIs for expBlueprint {}", expBlueprintResponse.getExpBlueprintInfo().get(0).getName());
-        for (KeyPerformanceIndicator kpi : expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint().getKpis()){
-            Publishtopic pt = new Publishtopic();
-            pt.setBrokerAddr(monitoringAddress+":"+monitoringPort);
-            pt.setKpi(kpi.getKpiId());
-            pt.setFormula(kpi.getFormula());
-            pt.setInterval(new BigDecimal(kpi.getInterval().replaceAll("[^0-9.]+", ""))); //TODO check if converts it in a proper way
-            List<String> metricsIds = new ArrayList<>();
-            pt.setUnit(kpi.getUnit());
-            for (String metric : kpi.getMetricIds()){
-                metricsIds.add(metric);
-            }
-            KpiThreshold kpiThreshold = expDescriptor.getKpiThresholds().get(kpi.getKpiId());
-            pt.setUpperBound(String.valueOf(kpiThreshold.getUpperBound()));
-            pt.setLowerBound(String.valueOf(kpiThreshold.getLowerBound()));
-            pt.setInput(metricsIds);
-            pt.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
-            log.debug("KPI topics created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
-            publishTopics.add(pt);
-        }
+//        log.debug("Adding KPIs for expBlueprint {}", expBlueprintResponse.getExpBlueprintInfo().get(0).getName());
+//        for (KeyPerformanceIndicator kpi : expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint().getKpis()){
+//            Publishtopic pt = new Publishtopic();
+//            pt.setBrokerAddr(monitoringAddress+":"+monitoringPort);
+//            pt.setKpi(kpi.getKpiId());
+//            pt.setFormula(kpi.getFormula());
+//            pt.setInterval(new BigDecimal(kpi.getInterval().replaceAll("[^0-9.]+", ""))); //TODO check if converts it in a proper way
+//            List<String> metricsIds = new ArrayList<>();
+//            pt.setUnit(kpi.getUnit());
+//            for (String metric : kpi.getMetricIds()){
+//                metricsIds.add(metric);
+//            }
+//            KpiThreshold kpiThreshold = expDescriptor.getKpiThresholds().get(kpi.getKpiId());
+//            pt.setUpperBound(String.valueOf(kpiThreshold.getUpperBound()));
+//            pt.setLowerBound(String.valueOf(kpiThreshold.getLowerBound()));
+//            pt.setInput(metricsIds);
+//            pt.setTopic(expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
+//            log.debug("KPI topics created for RAV: {}", expExecution.getUseCase()+"."+expExecution.getExperimentId()+"."+siteName+"."+ MetricDataType.KPI.toString().toLowerCase()+"."+kpi.getKpiId());
+//            publishTopics.add(pt);
+//        }
 
         ConfigurationDict confDict = new ConfigurationDict();
         confDict.setVertical(expExecution.getTenantId());
         confDict.setExpID(executionId);
+        if (perfDiag){
+            confDict.setNsInstanceId(nsInstanceId);
+            confDict.setPerfDiag(perfDiag);
+        }
 //        confDict.setExpID(experimentId);
 //        confDict.setExecutionID(executionId);
         List<ConfigurationDictTestcases> testCasesListConfig = new ArrayList<ConfigurationDictTestcases>();
@@ -378,32 +327,136 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
                 try {
                     sendMessageToQueue(internalMessage, topic);
                 } catch (JsonProcessingException e) {
-                    log.error("Error while translating internal scheduling message in Json format");
-                    manageValidationError("Error while translating internal scheduling message in Json format", executionId);
+                    log.error("Error while translating internal scheduling message in Json format", e);
+                    manageValidationError("EEM: Error while translating internal scheduling message in Json format", executionId);
                 }
             } else {
-                log.error("Configuration on RAV failed. Returned status {}", response.code());
-                manageValidationError("Configuration on RAV failed", executionId);
+                log.error("Status code {} on configure validation of execution {}", response.code(), executionId);
+                manageValidationError("RAV: Status code "+ response.code() +" on configure validation of execution " + executionId, executionId);
             }
         } catch (Exception e5){
-            log.error("Configuration action failed");
-            manageValidationError("Configuration action failed", executionId);
+            log.error("Configuration action of execution {} failed", executionId, e5);
+            manageValidationError("EEM: Configuration action of execution " + executionId + " failed", executionId);
         }
 
     }
 
-    private void terminationStuff(String experimentId, String executionId){
+    private void startValidationImplementation(String experimentId, String executionId, String tcDescriptorId){
+        log.info("Starting new validation task for execution {} and test case {}", executionId, tcDescriptorId);
+
+        try {
+            Call call = ravApi.startTestcaseValidationCall(executionId, tcDescriptorId, null, null);
+            Response response = call.execute();
+            if (response.code() != 200){
+                log.error("Status code {} on start validation of execution {} and tcDescriptor {}", response.code(), executionId, tcDescriptorId);
+                manageValidationError("RAV: Status code "+ response.code() +" on start validation of execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
+                return;
+            }
+        } catch (Exception e) {
+            log.error("Exception on start validation of execution {} and tcDescriptor {}", executionId, tcDescriptorId, e);
+            manageValidationError("EEM: Exception on start validation of execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
+            return;
+        }
+
+        String validationStarted = "OK";
+        String topic = "lifecycle.validation." + executionId;
+        InternalMessage internalMessage = new ValidationResultInternalMessage(ValidationStatus.ACQUIRING, validationStarted, false);
+        try {
+            sendMessageToQueue(internalMessage, topic);
+        } catch (JsonProcessingException e) {
+            log.error("Error while translating internal scheduling message in Json format", e);
+            manageValidationError("EEM: Error while translating internal scheduling message in Json format", executionId);
+        }
+    }
+
+    private void stopValidationImplementation(String experimentId, String executionId, String tcDescriptorId){
+        //TODO stop TC validation
+        try {//TODO remove
+            Call call = ravApi.terminateCurrentTestcaseCall(executionId, tcDescriptorId, null, null);
+            Response response = call.execute();
+            if (response.code() != 200){
+                log.error("Status code {} on stop validation of execution {} and tcDescriptor {}", response.code(), executionId, tcDescriptorId);
+                manageValidationError("RAV: Status code "+ response.code() +" on stop validation of execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
+                return;
+            }
+        } catch (Exception e) {
+            log.error("Exception on stop validation of execution {} and tcDescriptor {}", executionId, tcDescriptorId, e);
+            manageValidationError("EEM: Exception on stop validation of execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
+            return;
+        }
+
+        String validationStarted = "OK";
+        String topic = "lifecycle.validation." + executionId;
+        InternalMessage internalMessage = new ValidationResultInternalMessage(ValidationStatus.VALIDATING, validationStarted, false);
+        try {
+            sendMessageToQueue(internalMessage, topic);
+        } catch (JsonProcessingException e) {
+            log.error("Error while translating internal scheduling message in Json format", e);
+            manageValidationError("EEM: Error while translating internal scheduling message in Json format", executionId);
+        }
+        //validation not stopped
+        //manageValidationError();
+    }
+
+    private void queryValidationResultImplementation(String experimentId, String executionId, String tcDescriptorId){
+          StatusResponse statusResponse = null;
+//        try {
+//            Call call = ravApi.startTestcaseValidationCall(executionId, tcDescriptorId, null, null);
+//            Response response = call.execute();
+//            if (response.code() != 200){
+//                log.error("Failed to start validation of execution {} and tcDiD {}: Response code  received {}", executionId, tcDescriptorId, response.code());
+//                manageValidationError("Failed to start validation of execution " + executionId + " and tcDiD " + tcDescriptorId + ": Response code received " + response.code() , executionId);
+//            }
+//        } catch(Exception e1){
+//            log.error("Failed to start validation of execution {} and tcDiD {}", executionId, tcDescriptorId);
+//            e1.getMessage();
+//            manageValidationError("Error while translating internal scheduling message in Json format", executionId);
+//        }
+
+            try {
+                Thread.sleep(5000);
+                statusResponse = ravApi.showTestcaseValidationStatus(executionId, tcDescriptorId);//TODO add check on status code
+            } catch (Exception e){
+                log.error("Error trying to validate execution {} and tcDescriptor {}", executionId, tcDescriptorId, e);
+                manageValidationError("EEM: Error trying to validate execution " + executionId + " and tcDescriptor " + tcDescriptorId, executionId);
+                return;
+            }
+
+        //TODO insert some delay in performing queries..Every time EEM receives a VALIDATING message, it sends immediately a new queryValidationResult
+
+        //TODO remove, handled via Notification Endpoint
+        ValidationStatus validationStatus;
+        String reportUrl = null;
+        String topic = "lifecycle.validation." + executionId;
+        //if VALIDATING
+        if(! statusResponse.getStatus().equalsIgnoreCase("VALIDATED"))
+            validationStatus = ValidationStatus.VALIDATING;
+        else{
+            validationStatus = ValidationStatus.VALIDATED;
+            reportUrl = statusResponse.getReport();
+        }
+        InternalMessage internalMessage = new ValidationResultInternalMessage(validationStatus, reportUrl, false);
+        try {
+            sendMessageToQueue(internalMessage, topic);
+        } catch (JsonProcessingException e) {
+            log.error("Error while translating internal scheduling message in Json format", e);
+            manageValidationError("EEM: Error while translating internal scheduling message in Json format", executionId);
+        }
+
+    }
+
+    private void terminationImplementation(String experimentId, String executionId){
         Call call = null;
         try{
             call = ravApi.terminateExperimentCall(executionId, null, null);
             Response response = call.execute();
             if (response.code() == 200) {
-                log.debug("Validation terminated correctly");
+                log.debug("Validation of execution {} terminated correctly", executionId);
             } else {
-                log.error("RAV server replied with an error code {}", response.code());
+                log.error("RAV server replied with an error code {} when terminating validation of execution {}", response.code(), executionId);
             }
         } catch(Exception e){
-            log.error("Something went wrong terminating experiment validation identified by {}", executionId);
+            log.error("Something went wrong terminating experiment validation identified by {}", executionId, e);
         }
     }
 
@@ -415,8 +468,7 @@ public class RAVDriver implements ValidatorServiceProviderInterface {
         try {
             sendMessageToQueue(internalMessage, topic);
         } catch (JsonProcessingException e) {
-            log.error("Error while translating internal scheduling message in Json format");
-            log.debug(null, e);
+            log.error("Error while translating internal scheduling message in Json format", e);
         }
     }
 

@@ -18,7 +18,6 @@ import it.nextworks.eem.sbi.ExecutorService;
 import it.nextworks.eem.sbi.MultiSiteOrchestratorService;
 import it.nextworks.eem.sbi.ValidatorService;
 import it.nextworks.eem.sbi.expcatalogue.ExperimentCatalogueService;
-import it.nextworks.eem.sbi.rav.model.MetricDataType;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.*;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.*;
 import it.nextworks.nfvmano.libs.ifa.common.elements.Filter;
@@ -59,7 +58,7 @@ public class ExperimentExecutionInstanceManager {
 
     private ExpBlueprint expBlueprint;
     private ExpDescriptor expDescriptor;
-    private VsBlueprint vsBlueprint;
+    private List<VsBlueprint> vsBlueprints = new ArrayList<>();
     private VsDescriptor vsDescriptor;
     private List<CtxDescriptor> ctxDescriptors = new ArrayList<>();
     private List<CtxBlueprint> ctxBlueprints = new ArrayList<>();
@@ -78,7 +77,7 @@ public class ExperimentExecutionInstanceManager {
     {
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         if(!experimentExecutionOptional.isPresent())
-            throw new NotExistingEntityException(String.format("Experiment Execution with Id %s not found", executionId));
+            throw new NotExistingEntityException(String.format("EEM: Experiment Execution with Id %s not found", executionId));
         this.experimentId = experimentExecutionOptional.get().getExperimentId();
         this.executionId = executionId;
         this.currentState = experimentExecutionOptional.get().getState();
@@ -98,14 +97,14 @@ public class ExperimentExecutionInstanceManager {
             try {
                 retrieveAllInformation();
             }catch (FailedOperationException e){
-                log.error(e.getMessage());
+                log.error(e.getMessage(), e);
                 manageExperimentExecutionError(e.getMessage());
             }
         }
         //Restart experiment executions based on the current state
         switch(currentState){
             case CONFIGURING:
-                validatorService.configureExperiment(experimentId, executionId);
+                validatorService.configureExperiment(experimentId, executionId, experimentExecutionOptional.get().isPerfDiag(), experimentExecutionOptional.get().getNsInstanceId());
                 if(runType.equals(ExperimentRunType.RUN_ALL)){
                     //Run the first test case if run type is RUN_ALL
                     configureExperimentExecutionTestCase();
@@ -211,31 +210,34 @@ public class ExperimentExecutionInstanceManager {
                     break;
             }
         } catch (JsonParseException e) {
-            log.debug("Error while parsing message", e);
+            log.error("Error while parsing message", e);
             manageExperimentExecutionError("Error while parsing message: " + e.getMessage());
         } catch (JsonMappingException e) {
-            log.debug("Error in Json mapping", e);
+            log.error("Error in Json mapping", e);
             manageExperimentExecutionError("Error in Json mapping: " + e.getMessage());
         } catch (IOException e) {
-            log.debug("IO error when receiving json message", e);
+            log.error("IO error when receiving json message", e);
             manageExperimentExecutionError("IO error when receiving json message: " + e.getMessage());
         } catch (Exception e){
-            log.debug("Unhandled Exception", e);
+            log.error("Unhandled Exception", e);
             manageExperimentExecutionError("Generic internal error: " + e.getMessage());
         }
     }
 
-    private void processRunRequest(){
+    private void processRunRequest() throws NotExistingEntityException {
         if(updateAndNotifyExperimentExecutionState(ExperimentState.CONFIGURING)) {
             log.info("Configuring Experiment Execution with Id {}", executionId);
             try {
                 retrieveAllInformation();
             }catch (FailedOperationException e){
-                log.error(e.getMessage());
+                log.error(e.getMessage(), e);
                 manageExperimentExecutionError(e.getMessage());
                 return;
             }
-            validatorService.configureExperiment(experimentId, executionId);
+            Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
+            if(!experimentExecutionOptional.isPresent())
+                throw new NotExistingEntityException(String.format("EEM: Experiment Execution with Id %s not found", executionId));
+            validatorService.configureExperiment(experimentId, executionId, experimentExecutionOptional.get().isPerfDiag(), experimentExecutionOptional.get().getNsInstanceId());
             if(runType.equals(ExperimentRunType.RUN_ALL)){
                 //Run the first test case if run type is RUN_ALL
                 log.info("Running Experiment Execution with Id {}", executionId);
@@ -297,7 +299,7 @@ public class ExperimentExecutionInstanceManager {
          */
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         if(!experimentExecutionOptional.isPresent()){
-            log.error("Experiment Execution with Id {} not found", executionId);
+            log.error("EEM: Experiment Execution with Id {} not found", executionId);
             return;
         }
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
@@ -342,7 +344,7 @@ public class ExperimentExecutionInstanceManager {
             case VALIDATED:
                 Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
                 if(!experimentExecutionOptional.isPresent()){
-                    log.error("Experiment Execution with Id {} not found", executionId);
+                    log.error("EEM: Experiment Execution with Id {} not found", executionId);
                     return;
                 }
                 ExperimentExecution experimentExecution = experimentExecutionOptional.get();
@@ -397,7 +399,7 @@ public class ExperimentExecutionInstanceManager {
                 try {
                     configureInfrastructureMetrics();
                 }catch (FailedOperationException e){
-                    log.error(e.getMessage());
+                    log.error(e.getMessage(), e);
                     manageExperimentExecutionError(e.getMessage());
                 }
                 break;
@@ -474,19 +476,12 @@ public class ExperimentExecutionInstanceManager {
         List<MetricInfo> metrics = new ArrayList<>();
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         if(!experimentExecutionOptional.isPresent())
-            throw new FailedOperationException(String.format("Experiment Execution with Id %s not found", executionId));
+            throw new FailedOperationException(String.format("EEM: Experiment Execution with Id %s not found", executionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
-
-        EveSite siteName;//TODO handle multiple sites performing multiple requests or better sending a list of sites
-        try {
-            siteName = EveSite.valueOf(experimentExecution.getSiteNames().get(0).toUpperCase());
-        }catch (IllegalArgumentException e){
-            throw new FailedOperationException(String.format("Incorrect site name in the Experiment Execution with Id %s", executionId));
-        }
         // Infrastructure metrics from Experiment blueprint
         for (InfrastructureMetric im : expBlueprint.getMetrics()){
-            String topic = experimentExecution.getUseCase() + "." + experimentExecution.getExperimentId() + "." + experimentExecution.getSiteNames().get(0).toLowerCase() + "." + MetricDataType.INFRASTRUCTURE_METRIC.toString().toLowerCase() + "." + im.getMetricId();
-            MetricInfo metric = new MetricInfo(im, topic, siteName);
+            String topic = experimentExecution.getInfrastructureMetrics().get(im.getMetricId());
+            MetricInfo metric = new MetricInfo(im, topic, EveSite.valueOf(im.getTargetSite()));
             metrics.add(metric);
         }
         if(!metrics.isEmpty())
@@ -501,7 +496,7 @@ public class ExperimentExecutionInstanceManager {
         log.info("Retrieving all the information for Experiment Execution with Id {}", executionId);
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         if(!experimentExecutionOptional.isPresent())
-            throw new FailedOperationException(String.format("Experiment Execution with Id %s not found", executionId));
+            throw new FailedOperationException(String.format("EEM: Experiment Execution with Id %s not found", executionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         String experimentDescriptorId = experimentExecution.getExperimentDescriptorId();
         String nsInstanceId = experimentExecution.getNsInstanceId();
@@ -514,7 +509,7 @@ public class ExperimentExecutionInstanceManager {
             parameters.put("ExpD_ID", experimentDescriptorId);
             QueryExpDescriptorResponse expDescriptorResponse = catalogueService.queryExpDescriptor(request);
             if (expDescriptorResponse.getExpDescriptors().isEmpty())
-                throw new FailedOperationException(String.format("Experiment Descriptor with Id %s not found", experimentDescriptorId));
+                throw new FailedOperationException(String.format("Portal Catalogue: Experiment Descriptor with Id %s not found", experimentDescriptorId));
             expDescriptor = expDescriptorResponse.getExpDescriptors().get(0);
             parameters.remove("ExpD_ID");
             //Retrieve Experiment Blueprint
@@ -522,7 +517,7 @@ public class ExperimentExecutionInstanceManager {
             parameters.put("ExpB_ID", expDescriptor.getExpBlueprintId());
             QueryExpBlueprintResponse expBlueprintResponse = catalogueService.queryExpBlueprint(request);
             if (expBlueprintResponse.getExpBlueprintInfo().isEmpty())
-                throw new FailedOperationException(String.format("Experiment Blueprint with Id %s not found", expDescriptor.getExpBlueprintId()));
+                throw new FailedOperationException(String.format("Portal Catalogue: Experiment Blueprint with Id %s not found", expDescriptor.getExpBlueprintId()));
             expBlueprint = expBlueprintResponse.getExpBlueprintInfo().get(0).getExpBlueprint();
             parameters.remove("ExpB_ID");
             //Retrieve Vertical Service Blueprint
@@ -530,8 +525,22 @@ public class ExperimentExecutionInstanceManager {
             parameters.put("VSB_ID", expBlueprint.getVsBlueprintId());
             QueryVsBlueprintResponse vsBlueprintResponse = catalogueService.queryVsBlueprint(request);
             if (vsBlueprintResponse.getVsBlueprintInfo().isEmpty())
-                throw new FailedOperationException(String.format("Vertical Service Blueprint with Id %s not found", expBlueprint.getVsBlueprintId()));
-            vsBlueprint = vsBlueprintResponse.getVsBlueprintInfo().get(0).getVsBlueprint();
+                throw new FailedOperationException(String.format("Portal Catalogue: Vertical Service Blueprint with Id %s not found", expBlueprint.getVsBlueprintId()));
+            VsBlueprint vsBlueprint = vsBlueprintResponse.getVsBlueprintInfo().get(0).getVsBlueprint();
+            if(vsBlueprint.isInterSite()){
+                log.debug("Going to retrieve nested Vertical Service Blueprints");
+                for(VsComponent atomicComponent : vsBlueprint.getAtomicComponents()){
+                    if(atomicComponent.getType().equals(VsComponentType.SERVICE)) {
+                        log.debug("Going to retrieve Vertical Service Blueprint with Id {}", atomicComponent.getAssociatedVsbId());
+                        parameters.put("VSB_ID", atomicComponent.getAssociatedVsbId());
+                        vsBlueprintResponse = catalogueService.queryVsBlueprint(request);
+                        if (vsBlueprintResponse.getVsBlueprintInfo().isEmpty())
+                            throw new FailedOperationException(String.format("Portal Catalogue: Vertical Service Blueprint with Id %s not found", atomicComponent.getAssociatedVsbId()));
+                        vsBlueprints.add(vsBlueprintResponse.getVsBlueprintInfo().get(0).getVsBlueprint());
+                    }
+                }
+            }else
+                vsBlueprints.add(vsBlueprint);
             parameters.remove("VSB_ID");
             //Retrieve Vertical Service Descriptor
             String vsDescriptorId = expDescriptor.getVsDescriptorId();
@@ -539,7 +548,7 @@ public class ExperimentExecutionInstanceManager {
             parameters.put("VSD_ID", vsDescriptorId);
             QueryVsDescriptorResponse vsDescriptorResponse = catalogueService.queryVsDescriptor(request);
             if (vsDescriptorResponse.getVsDescriptors().isEmpty())
-                throw new FailedOperationException(String.format("Vertical Service Descriptor with Id %s not found", vsDescriptorId));
+                throw new FailedOperationException(String.format("Portal Catalogue: Vertical Service Descriptor with Id %s not found", vsDescriptorId));
             vsDescriptor = vsDescriptorResponse.getVsDescriptors().get(0);
             parameters.remove("VSD_ID");
             //Retrieve Context Blueprints
@@ -550,7 +559,7 @@ public class ExperimentExecutionInstanceManager {
                     parameters.put("CTXB_ID", ctxBId);
                     QueryCtxBlueprintResponse ctxBlueprintResponse = catalogueService.queryCtxBlueprint(request);
                     if (ctxBlueprintResponse.getCtxBlueprintInfos().isEmpty())
-                        throw new FailedOperationException(String.format("Context Blueprint with Id %s not found", ctxBId));
+                        throw new FailedOperationException(String.format("Portal Catalogue: Context Blueprint with Id %s not found", ctxBId));
                     CtxBlueprint ctxBlueprint = ctxBlueprintResponse.getCtxBlueprintInfos().get(0).getCtxBlueprint();
                     ctxBlueprints.add(ctxBlueprint);
                     parameters.remove("CTXB_ID");
@@ -564,7 +573,7 @@ public class ExperimentExecutionInstanceManager {
                     parameters.put("CTXD_ID", ctxDescriptorId);
                     QueryCtxDescriptorResponse ctxDescriptorResponse = catalogueService.queryCtxDescriptor(request);
                     if (ctxDescriptorResponse.getCtxDescriptors().isEmpty())
-                        throw new FailedOperationException(String.format("Context Descriptor with Id %s not found", ctxDescriptorId));
+                        throw new FailedOperationException(String.format("Portal Catalogue: Context Descriptor with Id %s not found", ctxDescriptorId));
                     CtxDescriptor ctxDescriptor = ctxDescriptorResponse.getCtxDescriptors().get(0);
                     ctxDescriptors.add(ctxDescriptor);
                     parameters.remove("CTXD_ID");
@@ -582,7 +591,7 @@ public class ExperimentExecutionInstanceManager {
                     parameters.put("TCD_ID", tcDescriptorId);
                     QueryTestCaseDescriptorResponse tcDescriptorResponse = catalogueService.queryTestCaseDescriptor(request);
                     if (tcDescriptorResponse.getTestCaseDescriptors().isEmpty())
-                        throw new FailedOperationException(String.format("Test Case Descriptor with Id %s not found", tcDescriptorId));
+                        throw new FailedOperationException(String.format("Portal Catalogue: Test Case Descriptor with Id %s not found", tcDescriptorId));
                     TestCaseDescriptor tcDescriptor = tcDescriptorResponse.getTestCaseDescriptors().get(0);
                     tcDescriptors.add(tcDescriptor);
                     parameters.remove("TCD_ID");
@@ -590,17 +599,15 @@ public class ExperimentExecutionInstanceManager {
             }
             //Retrieve Test Case Blueprints
             List<String> tcBlueprintIds = tcDescriptors.stream().map(TestCaseDescriptor::getTestCaseBlueprintId).collect(Collectors.toList());
-            if(tcBlueprintIds != null) {
-                log.debug("Going to retrieve Test Case Blueprints with Ids {}", tcBlueprintIds);
-                for (String tcBlueprintId : tcBlueprintIds) {
-                    parameters.put("TCB_ID", tcBlueprintId);
-                    QueryTestCaseBlueprintResponse tcBlueprintResponse = catalogueService.queryTestCaseBlueprint(request);
-                    if (tcBlueprintResponse.getTestCaseBlueprints().isEmpty())
-                        throw new FailedOperationException(String.format("Test Case Blueprint with Id %s not found", tcBlueprintId));
-                    TestCaseBlueprint tcBlueprint = tcBlueprintResponse.getTestCaseBlueprints().get(0).getTestCaseBlueprint();
-                    tcBlueprints.add(tcBlueprint);
-                    parameters.remove("TCB_ID");
-                }
+            log.debug("Going to retrieve Test Case Blueprints with Ids {}", tcBlueprintIds);
+            for (String tcBlueprintId : tcBlueprintIds) {
+                parameters.put("TCB_ID", tcBlueprintId);
+                QueryTestCaseBlueprintResponse tcBlueprintResponse = catalogueService.queryTestCaseBlueprint(request);
+                if (tcBlueprintResponse.getTestCaseBlueprints().isEmpty())
+                    throw new FailedOperationException(String.format("Portal Catalogue: Test Case Blueprint with Id %s not found", tcBlueprintId));
+                TestCaseBlueprint tcBlueprint = tcBlueprintResponse.getTestCaseBlueprints().get(0).getTestCaseBlueprint();
+                tcBlueprints.add(tcBlueprint);
+                parameters.remove("TCB_ID");
             }
             //Retrieve NsInstance
             if(nsInstanceId != null) {
@@ -611,14 +618,14 @@ public class ExperimentExecutionInstanceManager {
             }
             translateTestCases();
         }catch (MalformattedElementException e){
-            throw new FailedOperationException(e.getMessage());
+            throw new FailedOperationException(e.getMessage(), e);
         }
     }
 
     private void translateTestCases() throws FailedOperationException{
         Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
         if(!experimentExecutionOptional.isPresent())
-            throw new FailedOperationException(String.format("Experiment Execution with Id %s not found", executionId));
+            throw new FailedOperationException(String.format("EEM: Experiment Execution with Id %s not found", executionId));
         ExperimentExecution experimentExecution = experimentExecutionOptional.get();
         Set<String> executionResultIds = experimentExecution.getTestCaseResult().keySet();
         //Override user parameters inside the test case descriptor
@@ -695,8 +702,7 @@ public class ExperimentExecutionInstanceManager {
                     try {
                         infrastructureParameterValue = readParameter(InfrastructureParameterType.SAP_IP_ADDRESS, ids);
                     } catch (FailedOperationException e) {
-                        log.error("Unable to get SAP ip address. Skipping");
-                        log.debug("Unable to get SAP ip address", e);
+                        log.error("Unable to get SAP ip address. Skipping", e);
                     }
                 } else
                     log.error("Unacceptable Infrastructure parameter format: {}. Skipping", infrastructureParameter);
@@ -711,8 +717,7 @@ public class ExperimentExecutionInstanceManager {
                         ids.add(splits[3]);
                         infrastructureParameterValue = readParameter(InfrastructureParameterType.VNF_CP_IP_ADDRESS, ids);
                     } catch (FailedOperationException e) {
-                        log.error("Unable to get VNF ExtCp ip address. Skipping");
-                        log.debug("Unable to get VNF ExtCp ip address", e);
+                        log.error("Unable to get VNF ExtCp ip address. Skipping", e);
                     }
                 } else
                     log.error("Unacceptable Infrastructure parameter format: {}. Skipping ", infrastructureParameter);
@@ -724,8 +729,7 @@ public class ExperimentExecutionInstanceManager {
                         ids.add(splits[5]);
                         infrastructureParameterValue = readParameter(InfrastructureParameterType.VDU_CP_IP_ADDRESS, ids);
                     } catch (FailedOperationException e) {
-                        log.error("Unable to get CP Address. Skipping");
-                        log.debug("Unable to get CP Address", e);
+                        log.error("Unable to get CP Address. Skipping", e);
                     }
                 } else
                     log.error("Unacceptable Infrastructure parameter format: {}. Skipping ", infrastructureParameter);
@@ -739,8 +743,7 @@ public class ExperimentExecutionInstanceManager {
                         ids.add(splits[3]);
                         infrastructureParameterValue = readParameter(InfrastructureParameterType.PNF_CP_IP_ADDRESS, ids);
                     } catch (FailedOperationException e) {
-                        log.error("Unable to get Hostname. Skipping");
-                        log.debug("Unable to get Hostname", e);
+                        log.error("Unable to get Hostname. Skipping", e);
                     }
                 }else
                     log.error("Unacceptable Infrastructure parameter format: {}. Skipping", infrastructureParameter);
@@ -750,51 +753,53 @@ public class ExperimentExecutionInstanceManager {
             log.debug("Infrastructure parameter related to application metrics");
             Optional<ExperimentExecution> experimentExecutionOptional = experimentExecutionRepository.findByExecutionId(executionId);
             if(!experimentExecutionOptional.isPresent())
-                throw new FailedOperationException(String.format("Experiment Execution with Id %s not found", executionId));
+                throw new FailedOperationException(String.format("EEM: Experiment Execution with Id %s not found", executionId));
             ExperimentExecution experimentExecution = experimentExecutionOptional.get();
             String metricId = splits[2];
-            //Check application metrics from Context Blueprints
-            for (CtxBlueprint ctxB : ctxBlueprints) {
-                if(ctxB.getApplicationMetrics() != null) {
-                    for (ApplicationMetric amd : ctxB.getApplicationMetrics()) {
-                        if (amd.getMetricId().equalsIgnoreCase(metricId)) {
-                            switch (splits[1]) {
-                                case "topic":
-                                    infrastructureParameterValue = experimentExecution.getUseCase() + "." + experimentExecution.getExperimentId() + "." + experimentExecution.getSiteNames().get(0).toLowerCase() + "." + MetricDataType.APPLICATION_METRIC.toString().toLowerCase() + "." + amd.getMetricId();
-                                    break;
-                                case "site":
-                                    infrastructureParameterValue = experimentExecution.getSiteNames().get(0);
-                                    break;
-                                case "unit":
-                                    infrastructureParameterValue = amd.getUnit();
-                                    break;
-                                case "interval":
-                                    infrastructureParameterValue = amd.getInterval();
+            if(splits[1].equalsIgnoreCase("topic"))
+                infrastructureParameterValue = experimentExecution.getApplicationMetrics().get(metricId);
+            else if (splits[1].equalsIgnoreCase("site")){
+                String topic = experimentExecution.getApplicationMetrics().get(metricId);
+                if(topic != null) {
+                    String[] topicSplits = topic.split("\\.");
+                    if(topicSplits.length >= 3)
+                        infrastructureParameterValue = topicSplits[2];
+                }
+            }
+            else {
+                //Check application metrics from Context Blueprints
+                for (CtxBlueprint ctxB : ctxBlueprints) {
+                    if (ctxB.getApplicationMetrics() != null) {
+                        for (ApplicationMetric amd : ctxB.getApplicationMetrics()) {
+                            if (amd.getMetricId().equalsIgnoreCase(metricId)) {
+                                switch (splits[1]) {
+                                    case "unit":
+                                        infrastructureParameterValue = amd.getUnit();
+                                        break;
+                                    case "interval":
+                                        infrastructureParameterValue = amd.getInterval();
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
                 }
-            }
-            //Check application metrics from VS Blueprint
-            if(infrastructureParameterValue == null) {
-                if(vsBlueprint.getApplicationMetrics() != null) {
-                    for (ApplicationMetric amd : vsBlueprint.getApplicationMetrics()) {
-                        if (amd.getMetricId().equalsIgnoreCase(metricId)) {
-                            switch (splits[1]) {
-                                case "topic":
-                                    infrastructureParameterValue = experimentExecution.getUseCase() + "." + experimentExecution.getExperimentId() + "." + experimentExecution.getSiteNames().get(0).toLowerCase() + "." + MetricDataType.APPLICATION_METRIC.toString().toLowerCase() + "." + amd.getMetricId();
+                //Check application metrics from VS Blueprint
+                if (infrastructureParameterValue == null) {
+                    for (VsBlueprint vsB : vsBlueprints) {
+                        if (vsB.getApplicationMetrics() != null) {
+                            for (ApplicationMetric amd : vsB.getApplicationMetrics()) {
+                                if (amd.getMetricId().equalsIgnoreCase(metricId)) {
+                                    switch (splits[1]) {
+                                        case "unit":
+                                            infrastructureParameterValue = amd.getUnit();
+                                            break;
+                                        case "interval":
+                                            infrastructureParameterValue = amd.getInterval();
+                                    }
                                     break;
-                                case "site":
-                                    infrastructureParameterValue = experimentExecution.getSiteNames().get(0);
-                                    break;
-                                case "unit":
-                                    infrastructureParameterValue = amd.getUnit();
-                                    break;
-                                case "interval":
-                                    infrastructureParameterValue = amd.getInterval();
+                                }
                             }
-                            break;
                         }
                     }
                 }
@@ -803,7 +808,7 @@ public class ExperimentExecutionInstanceManager {
             log.error("Unacceptable Infrastructure parameter format: {}. Skipping", infrastructureParameter);
 
         if(infrastructureParameterValue == null)
-            throw new FailedOperationException("Cannot find the value for the Infrastructure Parameter " + infrastructureParameter);
+            throw new FailedOperationException("MSNO: Cannot find the value for the Infrastructure Parameter " + infrastructureParameter);
 
         return infrastructureParameterValue;
     }
@@ -811,7 +816,7 @@ public class ExperimentExecutionInstanceManager {
     private String readParameter(InfrastructureParameterType parameterType, List<String> ids) throws FailedOperationException{
         //TODO add try/catch block to handle NullPointerException?
         if(nsInstance == null)
-            throw new FailedOperationException("Cannot obtain infrastructure parameters information: Ns instance is null");
+            throw new FailedOperationException("EEM: Cannot obtain infrastructure parameters information: Ns instance is null");
         String parameterValue = null;
         switch (parameterType) {
             case SAP_IP_ADDRESS:
@@ -947,7 +952,7 @@ public class ExperimentExecutionInstanceManager {
             case RUNNING_STEP:
                 return currentState.equals(ExperimentState.PAUSED);
             default:
-                log.debug("New state not recognized");
+                log.error("New state not recognized");
                 return false;
         }
     }

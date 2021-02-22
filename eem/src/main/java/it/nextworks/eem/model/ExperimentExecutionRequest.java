@@ -1,14 +1,20 @@
 package it.nextworks.eem.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sun.corba.se.impl.ior.NewObjectKeyTemplateBase;
 import io.swagger.annotations.ApiModelProperty;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.validation.annotation.Validated;
+
+import javax.persistence.ElementCollection;
+import javax.persistence.FetchType;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 
@@ -38,6 +44,32 @@ public class ExperimentExecutionRequest   {
 
   @JsonProperty("useCase")
   private String useCase;
+
+
+  @JsonProperty("perfDiag")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private boolean perfDiag;
+
+  @JsonProperty("infrastructureMetrics")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SELECT)
+	@Cascade(org.hibernate.annotations.CascadeType.ALL)
+  private Map<String, String> infrastructureMetrics = new HashMap<>();
+
+  @JsonProperty("applicationMetrics")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SELECT)
+	@Cascade(org.hibernate.annotations.CascadeType.ALL)
+  private Map<String, String> applicationMetrics = new HashMap<>();
+
+  @JsonProperty("kpiMetrics")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SELECT)
+	@Cascade(org.hibernate.annotations.CascadeType.ALL)
+  private Map<String, String> kpiMetrics = new HashMap<>();
 
 
   public ExperimentExecutionRequest useCase(String useCase){
@@ -106,6 +138,60 @@ public class ExperimentExecutionRequest   {
   public ExperimentExecutionRequest testCaseDescriptorConfiguration(TestCaseDescrConfigMap testCaseDescriptorConfiguration) {
     this.testCaseDescriptorConfiguration = testCaseDescriptorConfiguration;
     return this;
+  }
+
+  public ExperimentExecutionRequest applicationMetrics(Map<String, String> applicationMetrics){
+    this.applicationMetrics = applicationMetrics;
+    return this; 
+  }
+
+
+  public ExperimentExecutionRequest kpiMetrics(Map<String, String> kpiMetrics){
+    this.kpiMetrics = kpiMetrics;
+    return this; 
+  }
+
+
+  public boolean isPerfDiag() {
+    return perfDiag;
+  }
+
+  public void setPerfDiag(boolean perfDiag) {
+    this.perfDiag = perfDiag;
+  }
+
+  public ExperimentExecutionRequest perfDiag(boolean perfDiag){
+    this.perfDiag = perfDiag;
+    return this;
+  }
+
+  public ExperimentExecutionRequest infrastructureMetrics(Map<String, String> infrastructureMetrics){
+    this.infrastructureMetrics = infrastructureMetrics;
+    return this; 
+  }
+
+  public Map<String, String> getInfrastructureMetrics() {
+    return infrastructureMetrics;
+  }
+
+  public void setInfrastructureMetrics(Map<String, String> infrastructureMetrics) {
+    this.infrastructureMetrics = infrastructureMetrics;
+  }
+
+  public Map<String, String> getApplicationMetrics() {
+    return applicationMetrics;
+  }
+
+  public void setApplicationMetrics(Map<String, String> applicationMetrics) {
+    this.applicationMetrics = applicationMetrics;
+  }
+
+  public Map<String, String> getKpiMetrics() {
+    return kpiMetrics;
+  }
+
+  public void setKpiMetrics(Map<String, String> kpiMetrics) {
+    this.kpiMetrics = kpiMetrics;
   }
 
   /**

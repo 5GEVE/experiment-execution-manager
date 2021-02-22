@@ -1,13 +1,7 @@
 package it.nextworks.eem.sbi.runtimeConfigurator;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URI;
+
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,10 +17,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-//import com.offbytwo.jenkins.JenkinsServer;
-//import com.offbytwo.jenkins.model.JobWithDetails;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.Response;
 
 import it.nextworks.eem.model.ConfigurationStatus;
 import it.nextworks.eem.model.MetricInfo;
@@ -40,9 +30,6 @@ import it.nextworks.eem.sbi.runtimeConfigurator.client.api.RcnbiControllerApi;
 import it.nextworks.eem.sbi.runtimeConfigurator.client.ApiClient;
 import it.nextworks.eem.sbi.runtimeConfigurator.client.ApiException;
 import it.nextworks.eem.sbi.runtimeConfigurator.client.model.*;
-
-import it.nextworks.nfvmano.catalogue.blueprint.elements.EveSite;
-import it.nextworks.nfvmano.catalogue.blueprint.elements.InfrastructureMetric;
 
 public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorServiceProviderInterface {
 
@@ -120,14 +107,14 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 	private void applyConfigurationImplementation (String executionId, String tcDescriptorId, String configScript, String resetScript) {
 
 		// PROCESS: Day-2 Configuration INIT
-		log.debug("PROCESS: Day-2 Configuration INIT. Initializing day-2 configuration task for Test Case {} with executionId {}", tcDescriptorId, executionId);
+		log.debug("Day-2 Configuration INIT. Initializing day-2 configuration task for Test Case {} with executionId {}", tcDescriptorId, executionId);
 		String result = "";
 		String configId = "";
 		//TODO: remove this approach (in all three processes), since the EEM gives the config/exec Id when needed
 		String experiments_key = "config_" + tcDescriptorId + "_" + executionId;
 								
 		// PROCESS: Request configId from RC
-		log.debug("PROCESS: Request configId from RC. Requesting configId for Test Case {} with executionId {}", tcDescriptorId, executionId);
+		log.debug("Request configId from RC. Requesting configId for Test Case {} with executionId {}", tcDescriptorId, executionId);
 		ApplicationDay2ConfigurationWrapper day2Wrapper = new ApplicationDay2ConfigurationWrapper();
 		day2Wrapper.setConfigurationScript (configScript);
 		day2Wrapper.setResetConfigScript (resetScript);
@@ -135,34 +122,34 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		try {
 			ApplicationDay2ConfigurationResponse configIdResponse = rcApi.applicationDay2ConfigurationInit(day2Wrapper);
 			configId = configIdResponse.getConfigurationId();
-			log.debug("PROCESS: Request configId from RC. configId for Test Case {} with executionId {} is: {}", tcDescriptorId, executionId, configId);
+			log.debug("Request configId from RC. configId for Test Case {} with executionId {} is: {}", tcDescriptorId, executionId, configId);
 
 			// we associate the configId with the specific ELM-provided ID; this is needed for the reset method
 			experiments.put(experiments_key, configId);
 
 		} catch (ApiException e1) {
-			log.error("PROCESS: Request configId from RC. ApiException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e1.getMessage());
-			manageConfigurationError("API Failure while requesting configId for application day-2 configuration", executionId);
+			log.error("Request configId from RC. ApiException for Test Case {} with executionId {}", tcDescriptorId, executionId, e1);
+			manageConfigurationError("EEM: API Failure while requesting configId for application day-2 configuration", executionId);
 			return;
 		}
 
 		// PROCESS: Start day-2 configuration
-		log.debug("PROCESS: Start day-2 configuration. Starting configuration process for Test Case {} with executionId {}", tcDescriptorId, executionId);
+		log.debug("Start day-2 configuration. Starting configuration process for Test Case {} with executionId {}", tcDescriptorId, executionId);
 		boolean isConfiguring = true;
 		
 		try {
 			ApplicationDay2ConfigurationStatusResponse startResponse = rcApi.applicationDay2ConfigurationStart(configId);
 			
 			switch (startResponse.getStatus()) {
-			case COMPLETED: result = "OK"; isConfiguring = false; break;
-			case ABORTED: result = "ABORTED"; isConfiguring = false; break;
-			case FAILED: result = "FAILED"; isConfiguring = false; break;
-			default:;
+				case COMPLETED: result = "OK"; isConfiguring = false; break;
+				case ABORTED: result = "ABORTED"; isConfiguring = false; break;
+				case FAILED: result = "FAILED"; isConfiguring = false; break;
+				default:;
 			}
 			
 		} catch (ApiException e2) {
-			log.error("PROCESS: Start day-2 configuration. ApiException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e2.getMessage());
-			manageConfigurationError("API Failure while starting application day-2 configuration", executionId);
+			log.error("Start day-2 configuration. ApiException for Test Case {} with executionId {}", tcDescriptorId, executionId, e2);
+			manageConfigurationError("EEM: API Failure while starting application day-2 configuration", executionId);
 			return;
 		}		
 
@@ -172,37 +159,37 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 				ApplicationDay2ConfigurationStatusResponse statusResponse = rcApi.applicationDay2ConfigurationStatus(configId);
 				
 				switch (statusResponse.getStatus()) {
-				case COMPLETED: result = "OK"; isConfiguring = false; break;
-				case ABORTED: result = "ABORTED"; isConfiguring = false; break;
-				case FAILED: result = "FAILED"; isConfiguring = false; break;
-				default: Thread.sleep(3000);
+					case COMPLETED: result = "OK"; isConfiguring = false; break;
+					case ABORTED: result = "ABORTED"; isConfiguring = false; break;
+					case FAILED: result = "FAILED"; isConfiguring = false; break;
+					default: Thread.sleep(3000);
 				}
 			}
 		} catch (ApiException e3) {
-			log.error("PROCESS: Day-2 configuration loop. ApiException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e3.getMessage());
-			manageConfigurationError("API Failure while waiting for application day-2 configuration", executionId);
+			log.error("Day-2 configuration loop. ApiException for Test Case {} with executionId {}", tcDescriptorId, executionId, e3);
+			manageConfigurationError("EEM: API Failure while waiting for application day-2 configuration", executionId);
 			return;
 		} catch (InterruptedException e4) {
-			log.error("PROCESS: Day-2 configuration loop. InterruptedException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e4.getMessage());
-			manageConfigurationError("Interruption while waiting for application day-2 configuration", executionId);
+			log.error("Day-2 configuration loop. InterruptedException for Test Case {} with executionId {}", tcDescriptorId, executionId, e4);
+			manageConfigurationError("EEM: Interruption while waiting for application day-2 configuration", executionId);
 			return;
 		}
 
-		log.debug("PROCESS: Day-2 configuration loop. Configuration process for Test Case {} with executionId {} finished with result {}", tcDescriptorId, executionId, result);
+		log.debug("Day-2 configuration loop. Configuration process for Test Case {} with executionId {} finished with result {}", tcDescriptorId, executionId, result);
 		
 		// Evaluation of results for configuration job
 		switch (result) {
-		case "OK": manageConfigurationOK(result, executionId, tcDescriptorId, configId); break;
-		case "ABORTED": manageConfigurationError("Day-2 Configuration task was ABORTED", executionId); break;
-		case "FAILED": manageConfigurationError("Day-2 Configuration task FAILED", executionId); break;
-		default: manageConfigurationError("Status for Day-2 Configuration is UNKNOWN", executionId); break;
+			case "OK": manageConfigurationOK(result, executionId, tcDescriptorId, configId); break;
+			case "ABORTED": manageConfigurationError("RC: Day-2 Configuration task was ABORTED", executionId); break;
+			case "FAILED": manageConfigurationError("RC: Day-2 Configuration task FAILED", executionId); break;
+			default: manageConfigurationError("RC: Status for Day-2 Configuration is UNKNOWN", executionId); break;
 		}
 	}
 
 	private void resetConfigurationImplementation(String executionId, String tcDescriptorId, String configId){
 		
 		// PROCESS: Day-2 Configuration reset INIT
-		log.debug("PROCESS: Day-2 Configuration RESET. Initializing day-2 configuration reset for Test Case {} with executionId {}", tcDescriptorId, executionId);
+		log.debug("Day-2 Configuration RESET. Initializing day-2 configuration reset for Test Case {} with executionId {}", tcDescriptorId, executionId);
 		String experiments_key = "config_" + tcDescriptorId + "_" + executionId;
 		//String configId = experiments.get(experiments_key); // we retrieve the configId from experiments
 		String result = "";
@@ -215,14 +202,14 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 			ApplicationDay2ConfigurationStatusResponse resetResponse = rcApi.applicationDay2ConfigurationReset(configId);
 			
 			switch (resetResponse.getStatus()) {
-			case CLEANED: result = "OK"; isReseting = false; break;
-			case ABORTED: result = "ABORTED"; isReseting = false; break;
-			case FAILED: result = "FAILED"; isReseting = false; break;
-			default:;
+				case CLEANED: result = "OK"; isReseting = false; break;
+				case ABORTED: result = "ABORTED"; isReseting = false; break;
+				case FAILED: result = "FAILED"; isReseting = false; break;
+				default:;
 			}
 		} catch (ApiException e1) {
-			log.error("PROCESS: Start day-2 configuration. ApiException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e1.getMessage());
-			manageConfigurationError("API Failure while starting application day-2 configuration", executionId);
+			log.error("Start day-2 configuration. ApiException for Test Case {} with executionId {}", tcDescriptorId, executionId, e1);
+			manageConfigurationError("EEM: API Failure while starting application day-2 configuration", executionId);
 			return;
 		}	
 		
@@ -232,43 +219,42 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 				ApplicationDay2ConfigurationStatusResponse statusResponse = rcApi.applicationDay2ConfigurationStatus(configId);
 				
 				switch (statusResponse.getStatus()) {
-				case CLEANED: result = "OK"; isReseting = false; break;
-				case ABORTED: result = "ABORTED"; isReseting = false; break;
-				case FAILED: result = "FAILED"; isReseting = false; break;
-				default: Thread.sleep(3000);
+					case CLEANED: result = "OK"; isReseting = false; break;
+					case ABORTED: result = "ABORTED"; isReseting = false; break;
+					case FAILED: result = "FAILED"; isReseting = false; break;
+					default: Thread.sleep(3000);
 				}
 			}
 		} catch (ApiException e2) {
-			log.error("PROCESS: Reset day-2 configuration. ApiException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e2.getMessage());
-			manageConfigurationError("API Failure while reseting application day-2 configuration", executionId);
+			log.error("Reset day-2 configuration. ApiException for Test Case {} with executionId {}", tcDescriptorId, executionId, e2);
+			manageConfigurationError("EEM: API Failure while resetting application day-2 configuration", executionId);
 			return;
 		} catch (InterruptedException e3) {
-			log.error("PROCESS: Reset day-2 configuration. InterruptedException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e3.getMessage());
-			manageConfigurationError("Interruption while reseting application day-2 configuration", executionId);
+			log.error("Reset day-2 configuration. InterruptedException for Test Case {} with executionId {}", tcDescriptorId, executionId, e3);
+			manageConfigurationError("EEM: Interruption while resetting application day-2 configuration", executionId);
 			return;
 		}
 		
-		log.debug("PROCESS: Reset day-2 configuration loop. Configuration reset for Test Case {} with executionId {} finished with result {}", tcDescriptorId, executionId, result);
+		log.debug("Reset day-2 configuration loop. Configuration reset for Test Case {} with executionId {} finished with result {}", tcDescriptorId, executionId, result);
 	
 		// we remove the configuration job from the list of jobs
 		experiments.remove(experiments_key, configId);
 
-
 		// Evaluation of results for configuration reset job
 		switch (result) {
-		case "OK":
-			String topic = "lifecycle.configurationResult." + executionId;
-			InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.CONF_RESET, result, null,false);
-			try {
-				sendMessageToQueue(internalMessage, topic);
-			} catch (JsonProcessingException e) {
-				log.error("Error while translating internal scheduling message in JSON format");
-				manageConfigurationError("Error while translating internal scheduling message in Json format", executionId);
-			}
-			break;
-		case "ABORTED": manageConfigurationError("Day-2 Configuration reset task was ABORTED", executionId); break;
-		case "FAILED": manageConfigurationError("Day-2 Configuration reset task FAILED", executionId); break;
-		default: manageConfigurationError("Status for Day-2 Configuration reset is UNKNOWN", executionId); break;
+			case "OK":
+				String topic = "lifecycle.configurationResult." + executionId;
+				InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.CONF_RESET, result, null,false);
+				try {
+					sendMessageToQueue(internalMessage, topic);
+				} catch (JsonProcessingException e) {
+					log.error("Error while translating internal scheduling message in JSON format", e);
+					manageConfigurationError("EEM: Error while translating internal scheduling message in Json format", executionId);
+				}
+				break;
+			case "ABORTED": manageConfigurationError("RC: Day-2 Configuration reset task was ABORTED", executionId); break;
+			case "FAILED": manageConfigurationError("RC: Day-2 Configuration reset task FAILED", executionId); break;
+			default: manageConfigurationError("RC: Status for Day-2 Configuration reset is UNKNOWN", executionId); break;
 		}
 
 	}
@@ -281,14 +267,14 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 	private void configureInfrastructureMetricCollectionImplementation(String executionId, String tcDescriptorId, List<MetricInfo> metrics, String nsInstanceId){
 
 		// PROCESS: Infrastructure Metrics Configuration INIT
-		log.debug("PROCESS: Infrastructure Metrics Configuration INIT. Initializing metrics configuration task for Test Case {} with executionId {}", tcDescriptorId, executionId);
+		log.debug("Infrastructure Metrics Configuration INIT. Initializing metrics configuration task for Test Case {} with executionId {}", tcDescriptorId, executionId);
 		String result = "";
 		String metricsConfigId = "";
 		// TODO: apparently this will not be needed since we get the metricsConfigId in the removal --> confirm and remove
 		String experiments_key = "metricsConfig_" + tcDescriptorId + "_" + executionId;
 
 		// PROCESS: Request metricsConfigId from RC
-		log.debug("PROCESS: Request metricsConfigId from RC. Requesting metricsConfigId for Test Case {} with executionId {}", tcDescriptorId, executionId);
+		log.debug("Request metricsConfigId from RC. Requesting metricsConfigId for Test Case {} with executionId {}", tcDescriptorId, executionId);
 
 		int numberOfMetrics = metrics.size();
 		InfrastructureDay2ConfigurationWrapper metricsWrapper = new InfrastructureDay2ConfigurationWrapper();
@@ -317,34 +303,35 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		try {
 			InfrastructureDay2ConfigurationResponse metricsConfigIdResponse = rcApi.infrastructureDay2ConfigurationInit(metricsWrapper, nsInstanceId);
 			metricsConfigId = metricsConfigIdResponse.getConfigurationId();
-			log.debug("PROCESS: Request metricsConfigId from RC. nsInstanceID {} with metricsConfigId for Test Case {} with executionId {} is: {}", nsInstanceId, tcDescriptorId, executionId, metricsConfigId);
+
+			log.debug("Request metricsConfigId from RC. metricsConfigId for Test Case {} with executionId {} is: {}", tcDescriptorId, executionId, metricsConfigId);
 
 			// TODO: we associate the metricsConfigId with the specific ELM-provided ID --> confirm this is not needed for the reset method and remove
 			experiments.put(experiments_key, metricsConfigId);
 
 		} catch (ApiException e1) {
-			log.error("PROCESS: Request metricsConfigId from RC. ApiException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e1.getMessage());
-			manageConfigurationError("API Failure while requesting metricsConfigId for infrastructure metrics configuration", executionId);
+			log.error("Request metricsConfigId from RC. ApiException for Test Case {} with executionId {}", tcDescriptorId, executionId, e1);
+			manageConfigurationError("EEM: API Failure while requesting metricsConfigId for infrastructure metrics configuration", executionId);
 			return;
 		}
 
 		// PROCESS: Start metrics configuration
-		log.debug("PROCESS: Start metrics configuration. Starting metrics configuration process for Test Case {} with executionId {}", tcDescriptorId, executionId);
+		log.debug("Start metrics configuration. Starting metrics configuration process for Test Case {} with executionId {}", tcDescriptorId, executionId);
 		boolean isConfiguring = true;
 
 		try {
 			InfrastructureDay2ConfigurationStatusResponse startResponse = rcApi.infrastructureDay2ConfigurationStart(metricsConfigId);
 
 			switch (startResponse.getStatus()) {
-			case COMPLETED: result = "OK"; isConfiguring = false; break;
-			case ABORTED: result = "ABORTED"; isConfiguring = false; break;
-			case FAILED: result = "FAILED"; isConfiguring = false; break;
-			default:;
+				case COMPLETED: result = "OK"; isConfiguring = false; break;
+				case ABORTED: result = "ABORTED"; isConfiguring = false; break;
+				case FAILED: result = "FAILED"; isConfiguring = false; break;
+				default:;
 			}
 
 		} catch (ApiException e2) {
-			log.error("PROCESS: Start metrics configuration. ApiException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e2.getMessage());
-			manageConfigurationError("API Failure while starting infrastructure metrics configuration", executionId);
+			log.error("Start metrics configuration. ApiException for Test Case {} with executionId {}", tcDescriptorId, executionId, e2);
+			manageConfigurationError("EEM: API Failure while starting infrastructure metrics configuration", executionId);
 			return;
 		}		
 
@@ -354,42 +341,42 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 				InfrastructureDay2ConfigurationStatusResponse statusResponse = rcApi.infrastructureDay2ConfigurationStatus(metricsConfigId);
 
 				switch (statusResponse.getStatus()) {
-				case COMPLETED: result = "OK"; isConfiguring = false; break;
-				case ABORTED: result = "ABORTED"; isConfiguring = false; break;
-				case FAILED: result = "FAILED"; isConfiguring = false; break;
-				default: Thread.sleep(3000);
+					case COMPLETED: result = "OK"; isConfiguring = false; break;
+					case ABORTED: result = "ABORTED"; isConfiguring = false; break;
+					case FAILED: result = "FAILED"; isConfiguring = false; break;
+					default: Thread.sleep(3000);
 				}
 			}
 		} catch (ApiException e3) {
-			log.error("PROCESS: Metrics configuration loop. ApiException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e3.getMessage());
-			manageConfigurationError("API Failure while waiting for infrastructure metrics configuration", executionId);
+			log.error("Metrics configuration loop. ApiException for Test Case {} with executionId {}", tcDescriptorId, executionId, e3);
+			manageConfigurationError("EEM: API Failure while waiting for infrastructure metrics configuration", executionId);
 			return;
 		} catch (InterruptedException e4) {
-			log.error("PROCESS: Metrics configuration loop. InterruptedException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e4.getMessage());
-			manageConfigurationError("Interruption while waiting for infrastructure metrics configuration", executionId);
+			log.error("Metrics configuration loop. InterruptedException for Test Case {} with executionId {}", tcDescriptorId, executionId, e4);
+			manageConfigurationError("EEM: Interruption while waiting for infrastructure metrics configuration", executionId);
 			return;
 		}
 
-		log.debug("PROCESS: Metrics configuration loop. Metrics configuration process for Test Case {} with executionId {} finished with result {}", tcDescriptorId, executionId, result);
+		log.debug("Metrics configuration loop. Metrics configuration process for Test Case {} with executionId {} finished with result {}", tcDescriptorId, executionId, result);
 
 		// Evaluation of results for metrics configuration job
 		switch (result){
-		case "OK":
-			// so far there is a single metricsConfigId that relates to all metrics. TODO: evaluate if this needs change
-			//List<String> metricConfigIds = new ArrayList<>();
-			//metricConfigIds.add("metricsConfigId");
-			String topic = "lifecycle.configurationResult." + executionId;
-			InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_CONFIGURED, result, metricsConfigId, false);
-			try {
-				sendMessageToQueue(internalMessage, topic);
-			} catch (JsonProcessingException e) {
-				log.error("Error while translating internal scheduling message in JSON format");
-				manageConfigurationError("Error while translating internal scheduling message in Json format", executionId);
-			}
-			break;
-		case "ABORTED": manageConfigurationError("Metrics Configuration task was ABORTED", executionId); break;
-		case "FAILED": manageConfigurationError("Metrics Configuration task FAILED", executionId); break;
-		default: manageConfigurationError("Status for Metrics Configuration is UNKNOWN", executionId); break;
+			case "OK":
+				// so far there is a single metricsConfigId that relates to all metrics. TODO: evaluate if this needs change
+				//List<String> metricConfigIds = new ArrayList<>();
+				//metricConfigIds.add("metricsConfigId");
+				String topic = "lifecycle.configurationResult." + executionId;
+				InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_CONFIGURED, result, metricsConfigId, false);
+				try {
+					sendMessageToQueue(internalMessage, topic);
+				} catch (JsonProcessingException e) {
+					log.error("Error while translating internal scheduling message in JSON format", e);
+					manageConfigurationError("EEM: Error while translating internal scheduling message in Json format", executionId);
+				}
+				break;
+			case "ABORTED": manageConfigurationError("RC: Metrics Configuration task was ABORTED", executionId); break;
+			case "FAILED": manageConfigurationError("RC: Metrics Configuration task FAILED", executionId); break;
+			default: manageConfigurationError("RC: Status for Metrics Configuration is UNKNOWN", executionId); break;
 		}
 
 	}
@@ -398,25 +385,25 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 	private void removeInfrastructureMetricCollectionImplementation(String executionId, String tcDescriptorId, String metricsConfigId){
 
 		// PROCESS: Metrics stop INIT
-		log.debug("PROCESS: Metrics stop INIT. Initializing infrastructure metrics stop for Test Case {} with executionId {}", tcDescriptorId, executionId);
+		log.debug("Metrics stop INIT. Initializing infrastructure metrics stop for Test Case {} with executionId {}", tcDescriptorId, executionId);
 		String result = "";
 
 		// PROCESS: Stop metrics
-		log.debug("PROCESS: Stop metrics. Stopping infrastructure metrics for Test Case {} with executionId {}", tcDescriptorId, executionId);
+		log.debug("Stop metrics. Stopping infrastructure metrics for Test Case {} with executionId {}", tcDescriptorId, executionId);
 		boolean isReseting = true;
 
 		try {
 			InfrastructureDay2ConfigurationStatusResponse stopResponse = rcApi.infrastructureDay2ConfigurationStop(metricsConfigId);
 
 			switch (stopResponse.getStatus()) {
-			case STOPPED: result = "OK"; isReseting = false; break;
-			case ABORTED: result = "ABORTED"; isReseting = false; break;
-			case FAILED: result = "FAILED"; isReseting = false; break;
-			default:;
+				case STOPPED: result = "OK"; isReseting = false; break;
+				case ABORTED: result = "ABORTED"; isReseting = false; break;
+				case FAILED: result = "FAILED"; isReseting = false; break;
+				default:;
 			}
 		} catch (ApiException e1) {
-			log.error("PROCESS: Stop metrics. ApiException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e1.getMessage());
-			manageConfigurationError("API Failure while requesting to stop infrastructure metrics", executionId);
+			log.error("Stop metrics. ApiException for Test Case {} with executionId {}", tcDescriptorId, executionId, e1);
+			manageConfigurationError("EEM: API Failure while requesting to stop infrastructure metrics", executionId);
 			return;
 		}	
 
@@ -426,81 +413,81 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 				InfrastructureDay2ConfigurationStatusResponse statusResponse = rcApi.infrastructureDay2ConfigurationStatus(metricsConfigId);
 
 				switch (statusResponse.getStatus()) {
-				case STOPPED: result = "OK"; isReseting = false; break;
-				case ABORTED: result = "ABORTED"; isReseting = false; break;
-				case FAILED: result = "FAILED"; isReseting = false; break;
-				default: Thread.sleep(3000);
+					case STOPPED: result = "OK"; isReseting = false; break;
+					case ABORTED: result = "ABORTED"; isReseting = false; break;
+					case FAILED: result = "FAILED"; isReseting = false; break;
+					default: Thread.sleep(3000);
 				}
 			}
 		} catch (ApiException e2) {
-			log.error("PROCESS: Stop metrics loop. ApiException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e2.getMessage());
-			manageConfigurationError("API Failure while waiting to stop infrastructure metrics", executionId);
+			log.error("Stop metrics loop. ApiException for Test Case {} with executionId {}", tcDescriptorId, executionId, e2);
+			manageConfigurationError("EEM: API Failure while waiting to stop infrastructure metrics", executionId);
 			return;
 		} catch (InterruptedException e3) {
-			log.error("PROCESS: Stop metrics loop. InterruptedException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e3.getMessage());
-			manageConfigurationError("Interruption while waiting to stop infrastructure metrics", executionId);
+			log.error("Stop metrics loop. InterruptedException for Test Case {} with executionId {}", tcDescriptorId, executionId, e3);
+			manageConfigurationError("EEM: Interruption while waiting to stop infrastructure metrics", executionId);
 			return;
 		}
 
-		log.debug("PROCESS: Stop metrics. Metrics for Test Case {} with executionId {} stopped with result {}", tcDescriptorId, executionId, result);
+		log.debug("Stop metrics. Metrics for Test Case {} with executionId {} stopped with result {}", tcDescriptorId, executionId, result);
 
 		// Evaluation of results for configuration reset job
 		switch (result) {
-		case "OK":
-			String topic = "lifecycle.configurationResult." + executionId;
-			InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_RESET, result, null,false);
-			try {
-				sendMessageToQueue(internalMessage, topic);
-			} catch (JsonProcessingException e) {
-				log.error("Error while translating internal scheduling message in Json format");
-				manageConfigurationError("Error while translating internal scheduling message in JSON format", executionId);
-			}
-			break;
-		case "ABORTED": manageConfigurationError("Metrics stop task was ABORTED", executionId); break;
-		case "FAILED": manageConfigurationError("Metrics stop task FAILED", executionId); break;
-		default: manageConfigurationError("Status for metrics stop task is UNKNOWN", executionId); break;
+			case "OK":
+				String topic = "lifecycle.configurationResult." + executionId;
+				InternalMessage internalMessage = new ConfigurationResultInternalMessage(ConfigurationStatus.METRIC_RESET, result, null,false);
+				try {
+					sendMessageToQueue(internalMessage, topic);
+				} catch (JsonProcessingException e) {
+					log.error("Error while translating internal scheduling message in Json format", e);
+					manageConfigurationError("EEM: Error while translating internal scheduling message in JSON format", executionId);
+				}
+				break;
+			case "ABORTED": manageConfigurationError("RC: Metrics stop task was ABORTED", executionId); break;
+			case "FAILED": manageConfigurationError("RC: Metrics stop task FAILED", executionId); break;
+			default: manageConfigurationError("RC: Status for metrics stop task is UNKNOWN", executionId); break;
 		}
 	}
 
 	private void runTestCaseImplementation(String executionId, String tcDescriptorId, String execScript){
 		
 		// PROCESS: Experiment Execution INIT
-		log.debug("PROCESS: Experiment Execution INIT. Initializing experiment execution task for Test Case {} with executionId {}", tcDescriptorId, executionId);
+		log.debug("Experiment Execution INIT. Initializing experiment execution task for Test Case {} with executionId {}", tcDescriptorId, executionId);
 		String result = "";
 		String execId = "";
 		
 		// PROCESS: Request execId from RC
-		log.debug("PROCESS: Request execId from RC. Requesting execId for Test Case {} with executionId {}", tcDescriptorId, executionId);
+		log.debug("Request execId from RC. Requesting execId for Test Case {} with executionId {}", tcDescriptorId, executionId);
 		ExecutionWrapper execWrapper = new ExecutionWrapper();
 		execWrapper.setExecutionScript (execScript);
 		
 		try {
 			ExecutionResponse execIdResponse = rcApi.executionInit(execWrapper);
 			execId = execIdResponse.getExecutionId();
-			log.debug("PROCESS: Request execId from RC. execId for Test Case {} with executionId {} is: {}", tcDescriptorId, executionId, execId);
+			log.debug("Request execId from RC. execId for Test Case {} with executionId {} is: {}", tcDescriptorId, executionId, execId);
 		} catch (ApiException e1) {
-			log.error("PROCESS: Request execId from RC. ApiException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e1.getMessage());
-			manageTestCaseError("API Failure while requesting execId for experiment execution", executionId, tcDescriptorId);
+			log.error("Request execId from RC. ApiException for Test Case {} with executionId {}", tcDescriptorId, executionId, e1);
+			manageTestCaseError("EEM: API Failure while requesting execId for experiment execution", executionId, tcDescriptorId);
 			return;
 		}
 
 		// PROCESS: Start experiment execution
-		log.debug("PROCESS: Start experiment execution. Starting execution process for Test Case {} with executionId {}", tcDescriptorId, executionId);
+		log.debug("Start experiment execution. Starting execution process for Test Case {} with executionId {}", tcDescriptorId, executionId);
 		boolean isRunning = true;
 
 		try {
 			ExecutionStatusResponse startResponse = rcApi.executionStart(execId);
 
 			switch (startResponse.getStatus()) {
-			case COMPLETED: result = "OK"; isRunning = false; break;
-			case ABORTED: result = "ABORTED"; isRunning = false; break;
-			case FAILED: result = "FAILED"; isRunning = false; break;
-			default:;
+				case COMPLETED: result = "OK"; isRunning = false; break;
+				case ABORTED: result = "ABORTED"; isRunning = false; break;
+				case FAILED: result = "FAILED"; isRunning = false; break;
+				default:;
 			}
 
 		} catch (ApiException e2) {
-			log.error("PROCESS: Start experiment execution. ApiException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e2.getMessage());
-			manageTestCaseError("API Failure while starting execution", executionId, tcDescriptorId);
+			log.error("Start experiment execution. ApiException for Test Case {} with executionId {}", tcDescriptorId, executionId, e2);
+			manageTestCaseError("EEM: API Failure while starting execution", executionId, tcDescriptorId);
 			return;
 		}		
 
@@ -510,30 +497,30 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 				ExecutionStatusResponse statusResponse = rcApi.executionStatus(execId);
 
 				switch (statusResponse.getStatus()) {
-				case COMPLETED: result = "OK"; isRunning = false; break;
-				case ABORTED: result = "ABORTED"; isRunning = false; break;
-				case FAILED: result = "FAILED"; isRunning = false; break;
-				default: Thread.sleep(3000);
+					case COMPLETED: result = "OK"; isRunning = false; break;
+					case ABORTED: result = "ABORTED"; isRunning = false; break;
+					case FAILED: result = "FAILED"; isRunning = false; break;
+					default: Thread.sleep(3000);
 				}
 			}
 		} catch (ApiException e3) {
-			log.error("PROCESS: Experiment execution loop. ApiException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e3.getMessage());
-			manageTestCaseError("API Failure while waiting for experiment execution", executionId, tcDescriptorId);
+			log.error("Experiment execution loop. ApiException for Test Case {} with executionId {}", tcDescriptorId, executionId, e3);
+			manageTestCaseError("EEM: API Failure while waiting for experiment execution", executionId, tcDescriptorId);
 			return;
 		} catch (InterruptedException e4) {
-			log.error("PROCESS: Experiment execution loop. InterruptedException for Test Case {} with executionId {}. Error {}", tcDescriptorId, executionId, e4.getMessage());
-			manageTestCaseError("Interruption while waiting for experiment execution", executionId, tcDescriptorId);
+			log.error("Experiment execution loop. InterruptedException for Test Case {} with executionId {}", tcDescriptorId, executionId, e4);
+			manageTestCaseError("EEM: Interruption while waiting for experiment execution", executionId, tcDescriptorId);
 			return;
 		}
 
-		log.debug("PROCESS: Experiment execution loop. Experiment execution process for Test Case {} with executionId {} finished with result {}", tcDescriptorId, executionId, result);
+		log.debug("Experiment execution loop. Experiment execution process for Test Case {} with executionId {} finished with result {}", tcDescriptorId, executionId, result);
 
 		// Evaluation of results for experiment execution job
 		switch (result) {
-		case "OK": manageExecutionOK(result, executionId, tcDescriptorId); break;
-		case "ABORTED": manageTestCaseError("Experiment execution task was ABORTED", executionId, tcDescriptorId); break;
-		case "FAILED": manageTestCaseError("Experiment execution task FAILED", executionId, tcDescriptorId); break;
-		default: manageTestCaseError("Status for experiment execution is UNKNOWN", executionId, tcDescriptorId); break;
+			case "OK": manageExecutionOK(result, executionId, tcDescriptorId); break;
+			case "ABORTED": manageTestCaseError("RC: Experiment execution task was ABORTED", executionId, tcDescriptorId); break;
+			case "FAILED": manageTestCaseError("RC: Experiment execution task FAILED", executionId, tcDescriptorId); break;
+			default: manageTestCaseError("RC: Status for experiment execution is UNKNOWN", executionId, tcDescriptorId); break;
 		}
 		
 	}
@@ -555,8 +542,8 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		try {
 			sendMessageToQueue(internalMessage, topic);
 		} catch (JsonProcessingException e) {
-			log.error("Error while translating internal scheduling message in Json format");
-			manageAbortingError("Error while translating internal scheduling message in Json format", executionId);
+			log.error("Error while translating internal scheduling message in Json format", e);
+			manageAbortingError("EEM: Error while translating internal scheduling message in Json format", executionId);
 		}
 
 		//TODO handle aborting error
@@ -570,10 +557,9 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		try {
 			sendMessageToQueue(internalMessage, topic);
 		} catch (JsonProcessingException e) {
-			log.error("Error while translating internal scheduling message in JSON format");
-			manageConfigurationError("Error while translating internal scheduling message in Json format", executionId);
+			log.error("Error while translating internal scheduling message in JSON format", e);
+			manageConfigurationError("EEM: Error while translating internal scheduling message in Json format", executionId);
 		}
-
 	}
 
 	private void manageExecutionOK (String result, String executionId, String tcDescriptorId) {
@@ -582,8 +568,8 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		try {
 			sendMessageToQueue(internalMessage, topic);
 		} catch (JsonProcessingException e) {
-			log.error("Error while translating internal scheduling message in Json format");
-			manageConfigurationError("Error while translating internal scheduling message in Json format", executionId);
+			log.error("Error while translating internal scheduling message in Json format", e);
+			manageConfigurationError("EEM: Error while translating internal scheduling message in Json format", executionId);
 		}
 	}
 
@@ -595,8 +581,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		try {
 			sendMessageToQueue(internalMessage, topic);
 		} catch (JsonProcessingException e) {
-			log.error("Error while translating internal scheduling message in JSON format");
-			log.debug(null, e);
+			log.error("Error while translating internal scheduling message in JSON format", e);
 		}
 	}
 
@@ -608,8 +593,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		try {
 			sendMessageToQueue(internalMessage, topic);
 		} catch (JsonProcessingException e) {
-			log.error("Error while translating internal scheduling message in Json format");
-			log.debug(null, e);
+			log.error("Error while translating internal scheduling message in Json format", e);
 		}
 	}
 
@@ -621,8 +605,7 @@ public class RCDriver implements ConfiguratorServiceProviderInterface, ExecutorS
 		try {
 			sendMessageToQueue(internalMessage, topic);
 		} catch (JsonProcessingException e) {
-			log.error("Error while translating internal scheduling message in Json format");
-			log.debug(null, e);
+			log.error("Error while translating internal scheduling message in Json format", e);
 		}
 	}
 

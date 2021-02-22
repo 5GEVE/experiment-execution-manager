@@ -89,6 +89,33 @@ public class ExperimentExecution {
   @JsonProperty("useCase")
   private String useCase = "";
 
+
+  @JsonIgnore
+  @JsonProperty("perfDiag")
+  private boolean perfDiag = false;
+
+
+  @JsonProperty("infrastructureMetrics")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SELECT)
+	@Cascade(org.hibernate.annotations.CascadeType.ALL)
+  private Map<String, String> infrastructureMetrics = new HashMap<>();
+
+  @JsonProperty("applicationMetrics")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SELECT)
+	@Cascade(org.hibernate.annotations.CascadeType.ALL)
+  private Map<String, String> applicationMetrics = new HashMap<>();
+
+  @JsonProperty("kpiMetrics")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @ElementCollection(fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SELECT)
+	@Cascade(org.hibernate.annotations.CascadeType.ALL)
+  private Map<String, String> kpiMetrics = new HashMap<>();
+
   @JsonIgnore
   private ExperimentRunType runType;
 
@@ -148,6 +175,19 @@ public class ExperimentExecution {
 
   public ExperimentExecution tenantId(String tenantId){
     this.tenantId = tenantId;
+    return this;
+  }
+
+  public boolean isPerfDiag() {
+    return perfDiag;
+  }
+
+  public void setPerfDiag(boolean perfDiag) {
+    this.perfDiag = perfDiag;
+  }
+
+  public ExperimentExecution perfDiag(boolean perfDiag){
+    this.perfDiag = perfDiag;
     return this;
   }
 
@@ -262,6 +302,23 @@ public class ExperimentExecution {
     return this;
   }
 
+  public ExperimentExecution applicationMetrics(Map<String, String> applicationMetrics){
+    this.applicationMetrics = applicationMetrics;
+    return this; 
+  }
+
+
+  public ExperimentExecution kpiMetrics(Map<String, String> kpiMetrics){
+    this.kpiMetrics = kpiMetrics;
+    return this; 
+  }
+
+
+  public ExperimentExecution infrastructureMetrics(Map<String, String> infrastructureMetrics){
+    this.infrastructureMetrics = infrastructureMetrics;
+    return this; 
+  }
+
   /**
    * Test cases for the requested execution
    * @return testCaseDescriptorConfiguration
@@ -334,6 +391,31 @@ public class ExperimentExecution {
     this.experimentId = experimentId;
     return this;
   }
+
+  public Map<String, String> getInfrastructureMetrics() {
+    return infrastructureMetrics;
+  }
+
+  public void setInfrastructureMetrics(Map<String, String> infrastructureMetrics) {
+    this.infrastructureMetrics = infrastructureMetrics;
+  }
+
+  public Map<String, String> getApplicationMetrics() {
+    return applicationMetrics;
+  }
+
+  public void setApplicationMetrics(Map<String, String> applicationMetrics) {
+    this.applicationMetrics = applicationMetrics;
+  }
+
+  public Map<String, String> getKpiMetrics() {
+    return kpiMetrics;
+  }
+
+  public void setKpiMetrics(Map<String, String> kpiMetrics) {
+    this.kpiMetrics = kpiMetrics;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {

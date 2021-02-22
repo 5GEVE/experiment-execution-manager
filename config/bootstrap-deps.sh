@@ -37,19 +37,26 @@ sudo apt install rabbitmq-server -y
 ## installing nfv-ifa-libs
 git clone https://github.com/nextworks-it/nfv-ifa-libs.git
 cd  nfv-ifa-libs
-git checkout v1.0
+git checkout 5geve-intersite
 cd NFV_MANO_LIBS_COMMON
 mvn clean install
 cd ../NFV_MANO_LIBS_DESCRIPTORS
 mvn clean install
 cd ../NFV_MANO_LIBS_CATALOGUES_IF
 mvn clean install
+cd ../NFV_MANO_LIBS_POLICY_MGT_IF/
+mvn clean install
 cd ../..
+
+## installing slicer-identity-mgmt
+git clone https://github.com/nextworks-it/slicer-identity-mgmt.git
+cd slicer-identity-mgmt
+mvn clean install
 
 ## installing slicer-catalogue
 git clone https://github.com/nextworks-it/slicer-catalogue.git
 cd slicer-catalogue
-git checkout 5geve-release
+git checkout 5geve-intersite
 cd VS_BLUEPRINTS_IM
 mvn clean install
 cd ../EVE_BLUEPRINTS_IM
@@ -65,6 +72,7 @@ cd ../..
 ## installing nfvo-drivers
 git clone https://github.com/nextworks-it/nfvo-drivers.git
 cd nfvo-drivers/msnoClient
+git checkout 5geve-multisite
 mvn clean install
 
 exit 0
