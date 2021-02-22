@@ -17,13 +17,14 @@ server.contextPath=/
 server.port=8080
 ##COMPONENTS TYPE
 configurator.type=RC
-executor.type=JENKINS
+executor.type=RC
 validator.type=RAV
 ##RABBITMQ
 spring.rabbitmq.host=localhost
 ##PORTAL CATALOGUE
 portal.catalogue.host=_CATALOGUE_
 ##MSNO
+multi.site.orchestrator.type=MSNO
 msno.host=_MSNO_
 ## Jenkins Data
 eem.jenkins.uri=http://10.0.8.30:8080
@@ -31,7 +32,9 @@ eem.jenkins.username=admin
 eem.jenkins.password=admin
 eem.jenkins.validation.url=http://10.0.8.30/
 ##RAV DATA
-rav.uri=localhost:8989
+rav.uri=http://_RAV_
 ##DCM DATA
 monitoring.address=localhost
 monitoring.port=12345
+##RC DATA
+runtime.configurator.uri=http://_RC_

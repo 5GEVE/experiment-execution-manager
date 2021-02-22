@@ -1,12 +1,12 @@
 #!/bin/bash
 
 usage() { 
-	echo "Usage: $0 -c cataloguehost -m msnoHost" 1>&2; 
-	echo "Example: $0 -c 127.0.0.1:8082 -m 127.0.0.1:8085"
+	echo "Usage: $0 -c catalogueHost -m msnoHost -r rcHost -v validatorHost" 1>&2;
+	echo "Example: $0 -c 127.0.0.1:8082 -m 127.0.0.1:8085 -r 127.0.0.1:8083 -v 127.0.0.1:8084"
 	exit 1; 
 }
 
-while getopts ":c:m:" o; do
+while getopts ":c:m:r:v:" o; do
     case "${o}" in
 		c)
 			c=${OPTARG}
@@ -14,14 +14,20 @@ while getopts ":c:m:" o; do
 		m)
 			m=${OPTARG}
 			;;
+	  r)
+	    r=${OPTARG}
+	    ;;
+	  v)
+	    v=${OPTARG}
+	    ;;
 		*)
-            usage
-            ;;
+      usage
+      ;;
     esac
 done
 shift $((OPTIND-1))
 
-if [ -z "${c}" ] || [ -z "${m}"]; then
+if [ -z "${c}" ] || [ -z "${m}" ] || [ -z "${r}" ] || [ -z "${v}" ]; then
     usage
 fi
 
@@ -45,26 +51,28 @@ mkdir -p /home/$USER/EEM/target/
 
 ## Move application properties to configuration directory
 echo -e "Copying application.properties of EEM to the configs directory"
-cp ${currdir}/../../eem/src/main/resources/application.properties.template /home/$USER/EEM/application.properties
+cp ${currdir}/../eem/src/main/resources/application.properties.template /home/$USER/EEM/application.properties
 
 ## Change data on application properties
 echo -e "Parameterizing the application.properties with the provided data"
 sed -i "s|_CATALOGUE_|"${c}"|g" /home/$USER/EEM/application.properties
 sed -i "s|_MSNO_|"${m}"|g" /home/$USER/EEM/application.properties
+sed -i "s|_RC_|"${r}"|g" /home/$USER/EEM/application.properties
+sed -i "s|_RAV_|"${v}"|g" /home/$USER/EEM/application.properties
 
 ## To avoid compile issue
-cp /home/$USER/EEM/application.properties ${currdir}/../../eem/src/main/resources/application.properties
+cp /home/$USER/EEM/application.properties ${currdir}/../eem/src/main/resources/application.properties
 
 ## Building EEM package
 echo -e "Building EEM package"
-cd ${currdir}/../../eem/ && mvn -DskipTests clean package
+cd ${currdir}/../eem/ && mvn -DskipTests clean package
 if [[ "$?" -ne 0 ]] ; then
   echo 'could not perform packaging of EEM'; exit $rc
 fi
 
 ## Moving jar to running directory
 echo -e "Moving package to packages directory"
-cp ${currdir}/../../eem/target/experiment-execution-manager-1.0.0.jar /home/$USER/EEM/target/.
+cp ${currdir}/../eem/target/experiment-execution-manager-1.0.0.jar /home/$USER/EEM/target/.
 
 ## Create service file for EEM
 echo "[Unit]" > /home/$USER/EEM/eem.service
