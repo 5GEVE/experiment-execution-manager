@@ -481,7 +481,13 @@ public class ExperimentExecutionInstanceManager {
         // Infrastructure metrics from Experiment blueprint
         for (InfrastructureMetric im : expBlueprint.getMetrics()){
             String topic = experimentExecution.getInfrastructureMetrics().get(im.getMetricId());
-            MetricInfo metric = new MetricInfo(im, topic, EveSite.valueOf(im.getTargetSite()));
+            MetricInfo metric;
+            if(im.getTargetSite() != null) {
+               metric = new MetricInfo(im, topic, EveSite.valueOf(im.getTargetSite().toUpperCase()));
+            } else {
+                // Backward compatibility with old infrastructure metric definition
+                metric = new MetricInfo(im, topic, expBlueprint.getSites().get(0));
+            }
             metrics.add(metric);
         }
         if(!metrics.isEmpty())
